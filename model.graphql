@@ -1,0 +1,26 @@
+enum TodoState {
+  READY
+  DONE
+}
+
+type Todo {
+  state: TodoState
+  text: String
+  blah: Float
+  done: Boolean!
+  user: User @relationship(inverse: "todos")
+  # test(aa: String): User
+}
+
+type User {
+  firstName: String
+  lastName: String
+  todos: [Todo!]! @relationship(inverse: "user")
+  friends: [User!]! @relationship(inverse: "friends")
+  employers: [Company!]! @relationship(inverse: "employees")
+}
+
+type Company {
+  name: String
+  employees: [User!]! @relationship(inverse: "employers")
+}

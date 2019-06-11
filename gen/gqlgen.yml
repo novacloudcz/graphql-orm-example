@@ -1,0 +1,69 @@
+# Generated with graphql-orm
+
+schema:
+  - schema.graphql
+exec:
+  filename: generated.go
+  package: gen
+model:
+  filename: models_gen.go
+  package: gen
+resolver:
+  filename: resolver.go
+  type: Resolver
+  package: gen
+
+models:
+  
+  TodoResultType:
+    fields:
+      count:
+        resolver: true
+      items:
+        resolver: true
+  Todo:
+    model: github.com/novacloudcz/graphql-orm-example/gen.Todo
+    fields:
+      user:
+        resolver: true
+  TodoCreateInput:
+    model: "map[string]interface{}"
+  TodoUpdateInput:
+    model: "map[string]interface{}"
+  
+  UserResultType:
+    fields:
+      count:
+        resolver: true
+      items:
+        resolver: true
+  User:
+    model: github.com/novacloudcz/graphql-orm-example/gen.User
+    fields:
+      todos:
+        resolver: true
+      friends:
+        resolver: true
+      employers:
+        resolver: true
+  UserCreateInput:
+    model: "map[string]interface{}"
+  UserUpdateInput:
+    model: "map[string]interface{}"
+  
+  CompanyResultType:
+    fields:
+      count:
+        resolver: true
+      items:
+        resolver: true
+  Company:
+    model: github.com/novacloudcz/graphql-orm-example/gen.Company
+    fields:
+      employees:
+        resolver: true
+  CompanyCreateInput:
+    model: "map[string]interface{}"
+  CompanyUpdateInput:
+    model: "map[string]interface{}"
+  

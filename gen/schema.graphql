@@ -1,0 +1,126 @@
+# This schema is generated, please don't update it manually
+
+scalar Time
+
+directive @relationship on FIELD_DEFINITION
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  todo(id: ID, q: String): Todo
+  todos(offset: Int, limit: Int = 30, q: String): TodoResultType
+  user(id: ID, q: String): User
+  users(offset: Int, limit: Int = 30, q: String): UserResultType
+  company(id: ID, q: String): Company
+  companies(offset: Int, limit: Int = 30, q: String): CompanyResultType
+}
+
+type Mutation {
+  createTodo(input: TodoCreateInput!): Todo!
+  updateTodo(id: ID!, input: TodoUpdateInput!): Todo!
+  deleteTodo(id: ID!): Todo!
+  createUser(input: UserCreateInput!): User!
+  updateUser(id: ID!, input: UserUpdateInput!): User!
+  deleteUser(id: ID!): User!
+  createCompany(input: CompanyCreateInput!): Company!
+  updateCompany(id: ID!, input: CompanyUpdateInput!): Company!
+  deleteCompany(id: ID!): Company!
+}
+
+enum TodoState {
+  READY
+  DONE
+}
+
+type Todo {
+  id: ID!
+  state: TodoState
+  text: String
+  blah: Float
+  done: Boolean!
+  user: User @relationship(inverse: "todos")
+  updatedAt: Time!
+  createdAt: Time!
+  deletedAt: Time
+}
+
+type User {
+  id: ID!
+  firstName: String
+  lastName: String
+  todos: [Todo!]! @relationship(inverse: "user")
+  friends: [User!]! @relationship(inverse: "friends")
+  employers: [Company!]! @relationship(inverse: "employees")
+  updatedAt: Time!
+  createdAt: Time!
+  deletedAt: Time
+}
+
+type Company {
+  id: ID!
+  name: String
+  employees: [User!]! @relationship(inverse: "employers")
+  updatedAt: Time!
+  createdAt: Time!
+  deletedAt: Time
+}
+
+input TodoCreateInput {
+  state: TodoState
+  text: String
+  blah: Float
+  done: Boolean!
+  userId: ID
+}
+
+input TodoUpdateInput {
+  state: TodoState
+  text: String
+  blah: Float
+  done: Boolean
+  userId: ID
+}
+
+type TodoResultType {
+  items: [Todo!]!
+  count: Int!
+}
+
+input UserCreateInput {
+  firstName: String
+  lastName: String
+  todosIds: [ID!]
+  friendsIds: [ID!]
+  employersIds: [ID!]
+}
+
+input UserUpdateInput {
+  firstName: String
+  lastName: String
+  todosIds: [ID!]
+  friendsIds: [ID!]
+  employersIds: [ID!]
+}
+
+type UserResultType {
+  items: [User!]!
+  count: Int!
+}
+
+input CompanyCreateInput {
+  name: String
+  employeesIds: [ID!]
+}
+
+input CompanyUpdateInput {
+  name: String
+  employeesIds: [ID!]
+}
+
+type CompanyResultType {
+  items: [Company!]!
+  count: Int!
+}
