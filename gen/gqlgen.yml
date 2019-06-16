@@ -15,43 +15,8 @@ resolver:
 
 models:
   
-  TodoResultType:
-    fields:
-      count:
-        resolver: true
-      items:
-        resolver: true
-  Todo:
-    model: github.com/novacloudcz/graphql-orm-example/gen.Todo
-    fields:
-      user:
-        resolver: true
-  TodoCreateInput:
-    model: "map[string]interface{}"
-  TodoUpdateInput:
-    model: "map[string]interface{}"
-  
-  UserResultType:
-    fields:
-      count:
-        resolver: true
-      items:
-        resolver: true
-  User:
-    model: github.com/novacloudcz/graphql-orm-example/gen.User
-    fields:
-      todos:
-        resolver: true
-      friends:
-        resolver: true
-      employers:
-        resolver: true
-  UserCreateInput:
-    model: "map[string]interface{}"
-  UserUpdateInput:
-    model: "map[string]interface{}"
-  
   CompanyResultType:
+    model: github.com/novacloudcz/graphql-orm-example/gen.CompanyResultType
     fields:
       count:
         resolver: true
@@ -65,5 +30,43 @@ models:
   CompanyCreateInput:
     model: "map[string]interface{}"
   CompanyUpdateInput:
+    model: "map[string]interface{}"
+  
+  UserResultType:
+    model: github.com/novacloudcz/graphql-orm-example/gen.UserResultType
+    fields:
+      count:
+        resolver: true
+      items:
+        resolver: true
+  User:
+    model: github.com/novacloudcz/graphql-orm-example/gen.User
+    fields:
+      tasks:
+        resolver: true
+      companies:
+        resolver: true
+      friends:
+        resolver: true
+  UserCreateInput:
+    model: "map[string]interface{}"
+  UserUpdateInput:
+    model: "map[string]interface{}"
+  
+  TaskResultType:
+    model: github.com/novacloudcz/graphql-orm-example/gen.TaskResultType
+    fields:
+      count:
+        resolver: true
+      items:
+        resolver: true
+  Task:
+    model: github.com/novacloudcz/graphql-orm-example/gen.Task
+    fields:
+      assignee:
+        resolver: true
+  TaskCreateInput:
+    model: "map[string]interface{}"
+  TaskUpdateInput:
     model: "map[string]interface{}"
   

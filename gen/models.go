@@ -1,50 +1,55 @@
 package gen
 
 import (
+	"github.com/novacloudcz/graphql-orm/resolvers"
 	"time"
 )
 
-type Todo struct {
-	ID string `json:"id" gorm:"primary_key"`
-
-	State *TodoState `json:"state"`
-	Text  *string    `json:"text"`
-	Blah  *float64   `json:"blah"`
-	Done  bool       `json:"done"`
-
-	User   *User `json:"user"`
-	UserID string
-
-	UpdatedAt time.Time  `json:"updatedAt"`
-	CreatedAt time.Time  `json:"createdAt"`
-	DeletedAt *time.Time `json:"deletedAt"`
-}
-
-type User struct {
-	ID string `json:"id" gorm:"primary_key"`
-
-	FirstName *string `json:"firstName"`
-	LastName  *string `json:"lastName"`
-
-	Todos []*Todo `json:"todos" gorm:"foreignkey:UserID"`
-
-	Friends []*User `json:"friends" gorm:"many2many:user_friends;association_jointable_foreignkey:friend_id"`
-
-	Employers []*Company `json:"employers" gorm:"many2many:user_employers;"`
-
-	UpdatedAt time.Time  `json:"updatedAt"`
-	CreatedAt time.Time  `json:"createdAt"`
-	DeletedAt *time.Time `json:"deletedAt"`
+type CompanyResultType struct {
+	resolvers.EntityResultType
 }
 
 type Company struct {
-	ID string `json:"id" gorm:"primary_key"`
+	ID        string    `json:"id" gorm:"column:id;primary_key"`
+	Name      *string   `json:"name" gorm:"column:name"`
+	UpdatedAt time.Time `json:"updatedAt" gorm:"column:updatedAt"`
+	CreatedAt time.Time `json:"createdAt" gorm:"column:createdAt"`
 
-	Name *string `json:"name"`
+	Employees []*User `json:"employees" gorm:"many2many:company_employees;jointable_foreignkey:employee_id;association_jointable_foreignkey:company_id"`
+}
 
-	Employees []*User `json:"employees" gorm:"many2many:user_employers;"`
+type UserResultType struct {
+	resolvers.EntityResultType
+}
 
-	UpdatedAt time.Time  `json:"updatedAt"`
-	CreatedAt time.Time  `json:"createdAt"`
-	DeletedAt *time.Time `json:"deletedAt"`
+type User struct {
+	ID        string    `json:"id" gorm:"column:id;primary_key"`
+	Email     *string   `json:"email" gorm:"column:email"`
+	FirstName *string   `json:"firstName" gorm:"column:firstName"`
+	LastName  *string   `json:"lastName" gorm:"column:lastName"`
+	UpdatedAt time.Time `json:"updatedAt" gorm:"column:updatedAt"`
+	CreatedAt time.Time `json:"createdAt" gorm:"column:createdAt"`
+
+	Tasks []*Task `json:"tasks" gorm:"foreignkey:AssigneeID"`
+
+	Companies []*Company `json:"companies" gorm:"many2many:company_employees;jointable_foreignkey:employee_id;association_jointable_foreignkey:company_id"`
+
+	Friends []*User `json:"friends" gorm:"many2many:user_friends;jointable_foreignkey:user_id;association_jointable_foreignkey:friend_id"`
+}
+
+type TaskResultType struct {
+	resolvers.EntityResultType
+}
+
+type Task struct {
+	ID        string     `json:"id" gorm:"column:id;primary_key"`
+	Title     *string    `json:"title" gorm:"column:title"`
+	Completed *bool      `json:"completed" gorm:"column:completed"`
+	DueDate   *time.Time `json:"dueDate" gorm:"column:dueDate"`
+	Type      *TaskType  `json:"type" gorm:"column:type"`
+	UpdatedAt time.Time  `json:"updatedAt" gorm:"column:updatedAt"`
+	CreatedAt time.Time  `json:"createdAt" gorm:"column:createdAt"`
+
+	Assignee   *User   `json:"assignee"`
+	AssigneeID *string `gorm:"column:assigneeId"`
 }

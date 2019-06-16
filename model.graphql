@@ -1,26 +1,27 @@
-enum TodoState {
-  READY
-  DONE
-}
-
-type Todo {
-  state: TodoState
-  text: String
-  blah: Float
-  done: Boolean!
-  user: User @relationship(inverse: "todos")
-  # test(aa: String): User
-}
-
-type User {
-  firstName: String
-  lastName: String
-  todos: [Todo!]! @relationship(inverse: "user")
-  friends: [User!]! @relationship(inverse: "friends")
-  employers: [Company!]! @relationship(inverse: "employees")
-}
-
 type Company {
   name: String
-  employees: [User!]! @relationship(inverse: "employers")
+
+  employees: [User!]! @relationship(inverse: "companies")
+}
+type User {
+  email: String
+  firstName: String
+  lastName: String
+
+  tasks: [Task!]! @relationship(inverse: "assignee")
+  companies: [Company!]! @relationship(inverse: "employees")
+  friends: [User!]! @relationship(inverse: "friends")
+}
+
+enum TaskType {
+  BUG
+  TASK
+}
+type Task {
+  title: String
+  completed: Boolean
+  dueDate: Time
+  type: TaskType
+
+  assignee: User @relationship(inverse: "tasks")
 }

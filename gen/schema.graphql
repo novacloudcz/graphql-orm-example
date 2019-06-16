@@ -2,7 +2,7 @@
 
 scalar Time
 
-directive @relationship on FIELD_DEFINITION
+directive @relationship(inverse: String!) on FIELD_DEFINITION
 
 schema {
   query: Query
@@ -10,107 +10,64 @@ schema {
 }
 
 type Query {
-  todo(id: ID, q: String): Todo
-  todos(offset: Int, limit: Int = 30, q: String): TodoResultType
-  user(id: ID, q: String): User
-  users(offset: Int, limit: Int = 30, q: String): UserResultType
   company(id: ID, q: String): Company
-  companies(offset: Int, limit: Int = 30, q: String): CompanyResultType
+  companies(offset: Int, limit: Int = 30, q: String, sort: [CompanySortType!], filter: CompanyFilterType): CompanyResultType
+  user(id: ID, q: String): User
+  users(offset: Int, limit: Int = 30, q: String, sort: [UserSortType!], filter: UserFilterType): UserResultType
+  task(id: ID, q: String): Task
+  tasks(offset: Int, limit: Int = 30, q: String, sort: [TaskSortType!], filter: TaskFilterType): TaskResultType
 }
 
 type Mutation {
-  createTodo(input: TodoCreateInput!): Todo!
-  updateTodo(id: ID!, input: TodoUpdateInput!): Todo!
-  deleteTodo(id: ID!): Todo!
-  createUser(input: UserCreateInput!): User!
-  updateUser(id: ID!, input: UserUpdateInput!): User!
-  deleteUser(id: ID!): User!
   createCompany(input: CompanyCreateInput!): Company!
   updateCompany(id: ID!, input: CompanyUpdateInput!): Company!
   deleteCompany(id: ID!): Company!
-}
-
-enum TodoState {
-  READY
-  DONE
-}
-
-type Todo {
-  id: ID!
-  state: TodoState
-  text: String
-  blah: Float
-  done: Boolean!
-  user: User @relationship(inverse: "todos")
-  updatedAt: Time!
-  createdAt: Time!
-  deletedAt: Time
-}
-
-type User {
-  id: ID!
-  firstName: String
-  lastName: String
-  todos: [Todo!]! @relationship(inverse: "user")
-  friends: [User!]! @relationship(inverse: "friends")
-  employers: [Company!]! @relationship(inverse: "employees")
-  updatedAt: Time!
-  createdAt: Time!
-  deletedAt: Time
+  createUser(input: UserCreateInput!): User!
+  updateUser(id: ID!, input: UserUpdateInput!): User!
+  deleteUser(id: ID!): User!
+  createTask(input: TaskCreateInput!): Task!
+  updateTask(id: ID!, input: TaskUpdateInput!): Task!
+  deleteTask(id: ID!): Task!
 }
 
 type Company {
   id: ID!
   name: String
-  employees: [User!]! @relationship(inverse: "employers")
+  employees: [User!]! @relationship(inverse: "companies")
   updatedAt: Time!
   createdAt: Time!
-  deletedAt: Time
 }
 
-input TodoCreateInput {
-  state: TodoState
-  text: String
-  blah: Float
-  done: Boolean!
-  userId: ID
-}
-
-input TodoUpdateInput {
-  state: TodoState
-  text: String
-  blah: Float
-  done: Boolean
-  userId: ID
-}
-
-type TodoResultType {
-  items: [Todo!]!
-  count: Int!
-}
-
-input UserCreateInput {
+type User {
+  id: ID!
+  email: String
   firstName: String
   lastName: String
-  todosIds: [ID!]
-  friendsIds: [ID!]
-  employersIds: [ID!]
+  tasks: [Task!]! @relationship(inverse: "assignee")
+  companies: [Company!]! @relationship(inverse: "employees")
+  friends: [User!]! @relationship(inverse: "friends")
+  updatedAt: Time!
+  createdAt: Time!
 }
 
-input UserUpdateInput {
-  firstName: String
-  lastName: String
-  todosIds: [ID!]
-  friendsIds: [ID!]
-  employersIds: [ID!]
+enum TaskType {
+  BUG
+  TASK
 }
 
-type UserResultType {
-  items: [User!]!
-  count: Int!
+type Task {
+  id: ID!
+  title: String
+  completed: Boolean
+  dueDate: Time
+  type: TaskType
+  assignee: User @relationship(inverse: "tasks")
+  updatedAt: Time!
+  createdAt: Time!
 }
 
 input CompanyCreateInput {
+  id: ID!
   name: String
   employeesIds: [ID!]
 }
@@ -120,7 +77,250 @@ input CompanyUpdateInput {
   employeesIds: [ID!]
 }
 
+enum CompanySortType {
+  ID_ASC
+  ID_DESC
+  NAME_ASC
+  NAME_DESC
+  UPDATED_AT_ASC
+  UPDATED_AT_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+}
+
+input CompanyFilterType {
+  AND: [CompanyFilterType!]
+  OR: [CompanyFilterType!]
+  id: ID
+  id_ne: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  name: String
+  name_ne: String
+  name_gt: String
+  name_lt: String
+  name_gte: String
+  name_lte: String
+  name_in: [String!]
+  name_like: String
+  name_prefix: String
+  name_suffix: String
+  updatedAt: Time
+  updatedAt_ne: Time
+  updatedAt_gt: Time
+  updatedAt_lt: Time
+  updatedAt_gte: Time
+  updatedAt_lte: Time
+  updatedAt_in: [Time!]
+  createdAt: Time
+  createdAt_ne: Time
+  createdAt_gt: Time
+  createdAt_lt: Time
+  createdAt_gte: Time
+  createdAt_lte: Time
+  createdAt_in: [Time!]
+  employees: UserFilterType
+}
+
 type CompanyResultType {
   items: [Company!]!
+  count: Int!
+}
+
+input UserCreateInput {
+  id: ID!
+  email: String
+  firstName: String
+  lastName: String
+  tasksIds: [ID!]
+  companiesIds: [ID!]
+  friendsIds: [ID!]
+}
+
+input UserUpdateInput {
+  email: String
+  firstName: String
+  lastName: String
+  tasksIds: [ID!]
+  companiesIds: [ID!]
+  friendsIds: [ID!]
+}
+
+enum UserSortType {
+  ID_ASC
+  ID_DESC
+  EMAIL_ASC
+  EMAIL_DESC
+  FIRST_NAME_ASC
+  FIRST_NAME_DESC
+  LAST_NAME_ASC
+  LAST_NAME_DESC
+  UPDATED_AT_ASC
+  UPDATED_AT_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+}
+
+input UserFilterType {
+  AND: [UserFilterType!]
+  OR: [UserFilterType!]
+  id: ID
+  id_ne: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  email: String
+  email_ne: String
+  email_gt: String
+  email_lt: String
+  email_gte: String
+  email_lte: String
+  email_in: [String!]
+  email_like: String
+  email_prefix: String
+  email_suffix: String
+  firstName: String
+  firstName_ne: String
+  firstName_gt: String
+  firstName_lt: String
+  firstName_gte: String
+  firstName_lte: String
+  firstName_in: [String!]
+  firstName_like: String
+  firstName_prefix: String
+  firstName_suffix: String
+  lastName: String
+  lastName_ne: String
+  lastName_gt: String
+  lastName_lt: String
+  lastName_gte: String
+  lastName_lte: String
+  lastName_in: [String!]
+  lastName_like: String
+  lastName_prefix: String
+  lastName_suffix: String
+  updatedAt: Time
+  updatedAt_ne: Time
+  updatedAt_gt: Time
+  updatedAt_lt: Time
+  updatedAt_gte: Time
+  updatedAt_lte: Time
+  updatedAt_in: [Time!]
+  createdAt: Time
+  createdAt_ne: Time
+  createdAt_gt: Time
+  createdAt_lt: Time
+  createdAt_gte: Time
+  createdAt_lte: Time
+  createdAt_in: [Time!]
+  tasks: TaskFilterType
+  companies: CompanyFilterType
+  friends: UserFilterType
+}
+
+type UserResultType {
+  items: [User!]!
+  count: Int!
+}
+
+input TaskCreateInput {
+  id: ID!
+  title: String
+  completed: Boolean
+  dueDate: Time
+  type: TaskType
+  assigneeId: ID
+}
+
+input TaskUpdateInput {
+  title: String
+  completed: Boolean
+  dueDate: Time
+  type: TaskType
+  assigneeId: ID
+}
+
+enum TaskSortType {
+  ID_ASC
+  ID_DESC
+  TITLE_ASC
+  TITLE_DESC
+  COMPLETED_ASC
+  COMPLETED_DESC
+  DUE_DATE_ASC
+  DUE_DATE_DESC
+  TYPE_ASC
+  TYPE_DESC
+  UPDATED_AT_ASC
+  UPDATED_AT_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+}
+
+input TaskFilterType {
+  AND: [TaskFilterType!]
+  OR: [TaskFilterType!]
+  id: ID
+  id_ne: ID
+  id_gt: ID
+  id_lt: ID
+  id_gte: ID
+  id_lte: ID
+  id_in: [ID!]
+  title: String
+  title_ne: String
+  title_gt: String
+  title_lt: String
+  title_gte: String
+  title_lte: String
+  title_in: [String!]
+  title_like: String
+  title_prefix: String
+  title_suffix: String
+  completed: Boolean
+  completed_ne: Boolean
+  completed_gt: Boolean
+  completed_lt: Boolean
+  completed_gte: Boolean
+  completed_lte: Boolean
+  completed_in: [Boolean!]
+  dueDate: Time
+  dueDate_ne: Time
+  dueDate_gt: Time
+  dueDate_lt: Time
+  dueDate_gte: Time
+  dueDate_lte: Time
+  dueDate_in: [Time!]
+  type: TaskType
+  type_ne: TaskType
+  type_gt: TaskType
+  type_lt: TaskType
+  type_gte: TaskType
+  type_lte: TaskType
+  type_in: [TaskType!]
+  updatedAt: Time
+  updatedAt_ne: Time
+  updatedAt_gt: Time
+  updatedAt_lt: Time
+  updatedAt_gte: Time
+  updatedAt_lte: Time
+  updatedAt_in: [Time!]
+  createdAt: Time
+  createdAt_ne: Time
+  createdAt_gt: Time
+  createdAt_lt: Time
+  createdAt_gte: Time
+  createdAt_lte: Time
+  createdAt_in: [Time!]
+  assignee: UserFilterType
+}
+
+type TaskResultType {
+  items: [Task!]!
   count: Int!
 }
