@@ -1,522 +1,743 @@
 package gen
 
 import (
+	"context"
 	"fmt"
 	"strings"
-
-	"github.com/jinzhu/gorm"
 )
 
-func (f *CompanyFilterType) Apply(db *gorm.DB) (*gorm.DB, error) {
-	return f.ApplyWithAlias(db, "companies")
+func (f *CompanyFilterType) Apply(ctx context.Context, wheres *[]string, values *[]interface{}, joins *[]string) error {
+	return f.ApplyWithAlias(ctx, "companies", wheres, values, joins)
 }
-func (f *CompanyFilterType) ApplyWithAlias(db *gorm.DB, alias string) (*gorm.DB, error) {
+func (f *CompanyFilterType) ApplyWithAlias(ctx context.Context, alias string, wheres *[]string, values *[]interface{}, joins *[]string) error {
 	if f == nil {
-		return db, nil
+		return nil
 	}
-	aliasPrefix := alias
-	if aliasPrefix != "" {
-		aliasPrefix += "."
-	}
+	aliasPrefix := alias + "."
 
-	if f.ID != nil {
-		db = db.Where(aliasPrefix+"id = ?", f.ID)
-	}
-	if f.IDNe != nil {
-		db = db.Where(aliasPrefix+"id != ?", f.IDNe)
-	}
-	if f.IDGt != nil {
-		db = db.Where(aliasPrefix+"id > ?", f.IDGt)
-	}
-	if f.IDLt != nil {
-		db = db.Where(aliasPrefix+"id < ?", f.IDLt)
-	}
-	if f.IDGte != nil {
-		db = db.Where(aliasPrefix+"id >= ?", f.IDGte)
-	}
-	if f.IDLte != nil {
-		db = db.Where(aliasPrefix+"id <= ?", f.IDLte)
-	}
-	if f.IDIn != nil {
-		db = db.Where(aliasPrefix+"id IN (?)", f.IDIn)
-	}
-
-	if f.Name != nil {
-		db = db.Where(aliasPrefix+"name = ?", f.Name)
-	}
-	if f.NameNe != nil {
-		db = db.Where(aliasPrefix+"name != ?", f.NameNe)
-	}
-	if f.NameGt != nil {
-		db = db.Where(aliasPrefix+"name > ?", f.NameGt)
-	}
-	if f.NameLt != nil {
-		db = db.Where(aliasPrefix+"name < ?", f.NameLt)
-	}
-	if f.NameGte != nil {
-		db = db.Where(aliasPrefix+"name >= ?", f.NameGte)
-	}
-	if f.NameLte != nil {
-		db = db.Where(aliasPrefix+"name <= ?", f.NameLte)
-	}
-	if f.NameIn != nil {
-		db = db.Where(aliasPrefix+"name IN (?)", f.NameIn)
-	}
-	if f.NameLike != nil {
-		db = db.Where(aliasPrefix+"name LIKE ?", strings.ReplaceAll(strings.ReplaceAll(*f.NameLike, "?", "_"), "*", "%"))
-	}
-	if f.NamePrefix != nil {
-		db = db.Where(aliasPrefix+"name LIKE ?", fmt.Sprintf("%s%%", *f.NamePrefix))
-	}
-	if f.NameSuffix != nil {
-		db = db.Where(aliasPrefix+"name LIKE ?", fmt.Sprintf("%%%s", *f.NameSuffix))
-	}
-
-	if f.UpdatedAt != nil {
-		db = db.Where(aliasPrefix+"updatedAt = ?", f.UpdatedAt)
-	}
-	if f.UpdatedAtNe != nil {
-		db = db.Where(aliasPrefix+"updatedAt != ?", f.UpdatedAtNe)
-	}
-	if f.UpdatedAtGt != nil {
-		db = db.Where(aliasPrefix+"updatedAt > ?", f.UpdatedAtGt)
-	}
-	if f.UpdatedAtLt != nil {
-		db = db.Where(aliasPrefix+"updatedAt < ?", f.UpdatedAtLt)
-	}
-	if f.UpdatedAtGte != nil {
-		db = db.Where(aliasPrefix+"updatedAt >= ?", f.UpdatedAtGte)
-	}
-	if f.UpdatedAtLte != nil {
-		db = db.Where(aliasPrefix+"updatedAt <= ?", f.UpdatedAtLte)
-	}
-	if f.UpdatedAtIn != nil {
-		db = db.Where(aliasPrefix+"updatedAt IN (?)", f.UpdatedAtIn)
-	}
-
-	if f.CreatedAt != nil {
-		db = db.Where(aliasPrefix+"createdAt = ?", f.CreatedAt)
-	}
-	if f.CreatedAtNe != nil {
-		db = db.Where(aliasPrefix+"createdAt != ?", f.CreatedAtNe)
-	}
-	if f.CreatedAtGt != nil {
-		db = db.Where(aliasPrefix+"createdAt > ?", f.CreatedAtGt)
-	}
-	if f.CreatedAtLt != nil {
-		db = db.Where(aliasPrefix+"createdAt < ?", f.CreatedAtLt)
-	}
-	if f.CreatedAtGte != nil {
-		db = db.Where(aliasPrefix+"createdAt >= ?", f.CreatedAtGte)
-	}
-	if f.CreatedAtLte != nil {
-		db = db.Where(aliasPrefix+"createdAt <= ?", f.CreatedAtLte)
-	}
-	if f.CreatedAtIn != nil {
-		db = db.Where(aliasPrefix+"createdAt IN (?)", f.CreatedAtIn)
-	}
+	_where, _values := f.WhereContent(aliasPrefix)
+	*wheres = append(*wheres, _where...)
+	*values = append(*values, _values...)
 
 	if f.Employees != nil {
 		_alias := alias + "_employees"
-		db = db.Joins("LEFT JOIN company_employees " + _alias + "_jointable ON " + alias + ".id = " + _alias + "_jointable.company_id LEFT JOIN users " + _alias + " ON " + _alias + "_jointable.employee_id = " + _alias + ".id")
-		_db, err := f.Employees.ApplyWithAlias(db, _alias)
+		*joins = append(*joins, "LEFT JOIN company_employees "+_alias+"_jointable ON "+alias+".id = "+_alias+"_jointable.company_id LEFT JOIN users "+_alias+" ON "+_alias+"_jointable.employee_id = "+_alias+".id")
+		err := f.Employees.ApplyWithAlias(ctx, _alias, wheres, values, joins)
 		if err != nil {
-			return db, err
+			return err
 		}
-		db = _db
 	}
 
-	return db, nil
+	return nil
 }
 
-func (f *UserFilterType) Apply(db *gorm.DB) (*gorm.DB, error) {
-	return f.ApplyWithAlias(db, "users")
-}
-func (f *UserFilterType) ApplyWithAlias(db *gorm.DB, alias string) (*gorm.DB, error) {
-	if f == nil {
-		return db, nil
+func (f *CompanyFilterType) WhereContent(aliasPrefix string) (conditions []string, values []interface{}) {
+	conditions = []string{}
+	values = []interface{}{}
+
+	if f.Or != nil {
+		cs := []string{}
+		vs := []interface{}{}
+		for _, or := range f.Or {
+			_cond, _values := or.WhereContent(aliasPrefix)
+			cs = append(cs, _cond...)
+			vs = append(vs, _values...)
+		}
+		conditions = append(conditions, "("+strings.Join(cs, " OR ")+")")
+		values = append(values, vs...)
 	}
-	aliasPrefix := alias
-	if aliasPrefix != "" {
-		aliasPrefix += "."
+	if f.And != nil {
+		cs := []string{}
+		vs := []interface{}{}
+		for _, or := range f.Or {
+			_cond, _values := or.WhereContent(aliasPrefix)
+			cs = append(cs, _cond...)
+			vs = append(vs, _values...)
+		}
+		conditions = append(conditions, strings.Join(cs, " AND "))
+		values = append(values, vs...)
 	}
 
 	if f.ID != nil {
-		db = db.Where(aliasPrefix+"id = ?", f.ID)
+		conditions = append(conditions, aliasPrefix+"id = ?")
+		values = append(values, f.ID)
 	}
 	if f.IDNe != nil {
-		db = db.Where(aliasPrefix+"id != ?", f.IDNe)
+		conditions = append(conditions, aliasPrefix+"id != ?")
+		values = append(values, f.IDNe)
 	}
 	if f.IDGt != nil {
-		db = db.Where(aliasPrefix+"id > ?", f.IDGt)
+		conditions = append(conditions, aliasPrefix+"id > ?")
+		values = append(values, f.IDGt)
 	}
 	if f.IDLt != nil {
-		db = db.Where(aliasPrefix+"id < ?", f.IDLt)
+		conditions = append(conditions, aliasPrefix+"id < ?")
+		values = append(values, f.IDLt)
 	}
 	if f.IDGte != nil {
-		db = db.Where(aliasPrefix+"id >= ?", f.IDGte)
+		conditions = append(conditions, aliasPrefix+"id >= ?")
+		values = append(values, f.IDGte)
 	}
 	if f.IDLte != nil {
-		db = db.Where(aliasPrefix+"id <= ?", f.IDLte)
+		conditions = append(conditions, aliasPrefix+"id <= ?")
+		values = append(values, f.IDLte)
 	}
 	if f.IDIn != nil {
-		db = db.Where(aliasPrefix+"id IN (?)", f.IDIn)
+		conditions = append(conditions, aliasPrefix+"id IN (?)")
+		values = append(values, f.IDIn)
 	}
 
-	if f.Email != nil {
-		db = db.Where(aliasPrefix+"email = ?", f.Email)
+	if f.Name != nil {
+		conditions = append(conditions, aliasPrefix+"name = ?")
+		values = append(values, f.Name)
 	}
-	if f.EmailNe != nil {
-		db = db.Where(aliasPrefix+"email != ?", f.EmailNe)
+	if f.NameNe != nil {
+		conditions = append(conditions, aliasPrefix+"name != ?")
+		values = append(values, f.NameNe)
 	}
-	if f.EmailGt != nil {
-		db = db.Where(aliasPrefix+"email > ?", f.EmailGt)
+	if f.NameGt != nil {
+		conditions = append(conditions, aliasPrefix+"name > ?")
+		values = append(values, f.NameGt)
 	}
-	if f.EmailLt != nil {
-		db = db.Where(aliasPrefix+"email < ?", f.EmailLt)
+	if f.NameLt != nil {
+		conditions = append(conditions, aliasPrefix+"name < ?")
+		values = append(values, f.NameLt)
 	}
-	if f.EmailGte != nil {
-		db = db.Where(aliasPrefix+"email >= ?", f.EmailGte)
+	if f.NameGte != nil {
+		conditions = append(conditions, aliasPrefix+"name >= ?")
+		values = append(values, f.NameGte)
 	}
-	if f.EmailLte != nil {
-		db = db.Where(aliasPrefix+"email <= ?", f.EmailLte)
+	if f.NameLte != nil {
+		conditions = append(conditions, aliasPrefix+"name <= ?")
+		values = append(values, f.NameLte)
 	}
-	if f.EmailIn != nil {
-		db = db.Where(aliasPrefix+"email IN (?)", f.EmailIn)
+	if f.NameIn != nil {
+		conditions = append(conditions, aliasPrefix+"name IN (?)")
+		values = append(values, f.NameIn)
 	}
-	if f.EmailLike != nil {
-		db = db.Where(aliasPrefix+"email LIKE ?", strings.ReplaceAll(strings.ReplaceAll(*f.EmailLike, "?", "_"), "*", "%"))
+	if f.NameLike != nil {
+		conditions = append(conditions, aliasPrefix+"name LIKE ?")
+		values = append(values, strings.ReplaceAll(strings.ReplaceAll(*f.NameLike, "?", "_"), "*", "%"))
 	}
-	if f.EmailPrefix != nil {
-		db = db.Where(aliasPrefix+"email LIKE ?", fmt.Sprintf("%s%%", *f.EmailPrefix))
+	if f.NamePrefix != nil {
+		conditions = append(conditions, aliasPrefix+"name LIKE ?")
+		values = append(values, fmt.Sprintf("%s%%", *f.NamePrefix))
 	}
-	if f.EmailSuffix != nil {
-		db = db.Where(aliasPrefix+"email LIKE ?", fmt.Sprintf("%%%s", *f.EmailSuffix))
-	}
-
-	if f.FirstName != nil {
-		db = db.Where(aliasPrefix+"firstName = ?", f.FirstName)
-	}
-	if f.FirstNameNe != nil {
-		db = db.Where(aliasPrefix+"firstName != ?", f.FirstNameNe)
-	}
-	if f.FirstNameGt != nil {
-		db = db.Where(aliasPrefix+"firstName > ?", f.FirstNameGt)
-	}
-	if f.FirstNameLt != nil {
-		db = db.Where(aliasPrefix+"firstName < ?", f.FirstNameLt)
-	}
-	if f.FirstNameGte != nil {
-		db = db.Where(aliasPrefix+"firstName >= ?", f.FirstNameGte)
-	}
-	if f.FirstNameLte != nil {
-		db = db.Where(aliasPrefix+"firstName <= ?", f.FirstNameLte)
-	}
-	if f.FirstNameIn != nil {
-		db = db.Where(aliasPrefix+"firstName IN (?)", f.FirstNameIn)
-	}
-	if f.FirstNameLike != nil {
-		db = db.Where(aliasPrefix+"firstName LIKE ?", strings.ReplaceAll(strings.ReplaceAll(*f.FirstNameLike, "?", "_"), "*", "%"))
-	}
-	if f.FirstNamePrefix != nil {
-		db = db.Where(aliasPrefix+"firstName LIKE ?", fmt.Sprintf("%s%%", *f.FirstNamePrefix))
-	}
-	if f.FirstNameSuffix != nil {
-		db = db.Where(aliasPrefix+"firstName LIKE ?", fmt.Sprintf("%%%s", *f.FirstNameSuffix))
-	}
-
-	if f.LastName != nil {
-		db = db.Where(aliasPrefix+"lastName = ?", f.LastName)
-	}
-	if f.LastNameNe != nil {
-		db = db.Where(aliasPrefix+"lastName != ?", f.LastNameNe)
-	}
-	if f.LastNameGt != nil {
-		db = db.Where(aliasPrefix+"lastName > ?", f.LastNameGt)
-	}
-	if f.LastNameLt != nil {
-		db = db.Where(aliasPrefix+"lastName < ?", f.LastNameLt)
-	}
-	if f.LastNameGte != nil {
-		db = db.Where(aliasPrefix+"lastName >= ?", f.LastNameGte)
-	}
-	if f.LastNameLte != nil {
-		db = db.Where(aliasPrefix+"lastName <= ?", f.LastNameLte)
-	}
-	if f.LastNameIn != nil {
-		db = db.Where(aliasPrefix+"lastName IN (?)", f.LastNameIn)
-	}
-	if f.LastNameLike != nil {
-		db = db.Where(aliasPrefix+"lastName LIKE ?", strings.ReplaceAll(strings.ReplaceAll(*f.LastNameLike, "?", "_"), "*", "%"))
-	}
-	if f.LastNamePrefix != nil {
-		db = db.Where(aliasPrefix+"lastName LIKE ?", fmt.Sprintf("%s%%", *f.LastNamePrefix))
-	}
-	if f.LastNameSuffix != nil {
-		db = db.Where(aliasPrefix+"lastName LIKE ?", fmt.Sprintf("%%%s", *f.LastNameSuffix))
+	if f.NameSuffix != nil {
+		conditions = append(conditions, aliasPrefix+"name LIKE ?")
+		values = append(values, fmt.Sprintf("%%%s", *f.NameSuffix))
 	}
 
 	if f.UpdatedAt != nil {
-		db = db.Where(aliasPrefix+"updatedAt = ?", f.UpdatedAt)
+		conditions = append(conditions, aliasPrefix+"updatedAt = ?")
+		values = append(values, f.UpdatedAt)
 	}
 	if f.UpdatedAtNe != nil {
-		db = db.Where(aliasPrefix+"updatedAt != ?", f.UpdatedAtNe)
+		conditions = append(conditions, aliasPrefix+"updatedAt != ?")
+		values = append(values, f.UpdatedAtNe)
 	}
 	if f.UpdatedAtGt != nil {
-		db = db.Where(aliasPrefix+"updatedAt > ?", f.UpdatedAtGt)
+		conditions = append(conditions, aliasPrefix+"updatedAt > ?")
+		values = append(values, f.UpdatedAtGt)
 	}
 	if f.UpdatedAtLt != nil {
-		db = db.Where(aliasPrefix+"updatedAt < ?", f.UpdatedAtLt)
+		conditions = append(conditions, aliasPrefix+"updatedAt < ?")
+		values = append(values, f.UpdatedAtLt)
 	}
 	if f.UpdatedAtGte != nil {
-		db = db.Where(aliasPrefix+"updatedAt >= ?", f.UpdatedAtGte)
+		conditions = append(conditions, aliasPrefix+"updatedAt >= ?")
+		values = append(values, f.UpdatedAtGte)
 	}
 	if f.UpdatedAtLte != nil {
-		db = db.Where(aliasPrefix+"updatedAt <= ?", f.UpdatedAtLte)
+		conditions = append(conditions, aliasPrefix+"updatedAt <= ?")
+		values = append(values, f.UpdatedAtLte)
 	}
 	if f.UpdatedAtIn != nil {
-		db = db.Where(aliasPrefix+"updatedAt IN (?)", f.UpdatedAtIn)
+		conditions = append(conditions, aliasPrefix+"updatedAt IN (?)")
+		values = append(values, f.UpdatedAtIn)
 	}
 
 	if f.CreatedAt != nil {
-		db = db.Where(aliasPrefix+"createdAt = ?", f.CreatedAt)
+		conditions = append(conditions, aliasPrefix+"createdAt = ?")
+		values = append(values, f.CreatedAt)
 	}
 	if f.CreatedAtNe != nil {
-		db = db.Where(aliasPrefix+"createdAt != ?", f.CreatedAtNe)
+		conditions = append(conditions, aliasPrefix+"createdAt != ?")
+		values = append(values, f.CreatedAtNe)
 	}
 	if f.CreatedAtGt != nil {
-		db = db.Where(aliasPrefix+"createdAt > ?", f.CreatedAtGt)
+		conditions = append(conditions, aliasPrefix+"createdAt > ?")
+		values = append(values, f.CreatedAtGt)
 	}
 	if f.CreatedAtLt != nil {
-		db = db.Where(aliasPrefix+"createdAt < ?", f.CreatedAtLt)
+		conditions = append(conditions, aliasPrefix+"createdAt < ?")
+		values = append(values, f.CreatedAtLt)
 	}
 	if f.CreatedAtGte != nil {
-		db = db.Where(aliasPrefix+"createdAt >= ?", f.CreatedAtGte)
+		conditions = append(conditions, aliasPrefix+"createdAt >= ?")
+		values = append(values, f.CreatedAtGte)
 	}
 	if f.CreatedAtLte != nil {
-		db = db.Where(aliasPrefix+"createdAt <= ?", f.CreatedAtLte)
+		conditions = append(conditions, aliasPrefix+"createdAt <= ?")
+		values = append(values, f.CreatedAtLte)
 	}
 	if f.CreatedAtIn != nil {
-		db = db.Where(aliasPrefix+"createdAt IN (?)", f.CreatedAtIn)
+		conditions = append(conditions, aliasPrefix+"createdAt IN (?)")
+		values = append(values, f.CreatedAtIn)
 	}
+
+	return
+}
+
+func (f *UserFilterType) Apply(ctx context.Context, wheres *[]string, values *[]interface{}, joins *[]string) error {
+	return f.ApplyWithAlias(ctx, "users", wheres, values, joins)
+}
+func (f *UserFilterType) ApplyWithAlias(ctx context.Context, alias string, wheres *[]string, values *[]interface{}, joins *[]string) error {
+	if f == nil {
+		return nil
+	}
+	aliasPrefix := alias + "."
+
+	_where, _values := f.WhereContent(aliasPrefix)
+	*wheres = append(*wheres, _where...)
+	*values = append(*values, _values...)
 
 	if f.Tasks != nil {
 		_alias := alias + "_tasks"
-		db = db.Joins("LEFT JOIN tasks " + _alias + " ON " + _alias + ".assigneeId = " + alias + ".id")
-		_db, err := f.Tasks.ApplyWithAlias(db, _alias)
+		*joins = append(*joins, "LEFT JOIN tasks "+_alias+" ON "+_alias+".assigneeId = "+alias+".id")
+		err := f.Tasks.ApplyWithAlias(ctx, _alias, wheres, values, joins)
 		if err != nil {
-			return db, err
+			return err
 		}
-		db = _db
 	}
 
 	if f.Companies != nil {
 		_alias := alias + "_companies"
-		db = db.Joins("LEFT JOIN company_employees " + _alias + "_jointable ON " + alias + ".id = " + _alias + "_jointable.employee_id LEFT JOIN companies " + _alias + " ON " + _alias + "_jointable.company_id = " + _alias + ".id")
-		_db, err := f.Companies.ApplyWithAlias(db, _alias)
+		*joins = append(*joins, "LEFT JOIN company_employees "+_alias+"_jointable ON "+alias+".id = "+_alias+"_jointable.employee_id LEFT JOIN companies "+_alias+" ON "+_alias+"_jointable.company_id = "+_alias+".id")
+		err := f.Companies.ApplyWithAlias(ctx, _alias, wheres, values, joins)
 		if err != nil {
-			return db, err
+			return err
 		}
-		db = _db
 	}
 
 	if f.Friends != nil {
 		_alias := alias + "_friends"
-		db = db.Joins("LEFT JOIN user_friends " + _alias + "_jointable ON " + alias + ".id = " + _alias + "_jointable.friend_id LEFT JOIN users " + _alias + " ON " + _alias + "_jointable.friend_id = " + _alias + ".id")
-		_db, err := f.Friends.ApplyWithAlias(db, _alias)
+		*joins = append(*joins, "LEFT JOIN user_friends "+_alias+"_jointable ON "+alias+".id = "+_alias+"_jointable.friend_id LEFT JOIN users "+_alias+" ON "+_alias+"_jointable.friend_id = "+_alias+".id")
+		err := f.Friends.ApplyWithAlias(ctx, _alias, wheres, values, joins)
 		if err != nil {
-			return db, err
+			return err
 		}
-		db = _db
 	}
 
-	return db, nil
+	return nil
 }
 
-func (f *TaskFilterType) Apply(db *gorm.DB) (*gorm.DB, error) {
-	return f.ApplyWithAlias(db, "tasks")
-}
-func (f *TaskFilterType) ApplyWithAlias(db *gorm.DB, alias string) (*gorm.DB, error) {
-	if f == nil {
-		return db, nil
+func (f *UserFilterType) WhereContent(aliasPrefix string) (conditions []string, values []interface{}) {
+	conditions = []string{}
+	values = []interface{}{}
+
+	if f.Or != nil {
+		cs := []string{}
+		vs := []interface{}{}
+		for _, or := range f.Or {
+			_cond, _values := or.WhereContent(aliasPrefix)
+			cs = append(cs, _cond...)
+			vs = append(vs, _values...)
+		}
+		conditions = append(conditions, "("+strings.Join(cs, " OR ")+")")
+		values = append(values, vs...)
 	}
-	aliasPrefix := alias
-	if aliasPrefix != "" {
-		aliasPrefix += "."
+	if f.And != nil {
+		cs := []string{}
+		vs := []interface{}{}
+		for _, or := range f.Or {
+			_cond, _values := or.WhereContent(aliasPrefix)
+			cs = append(cs, _cond...)
+			vs = append(vs, _values...)
+		}
+		conditions = append(conditions, strings.Join(cs, " AND "))
+		values = append(values, vs...)
 	}
 
 	if f.ID != nil {
-		db = db.Where(aliasPrefix+"id = ?", f.ID)
+		conditions = append(conditions, aliasPrefix+"id = ?")
+		values = append(values, f.ID)
 	}
 	if f.IDNe != nil {
-		db = db.Where(aliasPrefix+"id != ?", f.IDNe)
+		conditions = append(conditions, aliasPrefix+"id != ?")
+		values = append(values, f.IDNe)
 	}
 	if f.IDGt != nil {
-		db = db.Where(aliasPrefix+"id > ?", f.IDGt)
+		conditions = append(conditions, aliasPrefix+"id > ?")
+		values = append(values, f.IDGt)
 	}
 	if f.IDLt != nil {
-		db = db.Where(aliasPrefix+"id < ?", f.IDLt)
+		conditions = append(conditions, aliasPrefix+"id < ?")
+		values = append(values, f.IDLt)
 	}
 	if f.IDGte != nil {
-		db = db.Where(aliasPrefix+"id >= ?", f.IDGte)
+		conditions = append(conditions, aliasPrefix+"id >= ?")
+		values = append(values, f.IDGte)
 	}
 	if f.IDLte != nil {
-		db = db.Where(aliasPrefix+"id <= ?", f.IDLte)
+		conditions = append(conditions, aliasPrefix+"id <= ?")
+		values = append(values, f.IDLte)
 	}
 	if f.IDIn != nil {
-		db = db.Where(aliasPrefix+"id IN (?)", f.IDIn)
+		conditions = append(conditions, aliasPrefix+"id IN (?)")
+		values = append(values, f.IDIn)
 	}
 
-	if f.Title != nil {
-		db = db.Where(aliasPrefix+"title = ?", f.Title)
+	if f.Email != nil {
+		conditions = append(conditions, aliasPrefix+"email = ?")
+		values = append(values, f.Email)
 	}
-	if f.TitleNe != nil {
-		db = db.Where(aliasPrefix+"title != ?", f.TitleNe)
+	if f.EmailNe != nil {
+		conditions = append(conditions, aliasPrefix+"email != ?")
+		values = append(values, f.EmailNe)
 	}
-	if f.TitleGt != nil {
-		db = db.Where(aliasPrefix+"title > ?", f.TitleGt)
+	if f.EmailGt != nil {
+		conditions = append(conditions, aliasPrefix+"email > ?")
+		values = append(values, f.EmailGt)
 	}
-	if f.TitleLt != nil {
-		db = db.Where(aliasPrefix+"title < ?", f.TitleLt)
+	if f.EmailLt != nil {
+		conditions = append(conditions, aliasPrefix+"email < ?")
+		values = append(values, f.EmailLt)
 	}
-	if f.TitleGte != nil {
-		db = db.Where(aliasPrefix+"title >= ?", f.TitleGte)
+	if f.EmailGte != nil {
+		conditions = append(conditions, aliasPrefix+"email >= ?")
+		values = append(values, f.EmailGte)
 	}
-	if f.TitleLte != nil {
-		db = db.Where(aliasPrefix+"title <= ?", f.TitleLte)
+	if f.EmailLte != nil {
+		conditions = append(conditions, aliasPrefix+"email <= ?")
+		values = append(values, f.EmailLte)
 	}
-	if f.TitleIn != nil {
-		db = db.Where(aliasPrefix+"title IN (?)", f.TitleIn)
+	if f.EmailIn != nil {
+		conditions = append(conditions, aliasPrefix+"email IN (?)")
+		values = append(values, f.EmailIn)
 	}
-	if f.TitleLike != nil {
-		db = db.Where(aliasPrefix+"title LIKE ?", strings.ReplaceAll(strings.ReplaceAll(*f.TitleLike, "?", "_"), "*", "%"))
+	if f.EmailLike != nil {
+		conditions = append(conditions, aliasPrefix+"email LIKE ?")
+		values = append(values, strings.ReplaceAll(strings.ReplaceAll(*f.EmailLike, "?", "_"), "*", "%"))
 	}
-	if f.TitlePrefix != nil {
-		db = db.Where(aliasPrefix+"title LIKE ?", fmt.Sprintf("%s%%", *f.TitlePrefix))
+	if f.EmailPrefix != nil {
+		conditions = append(conditions, aliasPrefix+"email LIKE ?")
+		values = append(values, fmt.Sprintf("%s%%", *f.EmailPrefix))
 	}
-	if f.TitleSuffix != nil {
-		db = db.Where(aliasPrefix+"title LIKE ?", fmt.Sprintf("%%%s", *f.TitleSuffix))
-	}
-
-	if f.Completed != nil {
-		db = db.Where(aliasPrefix+"completed = ?", f.Completed)
-	}
-	if f.CompletedNe != nil {
-		db = db.Where(aliasPrefix+"completed != ?", f.CompletedNe)
-	}
-	if f.CompletedGt != nil {
-		db = db.Where(aliasPrefix+"completed > ?", f.CompletedGt)
-	}
-	if f.CompletedLt != nil {
-		db = db.Where(aliasPrefix+"completed < ?", f.CompletedLt)
-	}
-	if f.CompletedGte != nil {
-		db = db.Where(aliasPrefix+"completed >= ?", f.CompletedGte)
-	}
-	if f.CompletedLte != nil {
-		db = db.Where(aliasPrefix+"completed <= ?", f.CompletedLte)
-	}
-	if f.CompletedIn != nil {
-		db = db.Where(aliasPrefix+"completed IN (?)", f.CompletedIn)
+	if f.EmailSuffix != nil {
+		conditions = append(conditions, aliasPrefix+"email LIKE ?")
+		values = append(values, fmt.Sprintf("%%%s", *f.EmailSuffix))
 	}
 
-	if f.DueDate != nil {
-		db = db.Where(aliasPrefix+"dueDate = ?", f.DueDate)
+	if f.FirstName != nil {
+		conditions = append(conditions, aliasPrefix+"firstName = ?")
+		values = append(values, f.FirstName)
 	}
-	if f.DueDateNe != nil {
-		db = db.Where(aliasPrefix+"dueDate != ?", f.DueDateNe)
+	if f.FirstNameNe != nil {
+		conditions = append(conditions, aliasPrefix+"firstName != ?")
+		values = append(values, f.FirstNameNe)
 	}
-	if f.DueDateGt != nil {
-		db = db.Where(aliasPrefix+"dueDate > ?", f.DueDateGt)
+	if f.FirstNameGt != nil {
+		conditions = append(conditions, aliasPrefix+"firstName > ?")
+		values = append(values, f.FirstNameGt)
 	}
-	if f.DueDateLt != nil {
-		db = db.Where(aliasPrefix+"dueDate < ?", f.DueDateLt)
+	if f.FirstNameLt != nil {
+		conditions = append(conditions, aliasPrefix+"firstName < ?")
+		values = append(values, f.FirstNameLt)
 	}
-	if f.DueDateGte != nil {
-		db = db.Where(aliasPrefix+"dueDate >= ?", f.DueDateGte)
+	if f.FirstNameGte != nil {
+		conditions = append(conditions, aliasPrefix+"firstName >= ?")
+		values = append(values, f.FirstNameGte)
 	}
-	if f.DueDateLte != nil {
-		db = db.Where(aliasPrefix+"dueDate <= ?", f.DueDateLte)
+	if f.FirstNameLte != nil {
+		conditions = append(conditions, aliasPrefix+"firstName <= ?")
+		values = append(values, f.FirstNameLte)
 	}
-	if f.DueDateIn != nil {
-		db = db.Where(aliasPrefix+"dueDate IN (?)", f.DueDateIn)
+	if f.FirstNameIn != nil {
+		conditions = append(conditions, aliasPrefix+"firstName IN (?)")
+		values = append(values, f.FirstNameIn)
+	}
+	if f.FirstNameLike != nil {
+		conditions = append(conditions, aliasPrefix+"firstName LIKE ?")
+		values = append(values, strings.ReplaceAll(strings.ReplaceAll(*f.FirstNameLike, "?", "_"), "*", "%"))
+	}
+	if f.FirstNamePrefix != nil {
+		conditions = append(conditions, aliasPrefix+"firstName LIKE ?")
+		values = append(values, fmt.Sprintf("%s%%", *f.FirstNamePrefix))
+	}
+	if f.FirstNameSuffix != nil {
+		conditions = append(conditions, aliasPrefix+"firstName LIKE ?")
+		values = append(values, fmt.Sprintf("%%%s", *f.FirstNameSuffix))
 	}
 
-	if f.Type != nil {
-		db = db.Where(aliasPrefix+"type = ?", f.Type)
+	if f.LastName != nil {
+		conditions = append(conditions, aliasPrefix+"lastName = ?")
+		values = append(values, f.LastName)
 	}
-	if f.TypeNe != nil {
-		db = db.Where(aliasPrefix+"type != ?", f.TypeNe)
+	if f.LastNameNe != nil {
+		conditions = append(conditions, aliasPrefix+"lastName != ?")
+		values = append(values, f.LastNameNe)
 	}
-	if f.TypeGt != nil {
-		db = db.Where(aliasPrefix+"type > ?", f.TypeGt)
+	if f.LastNameGt != nil {
+		conditions = append(conditions, aliasPrefix+"lastName > ?")
+		values = append(values, f.LastNameGt)
 	}
-	if f.TypeLt != nil {
-		db = db.Where(aliasPrefix+"type < ?", f.TypeLt)
+	if f.LastNameLt != nil {
+		conditions = append(conditions, aliasPrefix+"lastName < ?")
+		values = append(values, f.LastNameLt)
 	}
-	if f.TypeGte != nil {
-		db = db.Where(aliasPrefix+"type >= ?", f.TypeGte)
+	if f.LastNameGte != nil {
+		conditions = append(conditions, aliasPrefix+"lastName >= ?")
+		values = append(values, f.LastNameGte)
 	}
-	if f.TypeLte != nil {
-		db = db.Where(aliasPrefix+"type <= ?", f.TypeLte)
+	if f.LastNameLte != nil {
+		conditions = append(conditions, aliasPrefix+"lastName <= ?")
+		values = append(values, f.LastNameLte)
 	}
-	if f.TypeIn != nil {
-		db = db.Where(aliasPrefix+"type IN (?)", f.TypeIn)
+	if f.LastNameIn != nil {
+		conditions = append(conditions, aliasPrefix+"lastName IN (?)")
+		values = append(values, f.LastNameIn)
+	}
+	if f.LastNameLike != nil {
+		conditions = append(conditions, aliasPrefix+"lastName LIKE ?")
+		values = append(values, strings.ReplaceAll(strings.ReplaceAll(*f.LastNameLike, "?", "_"), "*", "%"))
+	}
+	if f.LastNamePrefix != nil {
+		conditions = append(conditions, aliasPrefix+"lastName LIKE ?")
+		values = append(values, fmt.Sprintf("%s%%", *f.LastNamePrefix))
+	}
+	if f.LastNameSuffix != nil {
+		conditions = append(conditions, aliasPrefix+"lastName LIKE ?")
+		values = append(values, fmt.Sprintf("%%%s", *f.LastNameSuffix))
 	}
 
 	if f.UpdatedAt != nil {
-		db = db.Where(aliasPrefix+"updatedAt = ?", f.UpdatedAt)
+		conditions = append(conditions, aliasPrefix+"updatedAt = ?")
+		values = append(values, f.UpdatedAt)
 	}
 	if f.UpdatedAtNe != nil {
-		db = db.Where(aliasPrefix+"updatedAt != ?", f.UpdatedAtNe)
+		conditions = append(conditions, aliasPrefix+"updatedAt != ?")
+		values = append(values, f.UpdatedAtNe)
 	}
 	if f.UpdatedAtGt != nil {
-		db = db.Where(aliasPrefix+"updatedAt > ?", f.UpdatedAtGt)
+		conditions = append(conditions, aliasPrefix+"updatedAt > ?")
+		values = append(values, f.UpdatedAtGt)
 	}
 	if f.UpdatedAtLt != nil {
-		db = db.Where(aliasPrefix+"updatedAt < ?", f.UpdatedAtLt)
+		conditions = append(conditions, aliasPrefix+"updatedAt < ?")
+		values = append(values, f.UpdatedAtLt)
 	}
 	if f.UpdatedAtGte != nil {
-		db = db.Where(aliasPrefix+"updatedAt >= ?", f.UpdatedAtGte)
+		conditions = append(conditions, aliasPrefix+"updatedAt >= ?")
+		values = append(values, f.UpdatedAtGte)
 	}
 	if f.UpdatedAtLte != nil {
-		db = db.Where(aliasPrefix+"updatedAt <= ?", f.UpdatedAtLte)
+		conditions = append(conditions, aliasPrefix+"updatedAt <= ?")
+		values = append(values, f.UpdatedAtLte)
 	}
 	if f.UpdatedAtIn != nil {
-		db = db.Where(aliasPrefix+"updatedAt IN (?)", f.UpdatedAtIn)
+		conditions = append(conditions, aliasPrefix+"updatedAt IN (?)")
+		values = append(values, f.UpdatedAtIn)
 	}
 
 	if f.CreatedAt != nil {
-		db = db.Where(aliasPrefix+"createdAt = ?", f.CreatedAt)
+		conditions = append(conditions, aliasPrefix+"createdAt = ?")
+		values = append(values, f.CreatedAt)
 	}
 	if f.CreatedAtNe != nil {
-		db = db.Where(aliasPrefix+"createdAt != ?", f.CreatedAtNe)
+		conditions = append(conditions, aliasPrefix+"createdAt != ?")
+		values = append(values, f.CreatedAtNe)
 	}
 	if f.CreatedAtGt != nil {
-		db = db.Where(aliasPrefix+"createdAt > ?", f.CreatedAtGt)
+		conditions = append(conditions, aliasPrefix+"createdAt > ?")
+		values = append(values, f.CreatedAtGt)
 	}
 	if f.CreatedAtLt != nil {
-		db = db.Where(aliasPrefix+"createdAt < ?", f.CreatedAtLt)
+		conditions = append(conditions, aliasPrefix+"createdAt < ?")
+		values = append(values, f.CreatedAtLt)
 	}
 	if f.CreatedAtGte != nil {
-		db = db.Where(aliasPrefix+"createdAt >= ?", f.CreatedAtGte)
+		conditions = append(conditions, aliasPrefix+"createdAt >= ?")
+		values = append(values, f.CreatedAtGte)
 	}
 	if f.CreatedAtLte != nil {
-		db = db.Where(aliasPrefix+"createdAt <= ?", f.CreatedAtLte)
+		conditions = append(conditions, aliasPrefix+"createdAt <= ?")
+		values = append(values, f.CreatedAtLte)
 	}
 	if f.CreatedAtIn != nil {
-		db = db.Where(aliasPrefix+"createdAt IN (?)", f.CreatedAtIn)
+		conditions = append(conditions, aliasPrefix+"createdAt IN (?)")
+		values = append(values, f.CreatedAtIn)
 	}
+
+	return
+}
+
+func (f *TaskFilterType) Apply(ctx context.Context, wheres *[]string, values *[]interface{}, joins *[]string) error {
+	return f.ApplyWithAlias(ctx, "tasks", wheres, values, joins)
+}
+func (f *TaskFilterType) ApplyWithAlias(ctx context.Context, alias string, wheres *[]string, values *[]interface{}, joins *[]string) error {
+	if f == nil {
+		return nil
+	}
+	aliasPrefix := alias + "."
+
+	_where, _values := f.WhereContent(aliasPrefix)
+	*wheres = append(*wheres, _where...)
+	*values = append(*values, _values...)
 
 	if f.Assignee != nil {
 		_alias := alias + "_assignee"
-		db = db.Joins("LEFT JOIN users " + _alias + " ON " + _alias + ".id = " + alias + ".assigneeId")
-		_db, err := f.Assignee.ApplyWithAlias(db, _alias)
+		*joins = append(*joins, "LEFT JOIN users "+_alias+" ON "+_alias+".id = "+alias+".assigneeId")
+		err := f.Assignee.ApplyWithAlias(ctx, _alias, wheres, values, joins)
 		if err != nil {
-			return db, err
+			return err
 		}
-		db = _db
 	}
 
-	return db, nil
+	return nil
+}
+
+func (f *TaskFilterType) WhereContent(aliasPrefix string) (conditions []string, values []interface{}) {
+	conditions = []string{}
+	values = []interface{}{}
+
+	if f.Or != nil {
+		cs := []string{}
+		vs := []interface{}{}
+		for _, or := range f.Or {
+			_cond, _values := or.WhereContent(aliasPrefix)
+			cs = append(cs, _cond...)
+			vs = append(vs, _values...)
+		}
+		conditions = append(conditions, "("+strings.Join(cs, " OR ")+")")
+		values = append(values, vs...)
+	}
+	if f.And != nil {
+		cs := []string{}
+		vs := []interface{}{}
+		for _, or := range f.Or {
+			_cond, _values := or.WhereContent(aliasPrefix)
+			cs = append(cs, _cond...)
+			vs = append(vs, _values...)
+		}
+		conditions = append(conditions, strings.Join(cs, " AND "))
+		values = append(values, vs...)
+	}
+
+	if f.ID != nil {
+		conditions = append(conditions, aliasPrefix+"id = ?")
+		values = append(values, f.ID)
+	}
+	if f.IDNe != nil {
+		conditions = append(conditions, aliasPrefix+"id != ?")
+		values = append(values, f.IDNe)
+	}
+	if f.IDGt != nil {
+		conditions = append(conditions, aliasPrefix+"id > ?")
+		values = append(values, f.IDGt)
+	}
+	if f.IDLt != nil {
+		conditions = append(conditions, aliasPrefix+"id < ?")
+		values = append(values, f.IDLt)
+	}
+	if f.IDGte != nil {
+		conditions = append(conditions, aliasPrefix+"id >= ?")
+		values = append(values, f.IDGte)
+	}
+	if f.IDLte != nil {
+		conditions = append(conditions, aliasPrefix+"id <= ?")
+		values = append(values, f.IDLte)
+	}
+	if f.IDIn != nil {
+		conditions = append(conditions, aliasPrefix+"id IN (?)")
+		values = append(values, f.IDIn)
+	}
+
+	if f.Title != nil {
+		conditions = append(conditions, aliasPrefix+"title = ?")
+		values = append(values, f.Title)
+	}
+	if f.TitleNe != nil {
+		conditions = append(conditions, aliasPrefix+"title != ?")
+		values = append(values, f.TitleNe)
+	}
+	if f.TitleGt != nil {
+		conditions = append(conditions, aliasPrefix+"title > ?")
+		values = append(values, f.TitleGt)
+	}
+	if f.TitleLt != nil {
+		conditions = append(conditions, aliasPrefix+"title < ?")
+		values = append(values, f.TitleLt)
+	}
+	if f.TitleGte != nil {
+		conditions = append(conditions, aliasPrefix+"title >= ?")
+		values = append(values, f.TitleGte)
+	}
+	if f.TitleLte != nil {
+		conditions = append(conditions, aliasPrefix+"title <= ?")
+		values = append(values, f.TitleLte)
+	}
+	if f.TitleIn != nil {
+		conditions = append(conditions, aliasPrefix+"title IN (?)")
+		values = append(values, f.TitleIn)
+	}
+	if f.TitleLike != nil {
+		conditions = append(conditions, aliasPrefix+"title LIKE ?")
+		values = append(values, strings.ReplaceAll(strings.ReplaceAll(*f.TitleLike, "?", "_"), "*", "%"))
+	}
+	if f.TitlePrefix != nil {
+		conditions = append(conditions, aliasPrefix+"title LIKE ?")
+		values = append(values, fmt.Sprintf("%s%%", *f.TitlePrefix))
+	}
+	if f.TitleSuffix != nil {
+		conditions = append(conditions, aliasPrefix+"title LIKE ?")
+		values = append(values, fmt.Sprintf("%%%s", *f.TitleSuffix))
+	}
+
+	if f.Completed != nil {
+		conditions = append(conditions, aliasPrefix+"completed = ?")
+		values = append(values, f.Completed)
+	}
+	if f.CompletedNe != nil {
+		conditions = append(conditions, aliasPrefix+"completed != ?")
+		values = append(values, f.CompletedNe)
+	}
+	if f.CompletedGt != nil {
+		conditions = append(conditions, aliasPrefix+"completed > ?")
+		values = append(values, f.CompletedGt)
+	}
+	if f.CompletedLt != nil {
+		conditions = append(conditions, aliasPrefix+"completed < ?")
+		values = append(values, f.CompletedLt)
+	}
+	if f.CompletedGte != nil {
+		conditions = append(conditions, aliasPrefix+"completed >= ?")
+		values = append(values, f.CompletedGte)
+	}
+	if f.CompletedLte != nil {
+		conditions = append(conditions, aliasPrefix+"completed <= ?")
+		values = append(values, f.CompletedLte)
+	}
+	if f.CompletedIn != nil {
+		conditions = append(conditions, aliasPrefix+"completed IN (?)")
+		values = append(values, f.CompletedIn)
+	}
+
+	if f.DueDate != nil {
+		conditions = append(conditions, aliasPrefix+"dueDate = ?")
+		values = append(values, f.DueDate)
+	}
+	if f.DueDateNe != nil {
+		conditions = append(conditions, aliasPrefix+"dueDate != ?")
+		values = append(values, f.DueDateNe)
+	}
+	if f.DueDateGt != nil {
+		conditions = append(conditions, aliasPrefix+"dueDate > ?")
+		values = append(values, f.DueDateGt)
+	}
+	if f.DueDateLt != nil {
+		conditions = append(conditions, aliasPrefix+"dueDate < ?")
+		values = append(values, f.DueDateLt)
+	}
+	if f.DueDateGte != nil {
+		conditions = append(conditions, aliasPrefix+"dueDate >= ?")
+		values = append(values, f.DueDateGte)
+	}
+	if f.DueDateLte != nil {
+		conditions = append(conditions, aliasPrefix+"dueDate <= ?")
+		values = append(values, f.DueDateLte)
+	}
+	if f.DueDateIn != nil {
+		conditions = append(conditions, aliasPrefix+"dueDate IN (?)")
+		values = append(values, f.DueDateIn)
+	}
+
+	if f.Type != nil {
+		conditions = append(conditions, aliasPrefix+"type = ?")
+		values = append(values, f.Type)
+	}
+	if f.TypeNe != nil {
+		conditions = append(conditions, aliasPrefix+"type != ?")
+		values = append(values, f.TypeNe)
+	}
+	if f.TypeGt != nil {
+		conditions = append(conditions, aliasPrefix+"type > ?")
+		values = append(values, f.TypeGt)
+	}
+	if f.TypeLt != nil {
+		conditions = append(conditions, aliasPrefix+"type < ?")
+		values = append(values, f.TypeLt)
+	}
+	if f.TypeGte != nil {
+		conditions = append(conditions, aliasPrefix+"type >= ?")
+		values = append(values, f.TypeGte)
+	}
+	if f.TypeLte != nil {
+		conditions = append(conditions, aliasPrefix+"type <= ?")
+		values = append(values, f.TypeLte)
+	}
+	if f.TypeIn != nil {
+		conditions = append(conditions, aliasPrefix+"type IN (?)")
+		values = append(values, f.TypeIn)
+	}
+
+	if f.UpdatedAt != nil {
+		conditions = append(conditions, aliasPrefix+"updatedAt = ?")
+		values = append(values, f.UpdatedAt)
+	}
+	if f.UpdatedAtNe != nil {
+		conditions = append(conditions, aliasPrefix+"updatedAt != ?")
+		values = append(values, f.UpdatedAtNe)
+	}
+	if f.UpdatedAtGt != nil {
+		conditions = append(conditions, aliasPrefix+"updatedAt > ?")
+		values = append(values, f.UpdatedAtGt)
+	}
+	if f.UpdatedAtLt != nil {
+		conditions = append(conditions, aliasPrefix+"updatedAt < ?")
+		values = append(values, f.UpdatedAtLt)
+	}
+	if f.UpdatedAtGte != nil {
+		conditions = append(conditions, aliasPrefix+"updatedAt >= ?")
+		values = append(values, f.UpdatedAtGte)
+	}
+	if f.UpdatedAtLte != nil {
+		conditions = append(conditions, aliasPrefix+"updatedAt <= ?")
+		values = append(values, f.UpdatedAtLte)
+	}
+	if f.UpdatedAtIn != nil {
+		conditions = append(conditions, aliasPrefix+"updatedAt IN (?)")
+		values = append(values, f.UpdatedAtIn)
+	}
+
+	if f.CreatedAt != nil {
+		conditions = append(conditions, aliasPrefix+"createdAt = ?")
+		values = append(values, f.CreatedAt)
+	}
+	if f.CreatedAtNe != nil {
+		conditions = append(conditions, aliasPrefix+"createdAt != ?")
+		values = append(values, f.CreatedAtNe)
+	}
+	if f.CreatedAtGt != nil {
+		conditions = append(conditions, aliasPrefix+"createdAt > ?")
+		values = append(values, f.CreatedAtGt)
+	}
+	if f.CreatedAtLt != nil {
+		conditions = append(conditions, aliasPrefix+"createdAt < ?")
+		values = append(values, f.CreatedAtLt)
+	}
+	if f.CreatedAtGte != nil {
+		conditions = append(conditions, aliasPrefix+"createdAt >= ?")
+		values = append(values, f.CreatedAtGte)
+	}
+	if f.CreatedAtLte != nil {
+		conditions = append(conditions, aliasPrefix+"createdAt <= ?")
+		values = append(values, f.CreatedAtLte)
+	}
+	if f.CreatedAtIn != nil {
+		conditions = append(conditions, aliasPrefix+"createdAt IN (?)")
+		values = append(values, f.CreatedAtIn)
+	}
+
+	return
 }

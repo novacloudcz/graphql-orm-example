@@ -278,11 +278,12 @@ func (r *queryResolver) Companies(ctx context.Context, offset *int, limit *int, 
 	for _, s := range sort {
 		_sort = append(_sort, s)
 	}
+	query := CompanyQueryFilter{q}
 	return &CompanyResultType{
 		EntityResultType: resolvers.EntityResultType{
 			Offset: offset,
 			Limit:  limit,
-			Query:  q,
+			Query:  &query,
 			Sort:   _sort,
 			Filter: filter,
 		},
@@ -292,7 +293,7 @@ func (r *queryResolver) Companies(ctx context.Context, offset *int, limit *int, 
 type companyResultTypeResolver struct{ *Resolver }
 
 func (r *companyResultTypeResolver) Items(ctx context.Context, obj *CompanyResultType) (items []*Company, err error) {
-	err = obj.GetItems(ctx, r.DB.db, &items)
+	err = obj.GetItems(ctx, r.DB.db, "companies", &items)
 	return
 }
 
@@ -321,11 +322,12 @@ func (r *queryResolver) Users(ctx context.Context, offset *int, limit *int, q *s
 	for _, s := range sort {
 		_sort = append(_sort, s)
 	}
+	query := UserQueryFilter{q}
 	return &UserResultType{
 		EntityResultType: resolvers.EntityResultType{
 			Offset: offset,
 			Limit:  limit,
-			Query:  q,
+			Query:  &query,
 			Sort:   _sort,
 			Filter: filter,
 		},
@@ -335,7 +337,7 @@ func (r *queryResolver) Users(ctx context.Context, offset *int, limit *int, q *s
 type userResultTypeResolver struct{ *Resolver }
 
 func (r *userResultTypeResolver) Items(ctx context.Context, obj *UserResultType) (items []*User, err error) {
-	err = obj.GetItems(ctx, r.DB.db, &items)
+	err = obj.GetItems(ctx, r.DB.db, "users", &items)
 	return
 }
 
@@ -382,11 +384,12 @@ func (r *queryResolver) Tasks(ctx context.Context, offset *int, limit *int, q *s
 	for _, s := range sort {
 		_sort = append(_sort, s)
 	}
+	query := TaskQueryFilter{q}
 	return &TaskResultType{
 		EntityResultType: resolvers.EntityResultType{
 			Offset: offset,
 			Limit:  limit,
-			Query:  q,
+			Query:  &query,
 			Sort:   _sort,
 			Filter: filter,
 		},
@@ -396,7 +399,7 @@ func (r *queryResolver) Tasks(ctx context.Context, offset *int, limit *int, q *s
 type taskResultTypeResolver struct{ *Resolver }
 
 func (r *taskResultTypeResolver) Items(ctx context.Context, obj *TaskResultType) (items []*Task, err error) {
-	err = obj.GetItems(ctx, r.DB.db, &items)
+	err = obj.GetItems(ctx, r.DB.db, "tasks", &items)
 	return
 }
 

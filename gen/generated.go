@@ -716,7 +716,7 @@ type Task {
 }
 
 input CompanyCreateInput {
-  id: ID!
+  id: ID
   name: String
   employeesIds: [ID!]
 }
@@ -780,7 +780,7 @@ type CompanyResultType {
 }
 
 input UserCreateInput {
-  id: ID!
+  id: ID
   email: String
   firstName: String
   lastName: String
@@ -878,7 +878,7 @@ type UserResultType {
 }
 
 input TaskCreateInput {
-  id: ID!
+  id: ID
   title: String
   completed: Boolean
   dueDate: Time
