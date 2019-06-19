@@ -681,6 +681,35 @@ func (f *TaskFilterType) WhereContent(aliasPrefix string) (conditions []string, 
 		values = append(values, f.TypeIn)
 	}
 
+	if f.AssigneeID != nil {
+		conditions = append(conditions, aliasPrefix+"assigneeId = ?")
+		values = append(values, f.AssigneeID)
+	}
+	if f.AssigneeIDNe != nil {
+		conditions = append(conditions, aliasPrefix+"assigneeId != ?")
+		values = append(values, f.AssigneeIDNe)
+	}
+	if f.AssigneeIDGt != nil {
+		conditions = append(conditions, aliasPrefix+"assigneeId > ?")
+		values = append(values, f.AssigneeIDGt)
+	}
+	if f.AssigneeIDLt != nil {
+		conditions = append(conditions, aliasPrefix+"assigneeId < ?")
+		values = append(values, f.AssigneeIDLt)
+	}
+	if f.AssigneeIDGte != nil {
+		conditions = append(conditions, aliasPrefix+"assigneeId >= ?")
+		values = append(values, f.AssigneeIDGte)
+	}
+	if f.AssigneeIDLte != nil {
+		conditions = append(conditions, aliasPrefix+"assigneeId <= ?")
+		values = append(values, f.AssigneeIDLte)
+	}
+	if f.AssigneeIDIn != nil {
+		conditions = append(conditions, aliasPrefix+"assigneeId IN (?)")
+		values = append(values, f.AssigneeIDIn)
+	}
+
 	if f.UpdatedAt != nil {
 		conditions = append(conditions, aliasPrefix+"updatedAt = ?")
 		values = append(values, f.UpdatedAt)

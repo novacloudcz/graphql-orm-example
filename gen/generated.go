@@ -85,14 +85,15 @@ type ComplexityRoot struct {
 	}
 
 	Task struct {
-		Assignee  func(childComplexity int) int
-		Completed func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		DueDate   func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Title     func(childComplexity int) int
-		Type      func(childComplexity int) int
-		UpdatedAt func(childComplexity int) int
+		Assignee   func(childComplexity int) int
+		AssigneeID func(childComplexity int) int
+		Completed  func(childComplexity int) int
+		CreatedAt  func(childComplexity int) int
+		DueDate    func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Title      func(childComplexity int) int
+		Type       func(childComplexity int) int
+		UpdatedAt  func(childComplexity int) int
 	}
 
 	TaskResultType struct {
@@ -412,6 +413,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Task.Assignee(childComplexity), true
 
+	case "Task.assigneeId":
+		if e.complexity.Task.AssigneeID == nil {
+			break
+		}
+
+		return e.complexity.Task.AssigneeID(childComplexity), true
+
 	case "Task.completed":
 		if e.complexity.Task.Completed == nil {
 			break
@@ -711,6 +719,7 @@ type Task {
   dueDate: Time
   type: TaskType
   assignee: User @relationship(inverse: "tasks")
+  assigneeId: ID
   updatedAt: Time!
   createdAt: Time!
 }
@@ -905,6 +914,8 @@ enum TaskSortType {
   DUE_DATE_DESC
   TYPE_ASC
   TYPE_DESC
+  ASSIGNEE_ID_ASC
+  ASSIGNEE_ID_DESC
   UPDATED_AT_ASC
   UPDATED_AT_DESC
   CREATED_AT_ASC
@@ -952,6 +963,13 @@ input TaskFilterType {
   type_gte: TaskType
   type_lte: TaskType
   type_in: [TaskType!]
+  assigneeId: ID
+  assigneeId_ne: ID
+  assigneeId_gt: ID
+  assigneeId_lt: ID
+  assigneeId_gte: ID
+  assigneeId_lte: ID
+  assigneeId_in: [ID!]
   updatedAt: Time
   updatedAt_ne: Time
   updatedAt_gt: Time
@@ -2272,6 +2290,30 @@ func (ec *executionContext) _Task_assignee(ctx context.Context, field graphql.Co
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOUser2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Task_assigneeId(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object:   "Task",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AssigneeID, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Task_updatedAt(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
@@ -3963,6 +4005,48 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, v 
 			if err != nil {
 				return it, err
 			}
+		case "assigneeId":
+			var err error
+			it.AssigneeID, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeId_ne":
+			var err error
+			it.AssigneeIDNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeId_gt":
+			var err error
+			it.AssigneeIDGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeId_lt":
+			var err error
+			it.AssigneeIDLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeId_gte":
+			var err error
+			it.AssigneeIDGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeId_lte":
+			var err error
+			it.AssigneeIDLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeId_in":
+			var err error
+			it.AssigneeIDIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt":
 			var err error
 			it.UpdatedAt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
@@ -4720,6 +4804,8 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 				res = ec._Task_assignee(ctx, field, obj)
 				return res
 			})
+		case "assigneeId":
+			out.Values[i] = ec._Task_assigneeId(ctx, field, obj)
 		case "updatedAt":
 			out.Values[i] = ec._Task_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

@@ -42,14 +42,14 @@ type TaskResultType struct {
 }
 
 type Task struct {
-	ID        string     `json:"id" gorm:"column:id;primary_key"`
-	Title     *string    `json:"title" gorm:"column:title"`
-	Completed *bool      `json:"completed" gorm:"column:completed"`
-	DueDate   *time.Time `json:"dueDate" gorm:"column:dueDate"`
-	Type      *TaskType  `json:"type" gorm:"column:type"`
-	UpdatedAt time.Time  `json:"updatedAt" gorm:"column:updatedAt"`
-	CreatedAt time.Time  `json:"createdAt" gorm:"column:createdAt"`
+	ID         string     `json:"id" gorm:"column:id;primary_key"`
+	Title      *string    `json:"title" gorm:"column:title"`
+	Completed  *bool      `json:"completed" gorm:"column:completed"`
+	DueDate    *time.Time `json:"dueDate" gorm:"column:dueDate"`
+	Type       *TaskType  `json:"type" gorm:"column:type"`
+	AssigneeID *string    `json:"assigneeId" gorm:"column:assigneeId"`
+	UpdatedAt  time.Time  `json:"updatedAt" gorm:"column:updatedAt"`
+	CreatedAt  time.Time  `json:"createdAt" gorm:"column:createdAt"`
 
-	Assignee   *User   `json:"assignee"`
-	AssigneeID *string `gorm:"column:assigneeId"`
+	Assignee *User `json:"assignee"`
 }

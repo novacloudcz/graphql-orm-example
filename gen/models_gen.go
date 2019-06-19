@@ -47,61 +47,68 @@ type CompanyFilterType struct {
 }
 
 type TaskFilterType struct {
-	And          []*TaskFilterType `json:"AND"`
-	Or           []*TaskFilterType `json:"OR"`
-	ID           *string           `json:"id"`
-	IDNe         *string           `json:"id_ne"`
-	IDGt         *string           `json:"id_gt"`
-	IDLt         *string           `json:"id_lt"`
-	IDGte        *string           `json:"id_gte"`
-	IDLte        *string           `json:"id_lte"`
-	IDIn         []string          `json:"id_in"`
-	Title        *string           `json:"title"`
-	TitleNe      *string           `json:"title_ne"`
-	TitleGt      *string           `json:"title_gt"`
-	TitleLt      *string           `json:"title_lt"`
-	TitleGte     *string           `json:"title_gte"`
-	TitleLte     *string           `json:"title_lte"`
-	TitleIn      []string          `json:"title_in"`
-	TitleLike    *string           `json:"title_like"`
-	TitlePrefix  *string           `json:"title_prefix"`
-	TitleSuffix  *string           `json:"title_suffix"`
-	Completed    *bool             `json:"completed"`
-	CompletedNe  *bool             `json:"completed_ne"`
-	CompletedGt  *bool             `json:"completed_gt"`
-	CompletedLt  *bool             `json:"completed_lt"`
-	CompletedGte *bool             `json:"completed_gte"`
-	CompletedLte *bool             `json:"completed_lte"`
-	CompletedIn  []bool            `json:"completed_in"`
-	DueDate      *time.Time        `json:"dueDate"`
-	DueDateNe    *time.Time        `json:"dueDate_ne"`
-	DueDateGt    *time.Time        `json:"dueDate_gt"`
-	DueDateLt    *time.Time        `json:"dueDate_lt"`
-	DueDateGte   *time.Time        `json:"dueDate_gte"`
-	DueDateLte   *time.Time        `json:"dueDate_lte"`
-	DueDateIn    []*time.Time      `json:"dueDate_in"`
-	Type         *TaskType         `json:"type"`
-	TypeNe       *TaskType         `json:"type_ne"`
-	TypeGt       *TaskType         `json:"type_gt"`
-	TypeLt       *TaskType         `json:"type_lt"`
-	TypeGte      *TaskType         `json:"type_gte"`
-	TypeLte      *TaskType         `json:"type_lte"`
-	TypeIn       []TaskType        `json:"type_in"`
-	UpdatedAt    *time.Time        `json:"updatedAt"`
-	UpdatedAtNe  *time.Time        `json:"updatedAt_ne"`
-	UpdatedAtGt  *time.Time        `json:"updatedAt_gt"`
-	UpdatedAtLt  *time.Time        `json:"updatedAt_lt"`
-	UpdatedAtGte *time.Time        `json:"updatedAt_gte"`
-	UpdatedAtLte *time.Time        `json:"updatedAt_lte"`
-	UpdatedAtIn  []*time.Time      `json:"updatedAt_in"`
-	CreatedAt    *time.Time        `json:"createdAt"`
-	CreatedAtNe  *time.Time        `json:"createdAt_ne"`
-	CreatedAtGt  *time.Time        `json:"createdAt_gt"`
-	CreatedAtLt  *time.Time        `json:"createdAt_lt"`
-	CreatedAtGte *time.Time        `json:"createdAt_gte"`
-	CreatedAtLte *time.Time        `json:"createdAt_lte"`
-	CreatedAtIn  []*time.Time      `json:"createdAt_in"`
-	Assignee     *UserFilterType   `json:"assignee"`
+	And           []*TaskFilterType `json:"AND"`
+	Or            []*TaskFilterType `json:"OR"`
+	ID            *string           `json:"id"`
+	IDNe          *string           `json:"id_ne"`
+	IDGt          *string           `json:"id_gt"`
+	IDLt          *string           `json:"id_lt"`
+	IDGte         *string           `json:"id_gte"`
+	IDLte         *string           `json:"id_lte"`
+	IDIn          []string          `json:"id_in"`
+	Title         *string           `json:"title"`
+	TitleNe       *string           `json:"title_ne"`
+	TitleGt       *string           `json:"title_gt"`
+	TitleLt       *string           `json:"title_lt"`
+	TitleGte      *string           `json:"title_gte"`
+	TitleLte      *string           `json:"title_lte"`
+	TitleIn       []string          `json:"title_in"`
+	TitleLike     *string           `json:"title_like"`
+	TitlePrefix   *string           `json:"title_prefix"`
+	TitleSuffix   *string           `json:"title_suffix"`
+	Completed     *bool             `json:"completed"`
+	CompletedNe   *bool             `json:"completed_ne"`
+	CompletedGt   *bool             `json:"completed_gt"`
+	CompletedLt   *bool             `json:"completed_lt"`
+	CompletedGte  *bool             `json:"completed_gte"`
+	CompletedLte  *bool             `json:"completed_lte"`
+	CompletedIn   []bool            `json:"completed_in"`
+	DueDate       *time.Time        `json:"dueDate"`
+	DueDateNe     *time.Time        `json:"dueDate_ne"`
+	DueDateGt     *time.Time        `json:"dueDate_gt"`
+	DueDateLt     *time.Time        `json:"dueDate_lt"`
+	DueDateGte    *time.Time        `json:"dueDate_gte"`
+	DueDateLte    *time.Time        `json:"dueDate_lte"`
+	DueDateIn     []*time.Time      `json:"dueDate_in"`
+	Type          *TaskType         `json:"type"`
+	TypeNe        *TaskType         `json:"type_ne"`
+	TypeGt        *TaskType         `json:"type_gt"`
+	TypeLt        *TaskType         `json:"type_lt"`
+	TypeGte       *TaskType         `json:"type_gte"`
+	TypeLte       *TaskType         `json:"type_lte"`
+	TypeIn        []TaskType        `json:"type_in"`
+	AssigneeID    *string           `json:"assigneeId"`
+	AssigneeIDNe  *string           `json:"assigneeId_ne"`
+	AssigneeIDGt  *string           `json:"assigneeId_gt"`
+	AssigneeIDLt  *string           `json:"assigneeId_lt"`
+	AssigneeIDGte *string           `json:"assigneeId_gte"`
+	AssigneeIDLte *string           `json:"assigneeId_lte"`
+	AssigneeIDIn  []string          `json:"assigneeId_in"`
+	UpdatedAt     *time.Time        `json:"updatedAt"`
+	UpdatedAtNe   *time.Time        `json:"updatedAt_ne"`
+	UpdatedAtGt   *time.Time        `json:"updatedAt_gt"`
+	UpdatedAtLt   *time.Time        `json:"updatedAt_lt"`
+	UpdatedAtGte  *time.Time        `json:"updatedAt_gte"`
+	UpdatedAtLte  *time.Time        `json:"updatedAt_lte"`
+	UpdatedAtIn   []*time.Time      `json:"updatedAt_in"`
+	CreatedAt     *time.Time        `json:"createdAt"`
+	CreatedAtNe   *time.Time        `json:"createdAt_ne"`
+	CreatedAtGt   *time.Time        `json:"createdAt_gt"`
+	CreatedAtLt   *time.Time        `json:"createdAt_lt"`
+	CreatedAtGte  *time.Time        `json:"createdAt_gte"`
+	CreatedAtLte  *time.Time        `json:"createdAt_lte"`
+	CreatedAtIn   []*time.Time      `json:"createdAt_in"`
+	Assignee      *UserFilterType   `json:"assignee"`
 }
 
 type UserFilterType struct {
@@ -219,20 +226,22 @@ func (e CompanySortType) MarshalGQL(w io.Writer) {
 type TaskSortType string
 
 const (
-	TaskSortTypeIDAsc         TaskSortType = "ID_ASC"
-	TaskSortTypeIDDesc        TaskSortType = "ID_DESC"
-	TaskSortTypeTitleAsc      TaskSortType = "TITLE_ASC"
-	TaskSortTypeTitleDesc     TaskSortType = "TITLE_DESC"
-	TaskSortTypeCompletedAsc  TaskSortType = "COMPLETED_ASC"
-	TaskSortTypeCompletedDesc TaskSortType = "COMPLETED_DESC"
-	TaskSortTypeDueDateAsc    TaskSortType = "DUE_DATE_ASC"
-	TaskSortTypeDueDateDesc   TaskSortType = "DUE_DATE_DESC"
-	TaskSortTypeTypeAsc       TaskSortType = "TYPE_ASC"
-	TaskSortTypeTypeDesc      TaskSortType = "TYPE_DESC"
-	TaskSortTypeUpdatedAtAsc  TaskSortType = "UPDATED_AT_ASC"
-	TaskSortTypeUpdatedAtDesc TaskSortType = "UPDATED_AT_DESC"
-	TaskSortTypeCreatedAtAsc  TaskSortType = "CREATED_AT_ASC"
-	TaskSortTypeCreatedAtDesc TaskSortType = "CREATED_AT_DESC"
+	TaskSortTypeIDAsc          TaskSortType = "ID_ASC"
+	TaskSortTypeIDDesc         TaskSortType = "ID_DESC"
+	TaskSortTypeTitleAsc       TaskSortType = "TITLE_ASC"
+	TaskSortTypeTitleDesc      TaskSortType = "TITLE_DESC"
+	TaskSortTypeCompletedAsc   TaskSortType = "COMPLETED_ASC"
+	TaskSortTypeCompletedDesc  TaskSortType = "COMPLETED_DESC"
+	TaskSortTypeDueDateAsc     TaskSortType = "DUE_DATE_ASC"
+	TaskSortTypeDueDateDesc    TaskSortType = "DUE_DATE_DESC"
+	TaskSortTypeTypeAsc        TaskSortType = "TYPE_ASC"
+	TaskSortTypeTypeDesc       TaskSortType = "TYPE_DESC"
+	TaskSortTypeAssigneeIDAsc  TaskSortType = "ASSIGNEE_ID_ASC"
+	TaskSortTypeAssigneeIDDesc TaskSortType = "ASSIGNEE_ID_DESC"
+	TaskSortTypeUpdatedAtAsc   TaskSortType = "UPDATED_AT_ASC"
+	TaskSortTypeUpdatedAtDesc  TaskSortType = "UPDATED_AT_DESC"
+	TaskSortTypeCreatedAtAsc   TaskSortType = "CREATED_AT_ASC"
+	TaskSortTypeCreatedAtDesc  TaskSortType = "CREATED_AT_DESC"
 )
 
 var AllTaskSortType = []TaskSortType{
@@ -246,6 +255,8 @@ var AllTaskSortType = []TaskSortType{
 	TaskSortTypeDueDateDesc,
 	TaskSortTypeTypeAsc,
 	TaskSortTypeTypeDesc,
+	TaskSortTypeAssigneeIDAsc,
+	TaskSortTypeAssigneeIDDesc,
 	TaskSortTypeUpdatedAtAsc,
 	TaskSortTypeUpdatedAtDesc,
 	TaskSortTypeCreatedAtAsc,
@@ -254,7 +265,7 @@ var AllTaskSortType = []TaskSortType{
 
 func (e TaskSortType) IsValid() bool {
 	switch e {
-	case TaskSortTypeIDAsc, TaskSortTypeIDDesc, TaskSortTypeTitleAsc, TaskSortTypeTitleDesc, TaskSortTypeCompletedAsc, TaskSortTypeCompletedDesc, TaskSortTypeDueDateAsc, TaskSortTypeDueDateDesc, TaskSortTypeTypeAsc, TaskSortTypeTypeDesc, TaskSortTypeUpdatedAtAsc, TaskSortTypeUpdatedAtDesc, TaskSortTypeCreatedAtAsc, TaskSortTypeCreatedAtDesc:
+	case TaskSortTypeIDAsc, TaskSortTypeIDDesc, TaskSortTypeTitleAsc, TaskSortTypeTitleDesc, TaskSortTypeCompletedAsc, TaskSortTypeCompletedDesc, TaskSortTypeDueDateAsc, TaskSortTypeDueDateDesc, TaskSortTypeTypeAsc, TaskSortTypeTypeDesc, TaskSortTypeAssigneeIDAsc, TaskSortTypeAssigneeIDDesc, TaskSortTypeUpdatedAtAsc, TaskSortTypeUpdatedAtDesc, TaskSortTypeCreatedAtAsc, TaskSortTypeCreatedAtDesc:
 		return true
 	}
 	return false

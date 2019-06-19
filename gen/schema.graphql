@@ -62,6 +62,7 @@ type Task {
   dueDate: Time
   type: TaskType
   assignee: User @relationship(inverse: "tasks")
+  assigneeId: ID
   updatedAt: Time!
   createdAt: Time!
 }
@@ -256,6 +257,8 @@ enum TaskSortType {
   DUE_DATE_DESC
   TYPE_ASC
   TYPE_DESC
+  ASSIGNEE_ID_ASC
+  ASSIGNEE_ID_DESC
   UPDATED_AT_ASC
   UPDATED_AT_DESC
   CREATED_AT_ASC
@@ -303,6 +306,13 @@ input TaskFilterType {
   type_gte: TaskType
   type_lte: TaskType
   type_in: [TaskType!]
+  assigneeId: ID
+  assigneeId_ne: ID
+  assigneeId_gt: ID
+  assigneeId_lt: ID
+  assigneeId_gte: ID
+  assigneeId_lte: ID
+  assigneeId_in: [ID!]
   updatedAt: Time
   updatedAt_ne: Time
   updatedAt_gt: Time
