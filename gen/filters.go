@@ -117,7 +117,7 @@ func (f *CompanyFilterType) WhereContent(aliasPrefix string) (conditions []strin
 	}
 	if f.NameLike != nil {
 		conditions = append(conditions, aliasPrefix+"name LIKE ?")
-		values = append(values, strings.ReplaceAll(strings.ReplaceAll(*f.NameLike, "?", "_"), "*", "%"))
+		values = append(values, strings.Replace(strings.Replace(*f.NameLike, "?", "_", -1), "*", "%", -1))
 	}
 	if f.NamePrefix != nil {
 		conditions = append(conditions, aliasPrefix+"name LIKE ?")
@@ -318,7 +318,7 @@ func (f *UserFilterType) WhereContent(aliasPrefix string) (conditions []string, 
 	}
 	if f.EmailLike != nil {
 		conditions = append(conditions, aliasPrefix+"email LIKE ?")
-		values = append(values, strings.ReplaceAll(strings.ReplaceAll(*f.EmailLike, "?", "_"), "*", "%"))
+		values = append(values, strings.Replace(strings.Replace(*f.EmailLike, "?", "_", -1), "*", "%", -1))
 	}
 	if f.EmailPrefix != nil {
 		conditions = append(conditions, aliasPrefix+"email LIKE ?")
@@ -359,7 +359,7 @@ func (f *UserFilterType) WhereContent(aliasPrefix string) (conditions []string, 
 	}
 	if f.FirstNameLike != nil {
 		conditions = append(conditions, aliasPrefix+"firstName LIKE ?")
-		values = append(values, strings.ReplaceAll(strings.ReplaceAll(*f.FirstNameLike, "?", "_"), "*", "%"))
+		values = append(values, strings.Replace(strings.Replace(*f.FirstNameLike, "?", "_", -1), "*", "%", -1))
 	}
 	if f.FirstNamePrefix != nil {
 		conditions = append(conditions, aliasPrefix+"firstName LIKE ?")
@@ -400,7 +400,7 @@ func (f *UserFilterType) WhereContent(aliasPrefix string) (conditions []string, 
 	}
 	if f.LastNameLike != nil {
 		conditions = append(conditions, aliasPrefix+"lastName LIKE ?")
-		values = append(values, strings.ReplaceAll(strings.ReplaceAll(*f.LastNameLike, "?", "_"), "*", "%"))
+		values = append(values, strings.Replace(strings.Replace(*f.LastNameLike, "?", "_", -1), "*", "%", -1))
 	}
 	if f.LastNamePrefix != nil {
 		conditions = append(conditions, aliasPrefix+"lastName LIKE ?")
@@ -583,7 +583,7 @@ func (f *TaskFilterType) WhereContent(aliasPrefix string) (conditions []string, 
 	}
 	if f.TitleLike != nil {
 		conditions = append(conditions, aliasPrefix+"title LIKE ?")
-		values = append(values, strings.ReplaceAll(strings.ReplaceAll(*f.TitleLike, "?", "_"), "*", "%"))
+		values = append(values, strings.Replace(strings.Replace(*f.TitleLike, "?", "_", -1), "*", "%", -1))
 	}
 	if f.TitlePrefix != nil {
 		conditions = append(conditions, aliasPrefix+"title LIKE ?")

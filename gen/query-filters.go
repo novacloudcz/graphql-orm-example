@@ -38,7 +38,6 @@ func (qf *CompanyQueryFilter) applyQueryWithFields(fields []*ast.Field, query, a
 	if len(fields) == 0 {
 		return nil
 	}
-	aliasPrefix := alias + "."
 
 	fieldsMap := map[string]*ast.Field{}
 	for _, f := range fields {
@@ -46,7 +45,7 @@ func (qf *CompanyQueryFilter) applyQueryWithFields(fields []*ast.Field, query, a
 	}
 
 	if _, ok := fieldsMap["name"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]sname LIKE ? OR %[1]sname LIKE ?", aliasPrefix))
+		*ors = append(*ors, fmt.Sprintf("%[1]sname LIKE ? OR %[1]sname LIKE ?", alias+"."))
 		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
 	}
 
@@ -99,7 +98,6 @@ func (qf *UserQueryFilter) applyQueryWithFields(fields []*ast.Field, query, alia
 	if len(fields) == 0 {
 		return nil
 	}
-	aliasPrefix := alias + "."
 
 	fieldsMap := map[string]*ast.Field{}
 	for _, f := range fields {
@@ -107,17 +105,17 @@ func (qf *UserQueryFilter) applyQueryWithFields(fields []*ast.Field, query, alia
 	}
 
 	if _, ok := fieldsMap["email"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]semail LIKE ? OR %[1]semail LIKE ?", aliasPrefix))
+		*ors = append(*ors, fmt.Sprintf("%[1]semail LIKE ? OR %[1]semail LIKE ?", alias+"."))
 		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
 	}
 
 	if _, ok := fieldsMap["firstName"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]sfirstName LIKE ? OR %[1]sfirstName LIKE ?", aliasPrefix))
+		*ors = append(*ors, fmt.Sprintf("%[1]sfirstName LIKE ? OR %[1]sfirstName LIKE ?", alias+"."))
 		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
 	}
 
 	if _, ok := fieldsMap["lastName"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]slastName LIKE ? OR %[1]slastName LIKE ?", aliasPrefix))
+		*ors = append(*ors, fmt.Sprintf("%[1]slastName LIKE ? OR %[1]slastName LIKE ?", alias+"."))
 		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
 	}
 
@@ -204,7 +202,6 @@ func (qf *TaskQueryFilter) applyQueryWithFields(fields []*ast.Field, query, alia
 	if len(fields) == 0 {
 		return nil
 	}
-	aliasPrefix := alias + "."
 
 	fieldsMap := map[string]*ast.Field{}
 	for _, f := range fields {
@@ -212,7 +209,7 @@ func (qf *TaskQueryFilter) applyQueryWithFields(fields []*ast.Field, query, alia
 	}
 
 	if _, ok := fieldsMap["title"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]stitle LIKE ? OR %[1]stitle LIKE ?", aliasPrefix))
+		*ors = append(*ors, fmt.Sprintf("%[1]stitle LIKE ? OR %[1]stitle LIKE ?", alias+"."))
 		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
 	}
 

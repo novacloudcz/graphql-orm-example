@@ -2,11 +2,36 @@ package gen
 
 import (
 	"context"
+	"reflect"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/novacloudcz/graphql-orm/resolvers"
 	uuid "github.com/satori/go.uuid"
 )
+
+func ToTimeHookFunc() mapstructure.DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{}) (interface{}, error) {
+		if t != reflect.TypeOf(time.Time{}) {
+			return data, nil
+		}
+
+		switch f.Kind() {
+		case reflect.String:
+			return time.Parse(time.RFC3339, data.(string))
+		case reflect.Float64:
+			return time.Unix(0, int64(data.(float64))*int64(time.Millisecond)), nil
+		case reflect.Int64:
+			return time.Unix(0, data.(int64)*int64(time.Millisecond)), nil
+		default:
+			return data, nil
+		}
+		// Convert it by parsing
+	}
+}
 
 type Resolver struct {
 	DB *DB
@@ -60,7 +85,18 @@ func (r *mutationResolver) CreateCompany(ctx context.Context, input map[string]i
 		association.Replace(items)
 	}
 
-	err = mapstructure.Decode(input, item)
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata: nil,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			ToTimeHookFunc()),
+		Result: item,
+	})
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = decoder.Decode(input)
 	if err != nil {
 		tx.Rollback()
 		return
@@ -89,7 +125,18 @@ func (r *mutationResolver) UpdateCompany(ctx context.Context, id string, input m
 		association.Replace(items)
 	}
 
-	err = mapstructure.Decode(input, item)
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata: nil,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			ToTimeHookFunc()),
+		Result: item,
+	})
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = decoder.Decode(input)
 	if err != nil {
 		tx.Rollback()
 		return
@@ -143,7 +190,18 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input map[string]inte
 		association.Replace(items)
 	}
 
-	err = mapstructure.Decode(input, item)
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata: nil,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			ToTimeHookFunc()),
+		Result: item,
+	})
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = decoder.Decode(input)
 	if err != nil {
 		tx.Rollback()
 		return
@@ -186,7 +244,18 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input map[
 		association.Replace(items)
 	}
 
-	err = mapstructure.Decode(input, item)
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata: nil,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			ToTimeHookFunc()),
+		Result: item,
+	})
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = decoder.Decode(input)
 	if err != nil {
 		tx.Rollback()
 		return
@@ -219,7 +288,18 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input map[string]inte
 	item = &Task{ID: ID}
 	tx := r.DB.db.Begin()
 
-	err = mapstructure.Decode(input, item)
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata: nil,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			ToTimeHookFunc()),
+		Result: item,
+	})
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = decoder.Decode(input)
 	if err != nil {
 		tx.Rollback()
 		return
@@ -241,7 +321,18 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, id string, input map[
 		return
 	}
 
-	err = mapstructure.Decode(input, item)
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Metadata: nil,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			ToTimeHookFunc()),
+		Result: item,
+	})
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = decoder.Decode(input)
 	if err != nil {
 		tx.Rollback()
 		return
