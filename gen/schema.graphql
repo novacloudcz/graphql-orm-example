@@ -34,8 +34,10 @@ type Company {
   id: ID!
   name: String
   employees: [User!]! @relationship(inverse: "companies")
-  updatedAt: Time!
+  updatedAt: Time
   createdAt: Time!
+  updatedBy: ID
+  createdBy: ID!
 }
 
 type User {
@@ -46,8 +48,10 @@ type User {
   tasks: [Task!]! @relationship(inverse: "assignee")
   companies: [Company!]! @relationship(inverse: "employees")
   friends: [User!]! @relationship(inverse: "friends")
-  updatedAt: Time!
+  updatedAt: Time
   createdAt: Time!
+  updatedBy: ID
+  createdBy: ID!
 }
 
 enum TaskType {
@@ -63,8 +67,10 @@ type Task {
   type: TaskType
   assignee: User @relationship(inverse: "tasks")
   assigneeId: ID
-  updatedAt: Time!
+  updatedAt: Time
   createdAt: Time!
+  updatedBy: ID
+  createdBy: ID!
 }
 
 input CompanyCreateInput {
@@ -87,6 +93,10 @@ enum CompanySortType {
   UPDATED_AT_DESC
   CREATED_AT_ASC
   CREATED_AT_DESC
+  UPDATED_BY_ASC
+  UPDATED_BY_DESC
+  CREATED_BY_ASC
+  CREATED_BY_DESC
 }
 
 input CompanyFilterType {
@@ -123,6 +133,20 @@ input CompanyFilterType {
   createdAt_gte: Time
   createdAt_lte: Time
   createdAt_in: [Time!]
+  updatedBy: ID
+  updatedBy_ne: ID
+  updatedBy_gt: ID
+  updatedBy_lt: ID
+  updatedBy_gte: ID
+  updatedBy_lte: ID
+  updatedBy_in: [ID!]
+  createdBy: ID
+  createdBy_ne: ID
+  createdBy_gt: ID
+  createdBy_lt: ID
+  createdBy_gte: ID
+  createdBy_lte: ID
+  createdBy_in: [ID!]
   employees: UserFilterType
 }
 
@@ -163,6 +187,10 @@ enum UserSortType {
   UPDATED_AT_DESC
   CREATED_AT_ASC
   CREATED_AT_DESC
+  UPDATED_BY_ASC
+  UPDATED_BY_DESC
+  CREATED_BY_ASC
+  CREATED_BY_DESC
 }
 
 input UserFilterType {
@@ -219,6 +247,20 @@ input UserFilterType {
   createdAt_gte: Time
   createdAt_lte: Time
   createdAt_in: [Time!]
+  updatedBy: ID
+  updatedBy_ne: ID
+  updatedBy_gt: ID
+  updatedBy_lt: ID
+  updatedBy_gte: ID
+  updatedBy_lte: ID
+  updatedBy_in: [ID!]
+  createdBy: ID
+  createdBy_ne: ID
+  createdBy_gt: ID
+  createdBy_lt: ID
+  createdBy_gte: ID
+  createdBy_lte: ID
+  createdBy_in: [ID!]
   tasks: TaskFilterType
   companies: CompanyFilterType
   friends: UserFilterType
@@ -263,6 +305,10 @@ enum TaskSortType {
   UPDATED_AT_DESC
   CREATED_AT_ASC
   CREATED_AT_DESC
+  UPDATED_BY_ASC
+  UPDATED_BY_DESC
+  CREATED_BY_ASC
+  CREATED_BY_DESC
 }
 
 input TaskFilterType {
@@ -327,6 +373,20 @@ input TaskFilterType {
   createdAt_gte: Time
   createdAt_lte: Time
   createdAt_in: [Time!]
+  updatedBy: ID
+  updatedBy_ne: ID
+  updatedBy_gt: ID
+  updatedBy_lt: ID
+  updatedBy_gte: ID
+  updatedBy_lte: ID
+  updatedBy_in: [ID!]
+  createdBy: ID
+  createdBy_ne: ID
+  createdBy_gt: ID
+  createdBy_lt: ID
+  createdBy_gte: ID
+  createdBy_lte: ID
+  createdBy_in: [ID!]
   assignee: UserFilterType
 }
 

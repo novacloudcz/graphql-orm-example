@@ -43,6 +43,20 @@ type CompanyFilterType struct {
 	CreatedAtGte *time.Time           `json:"createdAt_gte"`
 	CreatedAtLte *time.Time           `json:"createdAt_lte"`
 	CreatedAtIn  []*time.Time         `json:"createdAt_in"`
+	UpdatedBy    *string              `json:"updatedBy"`
+	UpdatedByNe  *string              `json:"updatedBy_ne"`
+	UpdatedByGt  *string              `json:"updatedBy_gt"`
+	UpdatedByLt  *string              `json:"updatedBy_lt"`
+	UpdatedByGte *string              `json:"updatedBy_gte"`
+	UpdatedByLte *string              `json:"updatedBy_lte"`
+	UpdatedByIn  []string             `json:"updatedBy_in"`
+	CreatedBy    *string              `json:"createdBy"`
+	CreatedByNe  *string              `json:"createdBy_ne"`
+	CreatedByGt  *string              `json:"createdBy_gt"`
+	CreatedByLt  *string              `json:"createdBy_lt"`
+	CreatedByGte *string              `json:"createdBy_gte"`
+	CreatedByLte *string              `json:"createdBy_lte"`
+	CreatedByIn  []string             `json:"createdBy_in"`
 	Employees    *UserFilterType      `json:"employees"`
 }
 
@@ -108,6 +122,20 @@ type TaskFilterType struct {
 	CreatedAtGte  *time.Time        `json:"createdAt_gte"`
 	CreatedAtLte  *time.Time        `json:"createdAt_lte"`
 	CreatedAtIn   []*time.Time      `json:"createdAt_in"`
+	UpdatedBy     *string           `json:"updatedBy"`
+	UpdatedByNe   *string           `json:"updatedBy_ne"`
+	UpdatedByGt   *string           `json:"updatedBy_gt"`
+	UpdatedByLt   *string           `json:"updatedBy_lt"`
+	UpdatedByGte  *string           `json:"updatedBy_gte"`
+	UpdatedByLte  *string           `json:"updatedBy_lte"`
+	UpdatedByIn   []string          `json:"updatedBy_in"`
+	CreatedBy     *string           `json:"createdBy"`
+	CreatedByNe   *string           `json:"createdBy_ne"`
+	CreatedByGt   *string           `json:"createdBy_gt"`
+	CreatedByLt   *string           `json:"createdBy_lt"`
+	CreatedByGte  *string           `json:"createdBy_gte"`
+	CreatedByLte  *string           `json:"createdBy_lte"`
+	CreatedByIn   []string          `json:"createdBy_in"`
 	Assignee      *UserFilterType   `json:"assignee"`
 }
 
@@ -165,6 +193,20 @@ type UserFilterType struct {
 	CreatedAtGte    *time.Time         `json:"createdAt_gte"`
 	CreatedAtLte    *time.Time         `json:"createdAt_lte"`
 	CreatedAtIn     []*time.Time       `json:"createdAt_in"`
+	UpdatedBy       *string            `json:"updatedBy"`
+	UpdatedByNe     *string            `json:"updatedBy_ne"`
+	UpdatedByGt     *string            `json:"updatedBy_gt"`
+	UpdatedByLt     *string            `json:"updatedBy_lt"`
+	UpdatedByGte    *string            `json:"updatedBy_gte"`
+	UpdatedByLte    *string            `json:"updatedBy_lte"`
+	UpdatedByIn     []string           `json:"updatedBy_in"`
+	CreatedBy       *string            `json:"createdBy"`
+	CreatedByNe     *string            `json:"createdBy_ne"`
+	CreatedByGt     *string            `json:"createdBy_gt"`
+	CreatedByLt     *string            `json:"createdBy_lt"`
+	CreatedByGte    *string            `json:"createdBy_gte"`
+	CreatedByLte    *string            `json:"createdBy_lte"`
+	CreatedByIn     []string           `json:"createdBy_in"`
 	Tasks           *TaskFilterType    `json:"tasks"`
 	Companies       *CompanyFilterType `json:"companies"`
 	Friends         *UserFilterType    `json:"friends"`
@@ -181,6 +223,10 @@ const (
 	CompanySortTypeUpdatedAtDesc CompanySortType = "UPDATED_AT_DESC"
 	CompanySortTypeCreatedAtAsc  CompanySortType = "CREATED_AT_ASC"
 	CompanySortTypeCreatedAtDesc CompanySortType = "CREATED_AT_DESC"
+	CompanySortTypeUpdatedByAsc  CompanySortType = "UPDATED_BY_ASC"
+	CompanySortTypeUpdatedByDesc CompanySortType = "UPDATED_BY_DESC"
+	CompanySortTypeCreatedByAsc  CompanySortType = "CREATED_BY_ASC"
+	CompanySortTypeCreatedByDesc CompanySortType = "CREATED_BY_DESC"
 )
 
 var AllCompanySortType = []CompanySortType{
@@ -192,11 +238,15 @@ var AllCompanySortType = []CompanySortType{
 	CompanySortTypeUpdatedAtDesc,
 	CompanySortTypeCreatedAtAsc,
 	CompanySortTypeCreatedAtDesc,
+	CompanySortTypeUpdatedByAsc,
+	CompanySortTypeUpdatedByDesc,
+	CompanySortTypeCreatedByAsc,
+	CompanySortTypeCreatedByDesc,
 }
 
 func (e CompanySortType) IsValid() bool {
 	switch e {
-	case CompanySortTypeIDAsc, CompanySortTypeIDDesc, CompanySortTypeNameAsc, CompanySortTypeNameDesc, CompanySortTypeUpdatedAtAsc, CompanySortTypeUpdatedAtDesc, CompanySortTypeCreatedAtAsc, CompanySortTypeCreatedAtDesc:
+	case CompanySortTypeIDAsc, CompanySortTypeIDDesc, CompanySortTypeNameAsc, CompanySortTypeNameDesc, CompanySortTypeUpdatedAtAsc, CompanySortTypeUpdatedAtDesc, CompanySortTypeCreatedAtAsc, CompanySortTypeCreatedAtDesc, CompanySortTypeUpdatedByAsc, CompanySortTypeUpdatedByDesc, CompanySortTypeCreatedByAsc, CompanySortTypeCreatedByDesc:
 		return true
 	}
 	return false
@@ -242,6 +292,10 @@ const (
 	TaskSortTypeUpdatedAtDesc  TaskSortType = "UPDATED_AT_DESC"
 	TaskSortTypeCreatedAtAsc   TaskSortType = "CREATED_AT_ASC"
 	TaskSortTypeCreatedAtDesc  TaskSortType = "CREATED_AT_DESC"
+	TaskSortTypeUpdatedByAsc   TaskSortType = "UPDATED_BY_ASC"
+	TaskSortTypeUpdatedByDesc  TaskSortType = "UPDATED_BY_DESC"
+	TaskSortTypeCreatedByAsc   TaskSortType = "CREATED_BY_ASC"
+	TaskSortTypeCreatedByDesc  TaskSortType = "CREATED_BY_DESC"
 )
 
 var AllTaskSortType = []TaskSortType{
@@ -261,11 +315,15 @@ var AllTaskSortType = []TaskSortType{
 	TaskSortTypeUpdatedAtDesc,
 	TaskSortTypeCreatedAtAsc,
 	TaskSortTypeCreatedAtDesc,
+	TaskSortTypeUpdatedByAsc,
+	TaskSortTypeUpdatedByDesc,
+	TaskSortTypeCreatedByAsc,
+	TaskSortTypeCreatedByDesc,
 }
 
 func (e TaskSortType) IsValid() bool {
 	switch e {
-	case TaskSortTypeIDAsc, TaskSortTypeIDDesc, TaskSortTypeTitleAsc, TaskSortTypeTitleDesc, TaskSortTypeCompletedAsc, TaskSortTypeCompletedDesc, TaskSortTypeDueDateAsc, TaskSortTypeDueDateDesc, TaskSortTypeTypeAsc, TaskSortTypeTypeDesc, TaskSortTypeAssigneeIDAsc, TaskSortTypeAssigneeIDDesc, TaskSortTypeUpdatedAtAsc, TaskSortTypeUpdatedAtDesc, TaskSortTypeCreatedAtAsc, TaskSortTypeCreatedAtDesc:
+	case TaskSortTypeIDAsc, TaskSortTypeIDDesc, TaskSortTypeTitleAsc, TaskSortTypeTitleDesc, TaskSortTypeCompletedAsc, TaskSortTypeCompletedDesc, TaskSortTypeDueDateAsc, TaskSortTypeDueDateDesc, TaskSortTypeTypeAsc, TaskSortTypeTypeDesc, TaskSortTypeAssigneeIDAsc, TaskSortTypeAssigneeIDDesc, TaskSortTypeUpdatedAtAsc, TaskSortTypeUpdatedAtDesc, TaskSortTypeCreatedAtAsc, TaskSortTypeCreatedAtDesc, TaskSortTypeUpdatedByAsc, TaskSortTypeUpdatedByDesc, TaskSortTypeCreatedByAsc, TaskSortTypeCreatedByDesc:
 		return true
 	}
 	return false
@@ -348,6 +406,10 @@ const (
 	UserSortTypeUpdatedAtDesc UserSortType = "UPDATED_AT_DESC"
 	UserSortTypeCreatedAtAsc  UserSortType = "CREATED_AT_ASC"
 	UserSortTypeCreatedAtDesc UserSortType = "CREATED_AT_DESC"
+	UserSortTypeUpdatedByAsc  UserSortType = "UPDATED_BY_ASC"
+	UserSortTypeUpdatedByDesc UserSortType = "UPDATED_BY_DESC"
+	UserSortTypeCreatedByAsc  UserSortType = "CREATED_BY_ASC"
+	UserSortTypeCreatedByDesc UserSortType = "CREATED_BY_DESC"
 )
 
 var AllUserSortType = []UserSortType{
@@ -363,11 +425,15 @@ var AllUserSortType = []UserSortType{
 	UserSortTypeUpdatedAtDesc,
 	UserSortTypeCreatedAtAsc,
 	UserSortTypeCreatedAtDesc,
+	UserSortTypeUpdatedByAsc,
+	UserSortTypeUpdatedByDesc,
+	UserSortTypeCreatedByAsc,
+	UserSortTypeCreatedByDesc,
 }
 
 func (e UserSortType) IsValid() bool {
 	switch e {
-	case UserSortTypeIDAsc, UserSortTypeIDDesc, UserSortTypeEmailAsc, UserSortTypeEmailDesc, UserSortTypeFirstNameAsc, UserSortTypeFirstNameDesc, UserSortTypeLastNameAsc, UserSortTypeLastNameDesc, UserSortTypeUpdatedAtAsc, UserSortTypeUpdatedAtDesc, UserSortTypeCreatedAtAsc, UserSortTypeCreatedAtDesc:
+	case UserSortTypeIDAsc, UserSortTypeIDDesc, UserSortTypeEmailAsc, UserSortTypeEmailDesc, UserSortTypeFirstNameAsc, UserSortTypeFirstNameDesc, UserSortTypeLastNameAsc, UserSortTypeLastNameDesc, UserSortTypeUpdatedAtAsc, UserSortTypeUpdatedAtDesc, UserSortTypeCreatedAtAsc, UserSortTypeCreatedAtDesc, UserSortTypeUpdatedByAsc, UserSortTypeUpdatedByDesc, UserSortTypeCreatedByAsc, UserSortTypeCreatedByDesc:
 		return true
 	}
 	return false

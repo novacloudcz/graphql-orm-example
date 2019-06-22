@@ -10,10 +10,12 @@ type CompanyResultType struct {
 }
 
 type Company struct {
-	ID        string    `json:"id" gorm:"column:id;primary_key"`
-	Name      *string   `json:"name" gorm:"column:name"`
-	UpdatedAt time.Time `json:"updatedAt" gorm:"column:updatedAt"`
-	CreatedAt time.Time `json:"createdAt" gorm:"column:createdAt"`
+	ID        string     `json:"id" gorm:"column:id;primary_key"`
+	Name      *string    `json:"name" gorm:"column:name"`
+	UpdatedAt *time.Time `json:"updatedAt" gorm:"column:updatedAt"`
+	CreatedAt time.Time  `json:"createdAt" gorm:"column:createdAt"`
+	UpdatedBy *string    `json:"updatedBy" gorm:"column:updatedBy"`
+	CreatedBy string     `json:"createdBy" gorm:"column:createdBy"`
 
 	Employees []*User `json:"employees" gorm:"many2many:company_employees;jointable_foreignkey:employee_id;association_jointable_foreignkey:company_id"`
 }
@@ -23,12 +25,14 @@ type UserResultType struct {
 }
 
 type User struct {
-	ID        string    `json:"id" gorm:"column:id;primary_key"`
-	Email     *string   `json:"email" gorm:"column:email"`
-	FirstName *string   `json:"firstName" gorm:"column:firstName"`
-	LastName  *string   `json:"lastName" gorm:"column:lastName"`
-	UpdatedAt time.Time `json:"updatedAt" gorm:"column:updatedAt"`
-	CreatedAt time.Time `json:"createdAt" gorm:"column:createdAt"`
+	ID        string     `json:"id" gorm:"column:id;primary_key"`
+	Email     *string    `json:"email" gorm:"column:email"`
+	FirstName *string    `json:"firstName" gorm:"column:firstName"`
+	LastName  *string    `json:"lastName" gorm:"column:lastName"`
+	UpdatedAt *time.Time `json:"updatedAt" gorm:"column:updatedAt"`
+	CreatedAt time.Time  `json:"createdAt" gorm:"column:createdAt"`
+	UpdatedBy *string    `json:"updatedBy" gorm:"column:updatedBy"`
+	CreatedBy string     `json:"createdBy" gorm:"column:createdBy"`
 
 	Tasks []*Task `json:"tasks" gorm:"foreignkey:AssigneeID"`
 
@@ -48,8 +52,10 @@ type Task struct {
 	DueDate    *time.Time `json:"dueDate" gorm:"column:dueDate"`
 	Type       *TaskType  `json:"type" gorm:"column:type"`
 	AssigneeID *string    `json:"assigneeId" gorm:"column:assigneeId"`
-	UpdatedAt  time.Time  `json:"updatedAt" gorm:"column:updatedAt"`
+	UpdatedAt  *time.Time `json:"updatedAt" gorm:"column:updatedAt"`
 	CreatedAt  time.Time  `json:"createdAt" gorm:"column:createdAt"`
+	UpdatedBy  *string    `json:"updatedBy" gorm:"column:updatedBy"`
+	CreatedBy  string     `json:"createdBy" gorm:"column:createdBy"`
 
 	Assignee *User `json:"assignee"`
 }

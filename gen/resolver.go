@@ -33,6 +33,11 @@ func ToTimeHookFunc() mapstructure.DecodeHookFunc {
 	}
 }
 
+func getPrincipalID(ctx context.Context) string {
+	v, _ := ctx.Value(KeyPrincipalID).(string)
+	return v
+}
+
 type Resolver struct {
 	DB *DB
 }
@@ -75,7 +80,8 @@ func (r *mutationResolver) CreateCompany(ctx context.Context, input map[string]i
 	if !ok || ID == "" {
 		ID = uuid.Must(uuid.NewV4()).String()
 	}
-	item = &Company{ID: ID}
+	principalID := getPrincipalID(ctx)
+	item = &Company{ID: ID, CreatedBy: principalID}
 	tx := r.DB.db.Begin()
 
 	if ids, ok := input["employeesIds"].([]interface{}); ok {
@@ -117,6 +123,9 @@ func (r *mutationResolver) UpdateCompany(ctx context.Context, id string, input m
 	if err != nil {
 		return
 	}
+
+	principalID := getPrincipalID(ctx)
+	item.UpdatedBy = &principalID
 
 	if ids, ok := input["employeesIds"].([]interface{}); ok {
 		items := []User{}
@@ -166,7 +175,8 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input map[string]inte
 	if !ok || ID == "" {
 		ID = uuid.Must(uuid.NewV4()).String()
 	}
-	item = &User{ID: ID}
+	principalID := getPrincipalID(ctx)
+	item = &User{ID: ID, CreatedBy: principalID}
 	tx := r.DB.db.Begin()
 
 	if ids, ok := input["tasksIds"].([]interface{}); ok {
@@ -222,6 +232,9 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input map[
 	if err != nil {
 		return
 	}
+
+	principalID := getPrincipalID(ctx)
+	item.UpdatedBy = &principalID
 
 	if ids, ok := input["tasksIds"].([]interface{}); ok {
 		items := []Task{}
@@ -285,7 +298,8 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input map[string]inte
 	if !ok || ID == "" {
 		ID = uuid.Must(uuid.NewV4()).String()
 	}
-	item = &Task{ID: ID}
+	principalID := getPrincipalID(ctx)
+	item = &Task{ID: ID, CreatedBy: principalID}
 	tx := r.DB.db.Begin()
 
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
@@ -320,6 +334,9 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, id string, input map[
 	if err != nil {
 		return
 	}
+
+	principalID := getPrincipalID(ctx)
+	item.UpdatedBy = &principalID
 
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		Metadata: nil,

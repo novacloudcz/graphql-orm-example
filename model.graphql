@@ -3,6 +3,7 @@ type Company {
 
   employees: [User!]! @relationship(inverse: "companies")
 }
+
 type User {
   email: String
   firstName: String
