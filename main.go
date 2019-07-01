@@ -1,6 +1,7 @@
 package main
 
 import (
+
 	"context"
 	"fmt"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/handler"
+	"github.com/novacloudcz/graphql-orm/events"
 	"github.com/novacloudcz/graphql-orm-example/gen"
 )
 
@@ -30,7 +32,14 @@ func main() {
 	defer db.Close()
 	db.AutoMigrate()
 
-	gqlHandler := handler.GraphQL(gen.NewExecutableSchema(gen.Config{Resolvers: &gen.Resolver{DB: db}}))
+
+	eventController, err := events.NewEventController()
+	if err != nil {
+		panic(err)
+	}
+
+	gqlHandler := handler.GraphQL(gen.NewExecutableSchema(gen.Config{Resolvers: NewResolver(db, &eventController)}))
+
 	playgroundHandler := handler.Playground("GraphQL playground", "/graphql")
 	http.HandleFunc("/graphql", func(res http.ResponseWriter, req *http.Request) {
 		principalID := getPrincipalID(req)
@@ -57,6 +66,11 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-func getPrincipalID(req *http.Request) string {
-	return req.Header.Get("principal-id")
+func getPrincipalID(req *http.Request) *string {
+	pID := req.Header.Get("principal-id")
+	if pID == "" {
+		return nil
+	}
+	return &pID
 }
+

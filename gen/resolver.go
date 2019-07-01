@@ -2,87 +2,79 @@ package gen
 
 import (
 	"context"
-	"reflect"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/novacloudcz/graphql-orm/events"
 	"github.com/novacloudcz/graphql-orm/resolvers"
 	uuid "github.com/satori/go.uuid"
 )
 
-func ToTimeHookFunc() mapstructure.DecodeHookFunc {
-	return func(
-		f reflect.Type,
-		t reflect.Type,
-		data interface{}) (interface{}, error) {
-		if t != reflect.TypeOf(time.Time{}) {
-			return data, nil
-		}
-
-		switch f.Kind() {
-		case reflect.String:
-			return time.Parse(time.RFC3339, data.(string))
-		case reflect.Float64:
-			return time.Unix(0, int64(data.(float64))*int64(time.Millisecond)), nil
-		case reflect.Int64:
-			return time.Unix(0, data.(int64)*int64(time.Millisecond)), nil
-		default:
-			return data, nil
-		}
-		// Convert it by parsing
-	}
-}
-
-func getPrincipalID(ctx context.Context) string {
-	v, _ := ctx.Value(KeyPrincipalID).(string)
+func getPrincipalID(ctx context.Context) *string {
+	v, _ := ctx.Value(KeyPrincipalID).(*string)
 	return v
 }
 
-type Resolver struct {
-	DB *DB
+type GeneratedResolver struct {
+	DB              *DB
+	EventController *events.EventController
 }
 
-func (r *Resolver) Mutation() MutationResolver {
-	return &mutationResolver{r}
+func (r *GeneratedResolver) Mutation() MutationResolver {
+	return &GeneratedMutationResolver{r}
 }
-func (r *Resolver) Query() QueryResolver {
-	return &queryResolver{r}
-}
-
-func (r *Resolver) CompanyResultType() CompanyResultTypeResolver {
-	return &companyResultTypeResolver{r}
+func (r *GeneratedResolver) Query() QueryResolver {
+	return &GeneratedQueryResolver{r}
 }
 
-func (r *Resolver) Company() CompanyResolver {
-	return &companyResolver{r}
+func (r *GeneratedResolver) CompanyResultType() CompanyResultTypeResolver {
+	return &GeneratedCompanyResultTypeResolver{r}
 }
 
-func (r *Resolver) UserResultType() UserResultTypeResolver {
-	return &userResultTypeResolver{r}
+func (r *GeneratedResolver) Company() CompanyResolver {
+	return &GeneratedCompanyResolver{r}
 }
 
-func (r *Resolver) User() UserResolver {
-	return &userResolver{r}
+func (r *GeneratedResolver) UserResultType() UserResultTypeResolver {
+	return &GeneratedUserResultTypeResolver{r}
 }
 
-func (r *Resolver) TaskResultType() TaskResultTypeResolver {
-	return &taskResultTypeResolver{r}
+func (r *GeneratedResolver) User() UserResolver {
+	return &GeneratedUserResolver{r}
 }
 
-func (r *Resolver) Task() TaskResolver {
-	return &taskResolver{r}
+func (r *GeneratedResolver) TaskResultType() TaskResultTypeResolver {
+	return &GeneratedTaskResultTypeResolver{r}
 }
 
-type mutationResolver struct{ *Resolver }
+func (r *GeneratedResolver) Task() TaskResolver {
+	return &GeneratedTaskResolver{r}
+}
 
-func (r *mutationResolver) CreateCompany(ctx context.Context, input map[string]interface{}) (item *Company, err error) {
-	ID, ok := input["id"].(string)
-	if !ok || ID == "" {
-		ID = uuid.Must(uuid.NewV4()).String()
-	}
+type GeneratedMutationResolver struct{ *GeneratedResolver }
+
+func (r *GeneratedMutationResolver) CreateCompany(ctx context.Context, input map[string]interface{}) (item *Company, err error) {
 	principalID := getPrincipalID(ctx)
-	item = &Company{ID: ID, CreatedBy: principalID}
+	now := time.Now()
+	item = &Company{ID: uuid.Must(uuid.NewV4()).String(), CreatedAt: now, CreatedBy: principalID}
 	tx := r.DB.db.Begin()
+
+	event := events.NewEvent(events.EventMetadata{
+		Type:        events.EventTypeCreated,
+		Entity:      "Company",
+		EntityID:    item.ID,
+		Date:        now,
+		PrincipalID: principalID,
+	})
+
+	if val, ok := input["id"].(string); ok && (item.ID != val) {
+		item.ID = val
+		event.AddNewValue("id", &val)
+	}
+
+	if val, ok := input["name"].(string); ok && (item.Name == nil || *item.Name != val) {
+		item.Name = &val
+		event.AddNewValue("name", &val)
+	}
 
 	if ids, ok := input["employeesIds"].([]interface{}); ok {
 		items := []User{}
@@ -91,31 +83,22 @@ func (r *mutationResolver) CreateCompany(ctx context.Context, input map[string]i
 		association.Replace(items)
 	}
 
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Metadata: nil,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			ToTimeHookFunc()),
-		Result: item,
-	})
-	if err != nil {
-		tx.Rollback()
-		return
-	}
-
-	err = decoder.Decode(input)
-	if err != nil {
-		tx.Rollback()
-		return
-	}
 	err = tx.Create(item).Error
 	if err != nil {
 		tx.Rollback()
 		return
 	}
 	err = tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = r.EventController.SendEvent(ctx, &event)
+
 	return
 }
-func (r *mutationResolver) UpdateCompany(ctx context.Context, id string, input map[string]interface{}) (item *Company, err error) {
+func (r *GeneratedMutationResolver) UpdateCompany(ctx context.Context, id string, input map[string]interface{}) (item *Company, err error) {
 	item = &Company{}
 	tx := r.DB.db.Begin()
 
@@ -125,7 +108,11 @@ func (r *mutationResolver) UpdateCompany(ctx context.Context, id string, input m
 	}
 
 	principalID := getPrincipalID(ctx)
-	item.UpdatedBy = &principalID
+	item.UpdatedBy = principalID
+
+	if val, ok := input["name"].(string); ok && (item.Name == nil || *item.Name != val) {
+		item.Name = &val
+	}
 
 	if ids, ok := input["employeesIds"].([]interface{}); ok {
 		items := []User{}
@@ -134,22 +121,6 @@ func (r *mutationResolver) UpdateCompany(ctx context.Context, id string, input m
 		association.Replace(items)
 	}
 
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Metadata: nil,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			ToTimeHookFunc()),
-		Result: item,
-	})
-	if err != nil {
-		tx.Rollback()
-		return
-	}
-
-	err = decoder.Decode(input)
-	if err != nil {
-		tx.Rollback()
-		return
-	}
 	err = tx.Save(item).Error
 	if err != nil {
 		tx.Rollback()
@@ -158,7 +129,7 @@ func (r *mutationResolver) UpdateCompany(ctx context.Context, id string, input m
 	err = tx.Commit().Error
 	return
 }
-func (r *mutationResolver) DeleteCompany(ctx context.Context, id string) (item *Company, err error) {
+func (r *GeneratedMutationResolver) DeleteCompany(ctx context.Context, id string) (item *Company, err error) {
 	item = &Company{}
 	err = resolvers.GetItem(ctx, r.DB.Query(), item, &id)
 	if err != nil {
@@ -170,14 +141,39 @@ func (r *mutationResolver) DeleteCompany(ctx context.Context, id string) (item *
 	return
 }
 
-func (r *mutationResolver) CreateUser(ctx context.Context, input map[string]interface{}) (item *User, err error) {
-	ID, ok := input["id"].(string)
-	if !ok || ID == "" {
-		ID = uuid.Must(uuid.NewV4()).String()
-	}
+func (r *GeneratedMutationResolver) CreateUser(ctx context.Context, input map[string]interface{}) (item *User, err error) {
 	principalID := getPrincipalID(ctx)
-	item = &User{ID: ID, CreatedBy: principalID}
+	now := time.Now()
+	item = &User{ID: uuid.Must(uuid.NewV4()).String(), CreatedAt: now, CreatedBy: principalID}
 	tx := r.DB.db.Begin()
+
+	event := events.NewEvent(events.EventMetadata{
+		Type:        events.EventTypeCreated,
+		Entity:      "User",
+		EntityID:    item.ID,
+		Date:        now,
+		PrincipalID: principalID,
+	})
+
+	if val, ok := input["id"].(string); ok && (item.ID != val) {
+		item.ID = val
+		event.AddNewValue("id", &val)
+	}
+
+	if val, ok := input["email"].(string); ok && (item.Email == nil || *item.Email != val) {
+		item.Email = &val
+		event.AddNewValue("email", &val)
+	}
+
+	if val, ok := input["firstName"].(string); ok && (item.FirstName == nil || *item.FirstName != val) {
+		item.FirstName = &val
+		event.AddNewValue("firstName", &val)
+	}
+
+	if val, ok := input["lastName"].(string); ok && (item.LastName == nil || *item.LastName != val) {
+		item.LastName = &val
+		event.AddNewValue("lastName", &val)
+	}
 
 	if ids, ok := input["tasksIds"].([]interface{}); ok {
 		items := []Task{}
@@ -200,31 +196,22 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input map[string]inte
 		association.Replace(items)
 	}
 
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Metadata: nil,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			ToTimeHookFunc()),
-		Result: item,
-	})
-	if err != nil {
-		tx.Rollback()
-		return
-	}
-
-	err = decoder.Decode(input)
-	if err != nil {
-		tx.Rollback()
-		return
-	}
 	err = tx.Create(item).Error
 	if err != nil {
 		tx.Rollback()
 		return
 	}
 	err = tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = r.EventController.SendEvent(ctx, &event)
+
 	return
 }
-func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input map[string]interface{}) (item *User, err error) {
+func (r *GeneratedMutationResolver) UpdateUser(ctx context.Context, id string, input map[string]interface{}) (item *User, err error) {
 	item = &User{}
 	tx := r.DB.db.Begin()
 
@@ -234,7 +221,19 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input map[
 	}
 
 	principalID := getPrincipalID(ctx)
-	item.UpdatedBy = &principalID
+	item.UpdatedBy = principalID
+
+	if val, ok := input["email"].(string); ok && (item.Email == nil || *item.Email != val) {
+		item.Email = &val
+	}
+
+	if val, ok := input["firstName"].(string); ok && (item.FirstName == nil || *item.FirstName != val) {
+		item.FirstName = &val
+	}
+
+	if val, ok := input["lastName"].(string); ok && (item.LastName == nil || *item.LastName != val) {
+		item.LastName = &val
+	}
 
 	if ids, ok := input["tasksIds"].([]interface{}); ok {
 		items := []Task{}
@@ -257,22 +256,6 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input map[
 		association.Replace(items)
 	}
 
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Metadata: nil,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			ToTimeHookFunc()),
-		Result: item,
-	})
-	if err != nil {
-		tx.Rollback()
-		return
-	}
-
-	err = decoder.Decode(input)
-	if err != nil {
-		tx.Rollback()
-		return
-	}
 	err = tx.Save(item).Error
 	if err != nil {
 		tx.Rollback()
@@ -281,7 +264,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input map[
 	err = tx.Commit().Error
 	return
 }
-func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (item *User, err error) {
+func (r *GeneratedMutationResolver) DeleteUser(ctx context.Context, id string) (item *User, err error) {
 	item = &User{}
 	err = resolvers.GetItem(ctx, r.DB.Query(), item, &id)
 	if err != nil {
@@ -293,40 +276,66 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (item *Use
 	return
 }
 
-func (r *mutationResolver) CreateTask(ctx context.Context, input map[string]interface{}) (item *Task, err error) {
-	ID, ok := input["id"].(string)
-	if !ok || ID == "" {
-		ID = uuid.Must(uuid.NewV4()).String()
-	}
+func (r *GeneratedMutationResolver) CreateTask(ctx context.Context, input map[string]interface{}) (item *Task, err error) {
 	principalID := getPrincipalID(ctx)
-	item = &Task{ID: ID, CreatedBy: principalID}
+	now := time.Now()
+	item = &Task{ID: uuid.Must(uuid.NewV4()).String(), CreatedAt: now, CreatedBy: principalID}
 	tx := r.DB.db.Begin()
 
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Metadata: nil,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			ToTimeHookFunc()),
-		Result: item,
+	event := events.NewEvent(events.EventMetadata{
+		Type:        events.EventTypeCreated,
+		Entity:      "Task",
+		EntityID:    item.ID,
+		Date:        now,
+		PrincipalID: principalID,
 	})
-	if err != nil {
-		tx.Rollback()
-		return
+
+	if val, ok := input["id"].(string); ok && (item.ID != val) {
+		item.ID = val
+		event.AddNewValue("id", &val)
 	}
 
-	err = decoder.Decode(input)
-	if err != nil {
-		tx.Rollback()
-		return
+	if val, ok := input["title"].(string); ok && (item.Title == nil || *item.Title != val) {
+		item.Title = &val
+		event.AddNewValue("title", &val)
 	}
+
+	if val, ok := input["completed"].(bool); ok && (item.Completed == nil || *item.Completed != val) {
+		item.Completed = &val
+		event.AddNewValue("completed", &val)
+	}
+
+	if val, ok := input["dueDate"].(time.Time); ok && (item.DueDate == nil || *item.DueDate != val) {
+		item.DueDate = &val
+		event.AddNewValue("dueDate", &val)
+	}
+
+	if val, ok := input["type"].(TaskType); ok && (item.Type == nil || *item.Type != val) {
+		item.Type = &val
+		event.AddNewValue("type", &val)
+	}
+
+	if val, ok := input["assigneeId"].(string); ok && (item.AssigneeID == nil || *item.AssigneeID != val) {
+		item.AssigneeID = &val
+		event.AddNewValue("assigneeId", &val)
+	}
+
 	err = tx.Create(item).Error
 	if err != nil {
 		tx.Rollback()
 		return
 	}
 	err = tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = r.EventController.SendEvent(ctx, &event)
+
 	return
 }
-func (r *mutationResolver) UpdateTask(ctx context.Context, id string, input map[string]interface{}) (item *Task, err error) {
+func (r *GeneratedMutationResolver) UpdateTask(ctx context.Context, id string, input map[string]interface{}) (item *Task, err error) {
 	item = &Task{}
 	tx := r.DB.db.Begin()
 
@@ -336,24 +345,28 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, id string, input map[
 	}
 
 	principalID := getPrincipalID(ctx)
-	item.UpdatedBy = &principalID
+	item.UpdatedBy = principalID
 
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		Metadata: nil,
-		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			ToTimeHookFunc()),
-		Result: item,
-	})
-	if err != nil {
-		tx.Rollback()
-		return
+	if val, ok := input["title"].(string); ok && (item.Title == nil || *item.Title != val) {
+		item.Title = &val
 	}
 
-	err = decoder.Decode(input)
-	if err != nil {
-		tx.Rollback()
-		return
+	if val, ok := input["completed"].(bool); ok && (item.Completed == nil || *item.Completed != val) {
+		item.Completed = &val
 	}
+
+	if val, ok := input["dueDate"].(time.Time); ok && (item.DueDate == nil || *item.DueDate != val) {
+		item.DueDate = &val
+	}
+
+	if val, ok := input["type"].(TaskType); ok && (item.Type == nil || *item.Type != val) {
+		item.Type = &val
+	}
+
+	if val, ok := input["assigneeId"].(string); ok && (item.AssigneeID == nil || *item.AssigneeID != val) {
+		item.AssigneeID = &val
+	}
+
 	err = tx.Save(item).Error
 	if err != nil {
 		tx.Rollback()
@@ -362,7 +375,7 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, id string, input map[
 	err = tx.Commit().Error
 	return
 }
-func (r *mutationResolver) DeleteTask(ctx context.Context, id string) (item *Task, err error) {
+func (r *GeneratedMutationResolver) DeleteTask(ctx context.Context, id string) (item *Task, err error) {
 	item = &Task{}
 	err = resolvers.GetItem(ctx, r.DB.Query(), item, &id)
 	if err != nil {
@@ -374,14 +387,14 @@ func (r *mutationResolver) DeleteTask(ctx context.Context, id string) (item *Tas
 	return
 }
 
-type queryResolver struct{ *Resolver }
+type GeneratedQueryResolver struct{ *GeneratedResolver }
 
-func (r *queryResolver) Company(ctx context.Context, id *string, q *string) (*Company, error) {
+func (r *GeneratedQueryResolver) Company(ctx context.Context, id *string, q *string) (*Company, error) {
 	t := Company{}
 	err := resolvers.GetItem(ctx, r.DB.Query(), &t, id)
 	return &t, err
 }
-func (r *queryResolver) Companies(ctx context.Context, offset *int, limit *int, q *string, sort []CompanySortType, filter *CompanyFilterType) (*CompanyResultType, error) {
+func (r *GeneratedQueryResolver) Companies(ctx context.Context, offset *int, limit *int, q *string, sort []CompanySortType, filter *CompanyFilterType) (*CompanyResultType, error) {
 	_sort := []resolvers.EntitySort{}
 	for _, s := range sort {
 		_sort = append(_sort, s)
@@ -398,20 +411,20 @@ func (r *queryResolver) Companies(ctx context.Context, offset *int, limit *int, 
 	}, nil
 }
 
-type companyResultTypeResolver struct{ *Resolver }
+type GeneratedCompanyResultTypeResolver struct{ *GeneratedResolver }
 
-func (r *companyResultTypeResolver) Items(ctx context.Context, obj *CompanyResultType) (items []*Company, err error) {
+func (r *GeneratedCompanyResultTypeResolver) Items(ctx context.Context, obj *CompanyResultType) (items []*Company, err error) {
 	err = obj.GetItems(ctx, r.DB.db, "companies", &items)
 	return
 }
 
-func (r *companyResultTypeResolver) Count(ctx context.Context, obj *CompanyResultType) (count int, err error) {
+func (r *GeneratedCompanyResultTypeResolver) Count(ctx context.Context, obj *CompanyResultType) (count int, err error) {
 	return obj.GetCount(ctx, r.DB.db, &Company{})
 }
 
-type companyResolver struct{ *Resolver }
+type GeneratedCompanyResolver struct{ *GeneratedResolver }
 
-func (r *companyResolver) Employees(ctx context.Context, obj *Company) (res []*User, err error) {
+func (r *GeneratedCompanyResolver) Employees(ctx context.Context, obj *Company) (res []*User, err error) {
 
 	items := []*User{}
 	err = r.DB.Query().Model(obj).Related(&items, "Employees").Error
@@ -420,12 +433,12 @@ func (r *companyResolver) Employees(ctx context.Context, obj *Company) (res []*U
 	return
 }
 
-func (r *queryResolver) User(ctx context.Context, id *string, q *string) (*User, error) {
+func (r *GeneratedQueryResolver) User(ctx context.Context, id *string, q *string) (*User, error) {
 	t := User{}
 	err := resolvers.GetItem(ctx, r.DB.Query(), &t, id)
 	return &t, err
 }
-func (r *queryResolver) Users(ctx context.Context, offset *int, limit *int, q *string, sort []UserSortType, filter *UserFilterType) (*UserResultType, error) {
+func (r *GeneratedQueryResolver) Users(ctx context.Context, offset *int, limit *int, q *string, sort []UserSortType, filter *UserFilterType) (*UserResultType, error) {
 	_sort := []resolvers.EntitySort{}
 	for _, s := range sort {
 		_sort = append(_sort, s)
@@ -442,20 +455,20 @@ func (r *queryResolver) Users(ctx context.Context, offset *int, limit *int, q *s
 	}, nil
 }
 
-type userResultTypeResolver struct{ *Resolver }
+type GeneratedUserResultTypeResolver struct{ *GeneratedResolver }
 
-func (r *userResultTypeResolver) Items(ctx context.Context, obj *UserResultType) (items []*User, err error) {
+func (r *GeneratedUserResultTypeResolver) Items(ctx context.Context, obj *UserResultType) (items []*User, err error) {
 	err = obj.GetItems(ctx, r.DB.db, "users", &items)
 	return
 }
 
-func (r *userResultTypeResolver) Count(ctx context.Context, obj *UserResultType) (count int, err error) {
+func (r *GeneratedUserResultTypeResolver) Count(ctx context.Context, obj *UserResultType) (count int, err error) {
 	return obj.GetCount(ctx, r.DB.db, &User{})
 }
 
-type userResolver struct{ *Resolver }
+type GeneratedUserResolver struct{ *GeneratedResolver }
 
-func (r *userResolver) Tasks(ctx context.Context, obj *User) (res []*Task, err error) {
+func (r *GeneratedUserResolver) Tasks(ctx context.Context, obj *User) (res []*Task, err error) {
 
 	items := []*Task{}
 	err = r.DB.Query().Model(obj).Related(&items, "Tasks").Error
@@ -464,7 +477,7 @@ func (r *userResolver) Tasks(ctx context.Context, obj *User) (res []*Task, err e
 	return
 }
 
-func (r *userResolver) Companies(ctx context.Context, obj *User) (res []*Company, err error) {
+func (r *GeneratedUserResolver) Companies(ctx context.Context, obj *User) (res []*Company, err error) {
 
 	items := []*Company{}
 	err = r.DB.Query().Model(obj).Related(&items, "Companies").Error
@@ -473,7 +486,7 @@ func (r *userResolver) Companies(ctx context.Context, obj *User) (res []*Company
 	return
 }
 
-func (r *userResolver) Friends(ctx context.Context, obj *User) (res []*User, err error) {
+func (r *GeneratedUserResolver) Friends(ctx context.Context, obj *User) (res []*User, err error) {
 
 	items := []*User{}
 	err = r.DB.Query().Model(obj).Related(&items, "Friends").Error
@@ -482,12 +495,12 @@ func (r *userResolver) Friends(ctx context.Context, obj *User) (res []*User, err
 	return
 }
 
-func (r *queryResolver) Task(ctx context.Context, id *string, q *string) (*Task, error) {
+func (r *GeneratedQueryResolver) Task(ctx context.Context, id *string, q *string) (*Task, error) {
 	t := Task{}
 	err := resolvers.GetItem(ctx, r.DB.Query(), &t, id)
 	return &t, err
 }
-func (r *queryResolver) Tasks(ctx context.Context, offset *int, limit *int, q *string, sort []TaskSortType, filter *TaskFilterType) (*TaskResultType, error) {
+func (r *GeneratedQueryResolver) Tasks(ctx context.Context, offset *int, limit *int, q *string, sort []TaskSortType, filter *TaskFilterType) (*TaskResultType, error) {
 	_sort := []resolvers.EntitySort{}
 	for _, s := range sort {
 		_sort = append(_sort, s)
@@ -504,20 +517,20 @@ func (r *queryResolver) Tasks(ctx context.Context, offset *int, limit *int, q *s
 	}, nil
 }
 
-type taskResultTypeResolver struct{ *Resolver }
+type GeneratedTaskResultTypeResolver struct{ *GeneratedResolver }
 
-func (r *taskResultTypeResolver) Items(ctx context.Context, obj *TaskResultType) (items []*Task, err error) {
+func (r *GeneratedTaskResultTypeResolver) Items(ctx context.Context, obj *TaskResultType) (items []*Task, err error) {
 	err = obj.GetItems(ctx, r.DB.db, "tasks", &items)
 	return
 }
 
-func (r *taskResultTypeResolver) Count(ctx context.Context, obj *TaskResultType) (count int, err error) {
+func (r *GeneratedTaskResultTypeResolver) Count(ctx context.Context, obj *TaskResultType) (count int, err error) {
 	return obj.GetCount(ctx, r.DB.db, &Task{})
 }
 
-type taskResolver struct{ *Resolver }
+type GeneratedTaskResolver struct{ *GeneratedResolver }
 
-func (r *taskResolver) Assignee(ctx context.Context, obj *Task) (res *User, err error) {
+func (r *GeneratedTaskResolver) Assignee(ctx context.Context, obj *Task) (res *User, err error) {
 
 	item := User{}
 	_res := r.DB.Query().Model(obj).Related(&item, "Assignee")

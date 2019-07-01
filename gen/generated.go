@@ -742,7 +742,7 @@ type Company {
   updatedAt: Time
   createdAt: Time!
   updatedBy: ID
-  createdBy: ID!
+  createdBy: ID
 }
 
 type User {
@@ -756,7 +756,7 @@ type User {
   updatedAt: Time
   createdAt: Time!
   updatedBy: ID
-  createdBy: ID!
+  createdBy: ID
 }
 
 enum TaskType {
@@ -775,7 +775,7 @@ type Task {
   updatedAt: Time
   createdAt: Time!
   updatedBy: ID
-  createdBy: ID!
+  createdBy: ID
 }
 
 input CompanyCreateInput {
@@ -1689,15 +1689,12 @@ func (ec *executionContext) _Company_createdBy(ctx context.Context, field graphq
 		return obj.CreatedBy, nil
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CompanyResultType_items(ctx context.Context, field graphql.CollectedField, obj *CompanyResultType) graphql.Marshaler {
@@ -2563,15 +2560,12 @@ func (ec *executionContext) _Task_createdBy(ctx context.Context, field graphql.C
 		return obj.CreatedBy, nil
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TaskResultType_items(ctx context.Context, field graphql.CollectedField, obj *TaskResultType) graphql.Marshaler {
@@ -2899,15 +2893,12 @@ func (ec *executionContext) _User_createdBy(ctx context.Context, field graphql.C
 		return obj.CreatedBy, nil
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _UserResultType_items(ctx context.Context, field graphql.CollectedField, obj *UserResultType) graphql.Marshaler {
@@ -5046,9 +5037,6 @@ func (ec *executionContext) _Company(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Company_updatedBy(ctx, field, obj)
 		case "createdBy":
 			out.Values[i] = ec._Company_createdBy(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5325,9 +5313,6 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._Task_updatedBy(ctx, field, obj)
 		case "createdBy":
 			out.Values[i] = ec._Task_createdBy(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5464,9 +5449,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._User_updatedBy(ctx, field, obj)
 		case "createdBy":
 			out.Values[i] = ec._User_createdBy(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

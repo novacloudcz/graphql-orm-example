@@ -1,7 +1,5 @@
 package gen
 
-import ()
-
 type key int
 
 const (

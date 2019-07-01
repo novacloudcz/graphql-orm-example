@@ -1,8 +1,9 @@
 package gen
 
 import (
-	"github.com/novacloudcz/graphql-orm/resolvers"
 	"time"
+
+	"github.com/novacloudcz/graphql-orm/resolvers"
 )
 
 type CompanyResultType struct {
@@ -15,7 +16,7 @@ type Company struct {
 	UpdatedAt *time.Time `json:"updatedAt" gorm:"column:updatedAt"`
 	CreatedAt time.Time  `json:"createdAt" gorm:"column:createdAt"`
 	UpdatedBy *string    `json:"updatedBy" gorm:"column:updatedBy"`
-	CreatedBy string     `json:"createdBy" gorm:"column:createdBy"`
+	CreatedBy *string    `json:"createdBy" gorm:"column:createdBy"`
 
 	Employees []*User `json:"employees" gorm:"many2many:company_employees;jointable_foreignkey:employee_id;association_jointable_foreignkey:company_id"`
 }
@@ -32,7 +33,7 @@ type User struct {
 	UpdatedAt *time.Time `json:"updatedAt" gorm:"column:updatedAt"`
 	CreatedAt time.Time  `json:"createdAt" gorm:"column:createdAt"`
 	UpdatedBy *string    `json:"updatedBy" gorm:"column:updatedBy"`
-	CreatedBy string     `json:"createdBy" gorm:"column:createdBy"`
+	CreatedBy *string    `json:"createdBy" gorm:"column:createdBy"`
 
 	Tasks []*Task `json:"tasks" gorm:"foreignkey:AssigneeID"`
 
@@ -55,7 +56,7 @@ type Task struct {
 	UpdatedAt  *time.Time `json:"updatedAt" gorm:"column:updatedAt"`
 	CreatedAt  time.Time  `json:"createdAt" gorm:"column:createdAt"`
 	UpdatedBy  *string    `json:"updatedBy" gorm:"column:updatedBy"`
-	CreatedBy  string     `json:"createdBy" gorm:"column:createdBy"`
+	CreatedBy  *string    `json:"createdBy" gorm:"column:createdBy"`
 
 	Assignee *User `json:"assignee"`
 }

@@ -37,7 +37,7 @@ type Company {
   updatedAt: Time
   createdAt: Time!
   updatedBy: ID
-  createdBy: ID!
+  createdBy: ID
 }
 
 type User {
@@ -51,7 +51,7 @@ type User {
   updatedAt: Time
   createdAt: Time!
   updatedBy: ID
-  createdBy: ID!
+  createdBy: ID
 }
 
 enum TaskType {
@@ -70,7 +70,7 @@ type Task {
   updatedAt: Time
   createdAt: Time!
   updatedBy: ID
-  createdBy: ID!
+  createdBy: ID
 }
 
 input CompanyCreateInput {
