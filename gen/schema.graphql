@@ -30,6 +30,8 @@ type Mutation {
   deleteTask(id: ID!): Task!
 }
 
+directive @validator(valid: String!, required: String!) on FIELD_DEFINITION
+
 type Company {
   id: ID!
   name: String
@@ -42,7 +44,7 @@ type Company {
 
 type User {
   id: ID!
-  email: String
+  email: String @validator(valid: "email", required: "true")
   firstName: String
   lastName: String
   tasks: [Task!]! @relationship(inverse: "assignee")

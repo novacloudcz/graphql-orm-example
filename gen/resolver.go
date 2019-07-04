@@ -2,6 +2,8 @@ package gen
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/novacloudcz/graphql-orm/events"
@@ -66,14 +68,20 @@ func (r *GeneratedMutationResolver) CreateCompany(ctx context.Context, input map
 		PrincipalID: principalID,
 	})
 
-	if val, ok := input["id"].(string); ok && (item.ID != val) {
-		item.ID = val
-		event.AddNewValue("id", &val)
+	var changes CompanyChanges
+	err = ApplyChanges(input, &changes)
+	if err != nil {
+		return
 	}
 
-	if val, ok := input["name"].(string); ok && (item.Name == nil || *item.Name != val) {
-		item.Name = &val
-		event.AddNewValue("name", &val)
+	if _, ok := input["id"]; ok && (item.ID != changes.ID) {
+		item.ID = changes.ID
+		event.AddNewValue("id", changes.ID)
+	}
+
+	if _, ok := input["name"]; ok && (item.Name != changes.Name) && (item.Name == nil || changes.Name == nil || *item.Name != *changes.Name) {
+		item.Name = changes.Name
+		event.AddNewValue("name", changes.Name)
 	}
 
 	if ids, ok := input["employeesIds"].([]interface{}); ok {
@@ -94,24 +102,43 @@ func (r *GeneratedMutationResolver) CreateCompany(ctx context.Context, input map
 		return
 	}
 
-	err = r.EventController.SendEvent(ctx, &event)
+	if len(event.Changes) > 0 {
+		err = r.EventController.SendEvent(ctx, &event)
+	}
 
 	return
 }
 func (r *GeneratedMutationResolver) UpdateCompany(ctx context.Context, id string, input map[string]interface{}) (item *Company, err error) {
+	principalID := getPrincipalID(ctx)
 	item = &Company{}
+	now := time.Now()
 	tx := r.DB.db.Begin()
+
+	event := events.NewEvent(events.EventMetadata{
+		Type:        events.EventTypeCreated,
+		Entity:      "Company",
+		EntityID:    item.ID,
+		Date:        now,
+		PrincipalID: principalID,
+	})
+
+	var changes CompanyChanges
+	err = ApplyChanges(input, &changes)
+	if err != nil {
+		return
+	}
 
 	err = resolvers.GetItem(ctx, tx, item, &id)
 	if err != nil {
 		return
 	}
 
-	principalID := getPrincipalID(ctx)
 	item.UpdatedBy = principalID
 
-	if val, ok := input["name"].(string); ok && (item.Name == nil || *item.Name != val) {
-		item.Name = &val
+	if _, ok := input["name"]; ok && (item.Name != changes.Name) && (item.Name == nil || changes.Name == nil || *item.Name != *changes.Name) {
+		event.AddOldValue("name", item.Name)
+		event.AddNewValue("name", changes.Name)
+		item.Name = changes.Name
 	}
 
 	if ids, ok := input["employeesIds"].([]interface{}); ok {
@@ -127,6 +154,17 @@ func (r *GeneratedMutationResolver) UpdateCompany(ctx context.Context, id string
 		return
 	}
 	err = tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	if len(event.Changes) > 0 {
+		err = r.EventController.SendEvent(ctx, &event)
+		data, _ := json.Marshal(event)
+		fmt.Println("??", string(data))
+	}
+
 	return
 }
 func (r *GeneratedMutationResolver) DeleteCompany(ctx context.Context, id string) (item *Company, err error) {
@@ -155,24 +193,30 @@ func (r *GeneratedMutationResolver) CreateUser(ctx context.Context, input map[st
 		PrincipalID: principalID,
 	})
 
-	if val, ok := input["id"].(string); ok && (item.ID != val) {
-		item.ID = val
-		event.AddNewValue("id", &val)
+	var changes UserChanges
+	err = ApplyChanges(input, &changes)
+	if err != nil {
+		return
 	}
 
-	if val, ok := input["email"].(string); ok && (item.Email == nil || *item.Email != val) {
-		item.Email = &val
-		event.AddNewValue("email", &val)
+	if _, ok := input["id"]; ok && (item.ID != changes.ID) {
+		item.ID = changes.ID
+		event.AddNewValue("id", changes.ID)
 	}
 
-	if val, ok := input["firstName"].(string); ok && (item.FirstName == nil || *item.FirstName != val) {
-		item.FirstName = &val
-		event.AddNewValue("firstName", &val)
+	if _, ok := input["email"]; ok && (item.Email != changes.Email) && (item.Email == nil || changes.Email == nil || *item.Email != *changes.Email) {
+		item.Email = changes.Email
+		event.AddNewValue("email", changes.Email)
 	}
 
-	if val, ok := input["lastName"].(string); ok && (item.LastName == nil || *item.LastName != val) {
-		item.LastName = &val
-		event.AddNewValue("lastName", &val)
+	if _, ok := input["firstName"]; ok && (item.FirstName != changes.FirstName) && (item.FirstName == nil || changes.FirstName == nil || *item.FirstName != *changes.FirstName) {
+		item.FirstName = changes.FirstName
+		event.AddNewValue("firstName", changes.FirstName)
+	}
+
+	if _, ok := input["lastName"]; ok && (item.LastName != changes.LastName) && (item.LastName == nil || changes.LastName == nil || *item.LastName != *changes.LastName) {
+		item.LastName = changes.LastName
+		event.AddNewValue("lastName", changes.LastName)
 	}
 
 	if ids, ok := input["tasksIds"].([]interface{}); ok {
@@ -207,32 +251,55 @@ func (r *GeneratedMutationResolver) CreateUser(ctx context.Context, input map[st
 		return
 	}
 
-	err = r.EventController.SendEvent(ctx, &event)
+	if len(event.Changes) > 0 {
+		err = r.EventController.SendEvent(ctx, &event)
+	}
 
 	return
 }
 func (r *GeneratedMutationResolver) UpdateUser(ctx context.Context, id string, input map[string]interface{}) (item *User, err error) {
+	principalID := getPrincipalID(ctx)
 	item = &User{}
+	now := time.Now()
 	tx := r.DB.db.Begin()
+
+	event := events.NewEvent(events.EventMetadata{
+		Type:        events.EventTypeCreated,
+		Entity:      "User",
+		EntityID:    item.ID,
+		Date:        now,
+		PrincipalID: principalID,
+	})
+
+	var changes UserChanges
+	err = ApplyChanges(input, &changes)
+	if err != nil {
+		return
+	}
 
 	err = resolvers.GetItem(ctx, tx, item, &id)
 	if err != nil {
 		return
 	}
 
-	principalID := getPrincipalID(ctx)
 	item.UpdatedBy = principalID
 
-	if val, ok := input["email"].(string); ok && (item.Email == nil || *item.Email != val) {
-		item.Email = &val
+	if _, ok := input["email"]; ok && (item.Email != changes.Email) && (item.Email == nil || changes.Email == nil || *item.Email != *changes.Email) {
+		event.AddOldValue("email", item.Email)
+		event.AddNewValue("email", changes.Email)
+		item.Email = changes.Email
 	}
 
-	if val, ok := input["firstName"].(string); ok && (item.FirstName == nil || *item.FirstName != val) {
-		item.FirstName = &val
+	if _, ok := input["firstName"]; ok && (item.FirstName != changes.FirstName) && (item.FirstName == nil || changes.FirstName == nil || *item.FirstName != *changes.FirstName) {
+		event.AddOldValue("firstName", item.FirstName)
+		event.AddNewValue("firstName", changes.FirstName)
+		item.FirstName = changes.FirstName
 	}
 
-	if val, ok := input["lastName"].(string); ok && (item.LastName == nil || *item.LastName != val) {
-		item.LastName = &val
+	if _, ok := input["lastName"]; ok && (item.LastName != changes.LastName) && (item.LastName == nil || changes.LastName == nil || *item.LastName != *changes.LastName) {
+		event.AddOldValue("lastName", item.LastName)
+		event.AddNewValue("lastName", changes.LastName)
+		item.LastName = changes.LastName
 	}
 
 	if ids, ok := input["tasksIds"].([]interface{}); ok {
@@ -262,6 +329,17 @@ func (r *GeneratedMutationResolver) UpdateUser(ctx context.Context, id string, i
 		return
 	}
 	err = tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	if len(event.Changes) > 0 {
+		err = r.EventController.SendEvent(ctx, &event)
+		data, _ := json.Marshal(event)
+		fmt.Println("??", string(data))
+	}
+
 	return
 }
 func (r *GeneratedMutationResolver) DeleteUser(ctx context.Context, id string) (item *User, err error) {
@@ -290,34 +368,40 @@ func (r *GeneratedMutationResolver) CreateTask(ctx context.Context, input map[st
 		PrincipalID: principalID,
 	})
 
-	if val, ok := input["id"].(string); ok && (item.ID != val) {
-		item.ID = val
-		event.AddNewValue("id", &val)
+	var changes TaskChanges
+	err = ApplyChanges(input, &changes)
+	if err != nil {
+		return
 	}
 
-	if val, ok := input["title"].(string); ok && (item.Title == nil || *item.Title != val) {
-		item.Title = &val
-		event.AddNewValue("title", &val)
+	if _, ok := input["id"]; ok && (item.ID != changes.ID) {
+		item.ID = changes.ID
+		event.AddNewValue("id", changes.ID)
 	}
 
-	if val, ok := input["completed"].(bool); ok && (item.Completed == nil || *item.Completed != val) {
-		item.Completed = &val
-		event.AddNewValue("completed", &val)
+	if _, ok := input["title"]; ok && (item.Title != changes.Title) && (item.Title == nil || changes.Title == nil || *item.Title != *changes.Title) {
+		item.Title = changes.Title
+		event.AddNewValue("title", changes.Title)
 	}
 
-	if val, ok := input["dueDate"].(time.Time); ok && (item.DueDate == nil || *item.DueDate != val) {
-		item.DueDate = &val
-		event.AddNewValue("dueDate", &val)
+	if _, ok := input["completed"]; ok && (item.Completed != changes.Completed) && (item.Completed == nil || changes.Completed == nil || *item.Completed != *changes.Completed) {
+		item.Completed = changes.Completed
+		event.AddNewValue("completed", changes.Completed)
 	}
 
-	if val, ok := input["type"].(TaskType); ok && (item.Type == nil || *item.Type != val) {
-		item.Type = &val
-		event.AddNewValue("type", &val)
+	if _, ok := input["dueDate"]; ok && (item.DueDate != changes.DueDate) && (item.DueDate == nil || changes.DueDate == nil || *item.DueDate != *changes.DueDate) {
+		item.DueDate = changes.DueDate
+		event.AddNewValue("dueDate", changes.DueDate)
 	}
 
-	if val, ok := input["assigneeId"].(string); ok && (item.AssigneeID == nil || *item.AssigneeID != val) {
-		item.AssigneeID = &val
-		event.AddNewValue("assigneeId", &val)
+	if _, ok := input["type"]; ok && (item.Type != changes.Type) && (item.Type == nil || changes.Type == nil || *item.Type != *changes.Type) {
+		item.Type = changes.Type
+		event.AddNewValue("type", changes.Type)
+	}
+
+	if _, ok := input["assigneeId"]; ok && (item.AssigneeID != changes.AssigneeID) && (item.AssigneeID == nil || changes.AssigneeID == nil || *item.AssigneeID != *changes.AssigneeID) {
+		item.AssigneeID = changes.AssigneeID
+		event.AddNewValue("assigneeId", changes.AssigneeID)
 	}
 
 	err = tx.Create(item).Error
@@ -331,40 +415,67 @@ func (r *GeneratedMutationResolver) CreateTask(ctx context.Context, input map[st
 		return
 	}
 
-	err = r.EventController.SendEvent(ctx, &event)
+	if len(event.Changes) > 0 {
+		err = r.EventController.SendEvent(ctx, &event)
+	}
 
 	return
 }
 func (r *GeneratedMutationResolver) UpdateTask(ctx context.Context, id string, input map[string]interface{}) (item *Task, err error) {
+	principalID := getPrincipalID(ctx)
 	item = &Task{}
+	now := time.Now()
 	tx := r.DB.db.Begin()
+
+	event := events.NewEvent(events.EventMetadata{
+		Type:        events.EventTypeCreated,
+		Entity:      "Task",
+		EntityID:    item.ID,
+		Date:        now,
+		PrincipalID: principalID,
+	})
+
+	var changes TaskChanges
+	err = ApplyChanges(input, &changes)
+	if err != nil {
+		return
+	}
 
 	err = resolvers.GetItem(ctx, tx, item, &id)
 	if err != nil {
 		return
 	}
 
-	principalID := getPrincipalID(ctx)
 	item.UpdatedBy = principalID
 
-	if val, ok := input["title"].(string); ok && (item.Title == nil || *item.Title != val) {
-		item.Title = &val
+	if _, ok := input["title"]; ok && (item.Title != changes.Title) && (item.Title == nil || changes.Title == nil || *item.Title != *changes.Title) {
+		event.AddOldValue("title", item.Title)
+		event.AddNewValue("title", changes.Title)
+		item.Title = changes.Title
 	}
 
-	if val, ok := input["completed"].(bool); ok && (item.Completed == nil || *item.Completed != val) {
-		item.Completed = &val
+	if _, ok := input["completed"]; ok && (item.Completed != changes.Completed) && (item.Completed == nil || changes.Completed == nil || *item.Completed != *changes.Completed) {
+		event.AddOldValue("completed", item.Completed)
+		event.AddNewValue("completed", changes.Completed)
+		item.Completed = changes.Completed
 	}
 
-	if val, ok := input["dueDate"].(time.Time); ok && (item.DueDate == nil || *item.DueDate != val) {
-		item.DueDate = &val
+	if _, ok := input["dueDate"]; ok && (item.DueDate != changes.DueDate) && (item.DueDate == nil || changes.DueDate == nil || *item.DueDate != *changes.DueDate) {
+		event.AddOldValue("dueDate", item.DueDate)
+		event.AddNewValue("dueDate", changes.DueDate)
+		item.DueDate = changes.DueDate
 	}
 
-	if val, ok := input["type"].(TaskType); ok && (item.Type == nil || *item.Type != val) {
-		item.Type = &val
+	if _, ok := input["type"]; ok && (item.Type != changes.Type) && (item.Type == nil || changes.Type == nil || *item.Type != *changes.Type) {
+		event.AddOldValue("type", item.Type)
+		event.AddNewValue("type", changes.Type)
+		item.Type = changes.Type
 	}
 
-	if val, ok := input["assigneeId"].(string); ok && (item.AssigneeID == nil || *item.AssigneeID != val) {
-		item.AssigneeID = &val
+	if _, ok := input["assigneeId"]; ok && (item.AssigneeID != changes.AssigneeID) && (item.AssigneeID == nil || changes.AssigneeID == nil || *item.AssigneeID != *changes.AssigneeID) {
+		event.AddOldValue("assigneeId", item.AssigneeID)
+		event.AddNewValue("assigneeId", changes.AssigneeID)
+		item.AssigneeID = changes.AssigneeID
 	}
 
 	err = tx.Save(item).Error
@@ -373,6 +484,17 @@ func (r *GeneratedMutationResolver) UpdateTask(ctx context.Context, id string, i
 		return
 	}
 	err = tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	if len(event.Changes) > 0 {
+		err = r.EventController.SendEvent(ctx, &event)
+		data, _ := json.Marshal(event)
+		fmt.Println("??", string(data))
+	}
+
 	return
 }
 func (r *GeneratedMutationResolver) DeleteTask(ctx context.Context, id string) (item *Task, err error) {
