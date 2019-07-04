@@ -49,6 +49,8 @@ type DirectiveRoot struct {
 	Relationship func(ctx context.Context, obj interface{}, next graphql.Resolver, inverse string) (res interface{}, err error)
 
 	Validator func(ctx context.Context, obj interface{}, next graphql.Resolver, valid string, required string) (res interface{}, err error)
+
+	Validator2 func(ctx context.Context, obj interface{}, next graphql.Resolver, valid string, required string) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -693,6 +695,19 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 					return ec.directives.Validator(ctx, obj, n, args["valid"].(string), args["required"].(string))
 				}
 			}
+		case "validator2":
+			if ec.directives.Validator2 != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := ec.dir_validator2_args(ctx, rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.Validator2(ctx, obj, n, args["valid"].(string), args["required"].(string))
+				}
+			}
 		}
 	}
 	res, err := ec.ResolverMiddleware(ctx, next)
@@ -752,6 +767,8 @@ type Mutation {
 
 directive @validator(valid: String!, required: String!) on FIELD_DEFINITION
 
+directive @validator2(valid: String!, required: String!) on FIELD_DEFINITION
+
 type Company {
   id: ID!
   name: String
@@ -764,7 +781,7 @@ type Company {
 
 type User {
   id: ID!
-  email: String @validator(valid: "email", required: "true")
+  email: String @validator(valid: "email", required: "true") @validator2(valid: "email", required: "true")
   firstName: String
   lastName: String
   tasks: [Task!]! @relationship(inverse: "assignee")
@@ -1134,6 +1151,28 @@ func (ec *executionContext) dir_relationship_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["inverse"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) dir_validator2_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["valid"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["valid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["required"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["required"] = arg1
 	return args, nil
 }
 

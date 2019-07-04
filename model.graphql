@@ -1,4 +1,5 @@
 directive @validator(valid: String!, required: String!) on FIELD_DEFINITION
+directive @validator2(valid: String!, required: String!) on FIELD_DEFINITION
 
 type Company {
   name: String
@@ -7,7 +8,9 @@ type Company {
 }
 
 type User {
-  email: String @validator(valid: "email", required: "true")
+  email: String
+    @validator(valid: "email", required: "true")
+    @validator2(valid: "email", required: "true")
   firstName: String
   lastName: String
 
