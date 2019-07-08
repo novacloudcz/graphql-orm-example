@@ -33,7 +33,7 @@ type Mutation {
 type Company {
   id: ID!
   name: String
-  employees: [User!]! @relationship(inverse: "companies")
+  employees: [User!]!
   updatedAt: Time
   createdAt: Time!
   updatedBy: ID
@@ -45,9 +45,9 @@ type User {
   email: String
   firstName: String
   lastName: String
-  tasks: [Task!]! @relationship(inverse: "assignee")
-  companies: [Company!]! @relationship(inverse: "employees")
-  friends: [User!]! @relationship(inverse: "friends")
+  tasks: [Task!]!
+  companies: [Company!]!
+  friends: [User!]!
   updatedAt: Time
   createdAt: Time!
   updatedBy: ID
@@ -65,7 +65,7 @@ type Task {
   completed: Boolean
   dueDate: Time
   type: TaskType
-  assignee: User @relationship(inverse: "tasks")
+  assignee: User
   assigneeId: ID
   updatedAt: Time
   createdAt: Time!
