@@ -36,6 +36,8 @@ func NewDBWithString(urlString string) *DB {
 	if err != nil {
 		panic(err)
 	}
+	db.DB().SetMaxIdleConns(2)
+	db.DB().SetMaxOpenConns(13)
 	db.LogMode(true)
 	return NewDB(db)
 }
