@@ -46,7 +46,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Relationship func(ctx context.Context, obj interface{}, next graphql.Resolver, inverse string) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -87,17 +86,18 @@ type ComplexityRoot struct {
 	}
 
 	Task struct {
-		Assignee   func(childComplexity int) int
-		AssigneeID func(childComplexity int) int
-		Completed  func(childComplexity int) int
-		CreatedAt  func(childComplexity int) int
-		CreatedBy  func(childComplexity int) int
-		DueDate    func(childComplexity int) int
-		ID         func(childComplexity int) int
-		Title      func(childComplexity int) int
-		Type       func(childComplexity int) int
-		UpdatedAt  func(childComplexity int) int
-		UpdatedBy  func(childComplexity int) int
+		Assignee    func(childComplexity int) int
+		AssigneeID  func(childComplexity int) int
+		Completed   func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		CreatedBy   func(childComplexity int) int
+		Description func(childComplexity int) int
+		DueDate     func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Title       func(childComplexity int) int
+		Type        func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+		UpdatedBy   func(childComplexity int) int
 	}
 
 	TaskResultType struct {
@@ -461,6 +461,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Task.CreatedBy(childComplexity), true
 
+	case "Task.description":
+		if e.complexity.Task.Description == nil {
+			break
+		}
+
+		return e.complexity.Task.Description(childComplexity), true
+
 	case "Task.dueDate":
 		if e.complexity.Task.DueDate == nil {
 			break
@@ -674,8 +681,6 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 scalar Time
 
-directive @relationship(inverse: String!) on FIELD_DEFINITION
-
 schema {
   query: Query
   mutation: Mutation
@@ -737,6 +742,7 @@ type Task {
   completed: Boolean
   dueDate: Time
   type: TaskType
+  description: String
   assignee: User
   assigneeId: ID
   updatedAt: Time
@@ -949,6 +955,7 @@ input TaskCreateInput {
   completed: Boolean
   dueDate: Time
   type: TaskType
+  description: String
   assigneeId: ID
 }
 
@@ -957,6 +964,7 @@ input TaskUpdateInput {
   completed: Boolean
   dueDate: Time
   type: TaskType
+  description: String
   assigneeId: ID
 }
 
@@ -971,6 +979,8 @@ enum TaskSortType {
   DUE_DATE_DESC
   TYPE_ASC
   TYPE_DESC
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
   ASSIGNEE_ID_ASC
   ASSIGNEE_ID_DESC
   UPDATED_AT_ASC
@@ -1024,6 +1034,16 @@ input TaskFilterType {
   type_gte: TaskType
   type_lte: TaskType
   type_in: [TaskType!]
+  description: String
+  description_ne: String
+  description_gt: String
+  description_lt: String
+  description_gte: String
+  description_lte: String
+  description_in: [String!]
+  description_like: String
+  description_prefix: String
+  description_suffix: String
   assigneeId: ID
   assigneeId_ne: ID
   assigneeId_gt: ID
@@ -1072,20 +1092,6 @@ type TaskResultType {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) dir_relationship_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["inverse"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["inverse"] = arg0
-	return args, nil
-}
 
 func (ec *executionContext) field_Mutation_createCompany_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -2700,6 +2706,40 @@ func (ec *executionContext) _Task_type(ctx context.Context, field graphql.Collec
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Task_description(ctx context.Context, field graphql.CollectedField, obj *Task) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Task",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Task_assignee(ctx context.Context, field graphql.CollectedField, obj *Task) (ret graphql.Marshaler) {
@@ -5143,6 +5183,66 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "description":
+			var err error
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description_ne":
+			var err error
+			it.DescriptionNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description_gt":
+			var err error
+			it.DescriptionGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description_lt":
+			var err error
+			it.DescriptionLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description_gte":
+			var err error
+			it.DescriptionGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description_lte":
+			var err error
+			it.DescriptionLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description_in":
+			var err error
+			it.DescriptionIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description_like":
+			var err error
+			it.DescriptionLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description_prefix":
+			var err error
+			it.DescriptionPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description_suffix":
+			var err error
+			it.DescriptionSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "assigneeId":
 			var err error
 			it.AssigneeID, err = ec.unmarshalOID2ᚖstring(ctx, v)
@@ -6100,6 +6200,8 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._Task_dueDate(ctx, field, obj)
 		case "type":
 			out.Values[i] = ec._Task_type(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._Task_description(ctx, field, obj)
 		case "assignee":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {

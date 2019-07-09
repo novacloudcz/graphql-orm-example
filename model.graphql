@@ -23,6 +23,8 @@ type Task {
   completed: Boolean
   dueDate: Time
   type: TaskType
+  # type: text is forwarded to gorm tags, which is then used for db engine column type
+  description: String @column(type: "text")
 
   assignee: User @relationship(inverse: "tasks")
 }

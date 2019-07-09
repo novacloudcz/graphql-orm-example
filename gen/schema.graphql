@@ -2,8 +2,6 @@
 
 scalar Time
 
-directive @relationship(inverse: String!) on FIELD_DEFINITION
-
 schema {
   query: Query
   mutation: Mutation
@@ -65,6 +63,7 @@ type Task {
   completed: Boolean
   dueDate: Time
   type: TaskType
+  description: String
   assignee: User
   assigneeId: ID
   updatedAt: Time
@@ -277,6 +276,7 @@ input TaskCreateInput {
   completed: Boolean
   dueDate: Time
   type: TaskType
+  description: String
   assigneeId: ID
 }
 
@@ -285,6 +285,7 @@ input TaskUpdateInput {
   completed: Boolean
   dueDate: Time
   type: TaskType
+  description: String
   assigneeId: ID
 }
 
@@ -299,6 +300,8 @@ enum TaskSortType {
   DUE_DATE_DESC
   TYPE_ASC
   TYPE_DESC
+  DESCRIPTION_ASC
+  DESCRIPTION_DESC
   ASSIGNEE_ID_ASC
   ASSIGNEE_ID_DESC
   UPDATED_AT_ASC
@@ -352,6 +355,16 @@ input TaskFilterType {
   type_gte: TaskType
   type_lte: TaskType
   type_in: [TaskType!]
+  description: String
+  description_ne: String
+  description_gt: String
+  description_lt: String
+  description_gte: String
+  description_lte: String
+  description_in: [String!]
+  description_like: String
+  description_prefix: String
+  description_suffix: String
   assigneeId: ID
   assigneeId_ne: ID
   assigneeId_gt: ID

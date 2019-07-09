@@ -399,6 +399,11 @@ func (r *GeneratedMutationResolver) CreateTask(ctx context.Context, input map[st
 		event.AddNewValue("type", changes.Type)
 	}
 
+	if _, ok := input["description"]; ok && (item.Description != changes.Description) && (item.Description == nil || changes.Description == nil || *item.Description != *changes.Description) {
+		item.Description = changes.Description
+		event.AddNewValue("description", changes.Description)
+	}
+
 	if _, ok := input["assigneeId"]; ok && (item.AssigneeID != changes.AssigneeID) && (item.AssigneeID == nil || changes.AssigneeID == nil || *item.AssigneeID != *changes.AssigneeID) {
 		item.AssigneeID = changes.AssigneeID
 		event.AddNewValue("assigneeId", changes.AssigneeID)
@@ -470,6 +475,12 @@ func (r *GeneratedMutationResolver) UpdateTask(ctx context.Context, id string, i
 		event.AddOldValue("type", item.Type)
 		event.AddNewValue("type", changes.Type)
 		item.Type = changes.Type
+	}
+
+	if _, ok := input["description"]; ok && (item.Description != changes.Description) && (item.Description == nil || changes.Description == nil || *item.Description != *changes.Description) {
+		event.AddOldValue("description", item.Description)
+		event.AddNewValue("description", changes.Description)
+		item.Description = changes.Description
 	}
 
 	if _, ok := input["assigneeId"]; ok && (item.AssigneeID != changes.AssigneeID) && (item.AssigneeID == nil || changes.AssigneeID == nil || *item.AssigneeID != *changes.AssigneeID) {

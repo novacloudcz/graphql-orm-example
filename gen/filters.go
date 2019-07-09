@@ -797,6 +797,47 @@ func (f *TaskFilterType) WhereContent(aliasPrefix string) (conditions []string, 
 		values = append(values, f.TypeIn)
 	}
 
+	if f.Description != nil {
+		conditions = append(conditions, aliasPrefix+"description = ?")
+		values = append(values, f.Description)
+	}
+	if f.DescriptionNe != nil {
+		conditions = append(conditions, aliasPrefix+"description != ?")
+		values = append(values, f.DescriptionNe)
+	}
+	if f.DescriptionGt != nil {
+		conditions = append(conditions, aliasPrefix+"description > ?")
+		values = append(values, f.DescriptionGt)
+	}
+	if f.DescriptionLt != nil {
+		conditions = append(conditions, aliasPrefix+"description < ?")
+		values = append(values, f.DescriptionLt)
+	}
+	if f.DescriptionGte != nil {
+		conditions = append(conditions, aliasPrefix+"description >= ?")
+		values = append(values, f.DescriptionGte)
+	}
+	if f.DescriptionLte != nil {
+		conditions = append(conditions, aliasPrefix+"description <= ?")
+		values = append(values, f.DescriptionLte)
+	}
+	if f.DescriptionIn != nil {
+		conditions = append(conditions, aliasPrefix+"description IN (?)")
+		values = append(values, f.DescriptionIn)
+	}
+	if f.DescriptionLike != nil {
+		conditions = append(conditions, aliasPrefix+"description LIKE ?")
+		values = append(values, strings.Replace(strings.Replace(*f.DescriptionLike, "?", "_", -1), "*", "%", -1))
+	}
+	if f.DescriptionPrefix != nil {
+		conditions = append(conditions, aliasPrefix+"description LIKE ?")
+		values = append(values, fmt.Sprintf("%s%%", *f.DescriptionPrefix))
+	}
+	if f.DescriptionSuffix != nil {
+		conditions = append(conditions, aliasPrefix+"description LIKE ?")
+		values = append(values, fmt.Sprintf("%%%s", *f.DescriptionSuffix))
+	}
+
 	if f.AssigneeID != nil {
 		conditions = append(conditions, aliasPrefix+"assigneeId = ?")
 		values = append(values, f.AssigneeID)

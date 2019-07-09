@@ -213,6 +213,11 @@ func (qf *TaskQueryFilter) applyQueryWithFields(fields []*ast.Field, query, alia
 		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
 	}
 
+	if _, ok := fieldsMap["description"]; ok {
+		*ors = append(*ors, fmt.Sprintf("%[1]sdescription LIKE ? OR %[1]sdescription LIKE ?", alias+"."))
+		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
+	}
+
 	if f, ok := fieldsMap["employees"]; ok {
 		_fields := []*ast.Field{}
 		_alias := alias + "_assignee"
