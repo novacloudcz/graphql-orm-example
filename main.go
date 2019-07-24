@@ -1,16 +1,16 @@
 package main
 
 import (
-
 	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
-	"github.com/novacloudcz/graphql-orm/events"
 	"github.com/novacloudcz/graphql-orm-example/gen"
+	"github.com/novacloudcz/graphql-orm/events"
 )
 
 const (
@@ -32,13 +32,17 @@ func main() {
 	defer db.Close()
 	db.AutoMigrate()
 
-
 	eventController, err := events.NewEventController()
 	if err != nil {
 		panic(err)
 	}
+	c := gen.Config{Resolvers: NewResolver(db, &eventController)}
+	c.Directives.Validator = func(ctx context.Context, obj interface{}, next graphql.Resolver, required bool) (interface{}, error) {
 
-	gqlHandler := handler.GraphQL(gen.NewExecutableSchema(gen.Config{Resolvers: NewResolver(db, &eventController)}))
+		// or let it pass through
+		return next(ctx)
+	}
+	gqlHandler := handler.GraphQL(gen.NewExecutableSchema(c))
 
 	playgroundHandler := handler.Playground("GraphQL playground", "/graphql")
 	http.HandleFunc("/graphql", func(res http.ResponseWriter, req *http.Request) {
@@ -73,4 +77,3 @@ func getPrincipalID(req *http.Request) *string {
 	}
 	return &pID
 }
-

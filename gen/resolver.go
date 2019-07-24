@@ -2,7 +2,6 @@ package gen
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -161,8 +160,8 @@ func (r *GeneratedMutationResolver) UpdateCompany(ctx context.Context, id string
 
 	if len(event.Changes) > 0 {
 		err = r.EventController.SendEvent(ctx, &event)
-		data, _ := json.Marshal(event)
-		fmt.Println("??", string(data))
+		// data, _ := json.Marshal(event)
+		// fmt.Println("?",string(data))
 	}
 
 	return
@@ -174,7 +173,7 @@ func (r *GeneratedMutationResolver) DeleteCompany(ctx context.Context, id string
 		return
 	}
 
-	err = r.DB.Query().Delete(item, "id = ?", id).Error
+	err = r.DB.Query().Delete(item, "companies.id = ?", id).Error
 
 	return
 }
@@ -336,8 +335,8 @@ func (r *GeneratedMutationResolver) UpdateUser(ctx context.Context, id string, i
 
 	if len(event.Changes) > 0 {
 		err = r.EventController.SendEvent(ctx, &event)
-		data, _ := json.Marshal(event)
-		fmt.Println("??", string(data))
+		// data, _ := json.Marshal(event)
+		// fmt.Println("?",string(data))
 	}
 
 	return
@@ -349,7 +348,7 @@ func (r *GeneratedMutationResolver) DeleteUser(ctx context.Context, id string) (
 		return
 	}
 
-	err = r.DB.Query().Delete(item, "id = ?", id).Error
+	err = r.DB.Query().Delete(item, "users.id = ?", id).Error
 
 	return
 }
@@ -502,8 +501,8 @@ func (r *GeneratedMutationResolver) UpdateTask(ctx context.Context, id string, i
 
 	if len(event.Changes) > 0 {
 		err = r.EventController.SendEvent(ctx, &event)
-		data, _ := json.Marshal(event)
-		fmt.Println("??", string(data))
+		// data, _ := json.Marshal(event)
+		// fmt.Println("?",string(data))
 	}
 
 	return
@@ -515,17 +514,39 @@ func (r *GeneratedMutationResolver) DeleteTask(ctx context.Context, id string) (
 		return
 	}
 
-	err = r.DB.Query().Delete(item, "id = ?", id).Error
+	err = r.DB.Query().Delete(item, "tasks.id = ?", id).Error
 
 	return
 }
 
 type GeneratedQueryResolver struct{ *GeneratedResolver }
 
-func (r *GeneratedQueryResolver) Company(ctx context.Context, id *string, q *string) (*Company, error) {
-	t := Company{}
-	err := resolvers.GetItem(ctx, r.DB.Query(), &t, id)
-	return &t, err
+func (r *GeneratedQueryResolver) Company(ctx context.Context, id *string, q *string, filter *CompanyFilterType) (*Company, error) {
+	query := CompanyQueryFilter{q}
+	offset := 0
+	limit := 1
+	rt := &CompanyResultType{
+		EntityResultType: resolvers.EntityResultType{
+			Offset: &offset,
+			Limit:  &limit,
+			Query:  &query,
+			Filter: filter,
+		},
+	}
+	qb := r.DB.Query()
+	if id != nil {
+		qb = qb.Where("companies.id = ?", *id)
+	}
+
+	var items []*Company
+	err := rt.GetItems(ctx, qb, "companies", &items)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return nil, fmt.Errorf("record not found")
+	}
+	return items[0], err
 }
 func (r *GeneratedQueryResolver) Companies(ctx context.Context, offset *int, limit *int, q *string, sort []CompanySortType, filter *CompanyFilterType) (*CompanyResultType, error) {
 	_sort := []resolvers.EntitySort{}
@@ -566,10 +587,32 @@ func (r *GeneratedCompanyResolver) Employees(ctx context.Context, obj *Company) 
 	return
 }
 
-func (r *GeneratedQueryResolver) User(ctx context.Context, id *string, q *string) (*User, error) {
-	t := User{}
-	err := resolvers.GetItem(ctx, r.DB.Query(), &t, id)
-	return &t, err
+func (r *GeneratedQueryResolver) User(ctx context.Context, id *string, q *string, filter *UserFilterType) (*User, error) {
+	query := UserQueryFilter{q}
+	offset := 0
+	limit := 1
+	rt := &UserResultType{
+		EntityResultType: resolvers.EntityResultType{
+			Offset: &offset,
+			Limit:  &limit,
+			Query:  &query,
+			Filter: filter,
+		},
+	}
+	qb := r.DB.Query()
+	if id != nil {
+		qb = qb.Where("users.id = ?", *id)
+	}
+
+	var items []*User
+	err := rt.GetItems(ctx, qb, "users", &items)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return nil, fmt.Errorf("record not found")
+	}
+	return items[0], err
 }
 func (r *GeneratedQueryResolver) Users(ctx context.Context, offset *int, limit *int, q *string, sort []UserSortType, filter *UserFilterType) (*UserResultType, error) {
 	_sort := []resolvers.EntitySort{}
@@ -628,10 +671,32 @@ func (r *GeneratedUserResolver) Friends(ctx context.Context, obj *User) (res []*
 	return
 }
 
-func (r *GeneratedQueryResolver) Task(ctx context.Context, id *string, q *string) (*Task, error) {
-	t := Task{}
-	err := resolvers.GetItem(ctx, r.DB.Query(), &t, id)
-	return &t, err
+func (r *GeneratedQueryResolver) Task(ctx context.Context, id *string, q *string, filter *TaskFilterType) (*Task, error) {
+	query := TaskQueryFilter{q}
+	offset := 0
+	limit := 1
+	rt := &TaskResultType{
+		EntityResultType: resolvers.EntityResultType{
+			Offset: &offset,
+			Limit:  &limit,
+			Query:  &query,
+			Filter: filter,
+		},
+	}
+	qb := r.DB.Query()
+	if id != nil {
+		qb = qb.Where("tasks.id = ?", *id)
+	}
+
+	var items []*Task
+	err := rt.GetItems(ctx, qb, "tasks", &items)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return nil, fmt.Errorf("record not found")
+	}
+	return items[0], err
 }
 func (r *GeneratedQueryResolver) Tasks(ctx context.Context, offset *int, limit *int, q *string, sort []TaskSortType, filter *TaskFilterType) (*TaskResultType, error) {
 	_sort := []resolvers.EntitySort{}

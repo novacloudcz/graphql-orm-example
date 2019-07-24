@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -46,6 +47,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Validator func(ctx context.Context, obj interface{}, next graphql.Resolver, required bool) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -78,10 +80,10 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Companies func(childComplexity int, offset *int, limit *int, q *string, sort []CompanySortType, filter *CompanyFilterType) int
-		Company   func(childComplexity int, id *string, q *string) int
-		Task      func(childComplexity int, id *string, q *string) int
+		Company   func(childComplexity int, id *string, q *string, filter *CompanyFilterType) int
+		Task      func(childComplexity int, id *string, q *string, filter *TaskFilterType) int
 		Tasks     func(childComplexity int, offset *int, limit *int, q *string, sort []TaskSortType, filter *TaskFilterType) int
-		User      func(childComplexity int, id *string, q *string) int
+		User      func(childComplexity int, id *string, q *string, filter *UserFilterType) int
 		Users     func(childComplexity int, offset *int, limit *int, q *string, sort []UserSortType, filter *UserFilterType) int
 	}
 
@@ -144,11 +146,11 @@ type MutationResolver interface {
 	DeleteTask(ctx context.Context, id string) (*Task, error)
 }
 type QueryResolver interface {
-	Company(ctx context.Context, id *string, q *string) (*Company, error)
+	Company(ctx context.Context, id *string, q *string, filter *CompanyFilterType) (*Company, error)
 	Companies(ctx context.Context, offset *int, limit *int, q *string, sort []CompanySortType, filter *CompanyFilterType) (*CompanyResultType, error)
-	User(ctx context.Context, id *string, q *string) (*User, error)
+	User(ctx context.Context, id *string, q *string, filter *UserFilterType) (*User, error)
 	Users(ctx context.Context, offset *int, limit *int, q *string, sort []UserSortType, filter *UserFilterType) (*UserResultType, error)
-	Task(ctx context.Context, id *string, q *string) (*Task, error)
+	Task(ctx context.Context, id *string, q *string, filter *TaskFilterType) (*Task, error)
 	Tasks(ctx context.Context, offset *int, limit *int, q *string, sort []TaskSortType, filter *TaskFilterType) (*TaskResultType, error)
 }
 type TaskResolver interface {
@@ -376,7 +378,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Company(childComplexity, args["id"].(*string), args["q"].(*string)), true
+		return e.complexity.Query.Company(childComplexity, args["id"].(*string), args["q"].(*string), args["filter"].(*CompanyFilterType)), true
 
 	case "Query.task":
 		if e.complexity.Query.Task == nil {
@@ -388,7 +390,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Task(childComplexity, args["id"].(*string), args["q"].(*string)), true
+		return e.complexity.Query.Task(childComplexity, args["id"].(*string), args["q"].(*string), args["filter"].(*TaskFilterType)), true
 
 	case "Query.tasks":
 		if e.complexity.Query.Tasks == nil {
@@ -412,7 +414,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["id"].(*string), args["q"].(*string)), true
+		return e.complexity.Query.User(childComplexity, args["id"].(*string), args["q"].(*string), args["filter"].(*UserFilterType)), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -687,11 +689,11 @@ schema {
 }
 
 type Query {
-  company(id: ID, q: String): Company
+  company(id: ID, q: String, filter: CompanyFilterType): Company
   companies(offset: Int, limit: Int = 30, q: String, sort: [CompanySortType!], filter: CompanyFilterType): CompanyResultType
-  user(id: ID, q: String): User
+  user(id: ID, q: String, filter: UserFilterType): User
   users(offset: Int, limit: Int = 30, q: String, sort: [UserSortType!], filter: UserFilterType): UserResultType
-  task(id: ID, q: String): Task
+  task(id: ID, q: String, filter: TaskFilterType): Task
   tasks(offset: Int, limit: Int = 30, q: String, sort: [TaskSortType!], filter: TaskFilterType): TaskResultType
 }
 
@@ -707,9 +709,11 @@ type Mutation {
   deleteTask(id: ID!): Task!
 }
 
+directive @validator(required: Boolean!) on FIELD_DEFINITION
+
 type Company {
   id: ID!
-  name: String
+  name: String @validator(required: true)
   employees: [User!]!
   updatedAt: Time
   createdAt: Time!
@@ -1093,6 +1097,20 @@ type TaskResultType {
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) dir_validator_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["required"]; ok {
+		arg0, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["required"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createCompany_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1322,6 +1340,14 @@ func (ec *executionContext) field_Query_company_args(ctx context.Context, rawArg
 		}
 	}
 	args["q"] = arg1
+	var arg2 *CompanyFilterType
+	if tmp, ok := rawArgs["filter"]; ok {
+		arg2, err = ec.unmarshalOCompanyFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyFilterType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg2
 	return args, nil
 }
 
@@ -1344,6 +1370,14 @@ func (ec *executionContext) field_Query_task_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["q"] = arg1
+	var arg2 *TaskFilterType
+	if tmp, ok := rawArgs["filter"]; ok {
+		arg2, err = ec.unmarshalOTaskFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskFilterType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg2
 	return args, nil
 }
 
@@ -1412,6 +1446,14 @@ func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["q"] = arg1
+	var arg2 *UserFilterType
+	if tmp, ok := rawArgs["filter"]; ok {
+		arg2, err = ec.unmarshalOUserFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg2
 	return args, nil
 }
 
@@ -1552,8 +1594,27 @@ func (ec *executionContext) _Company_name(ctx context.Context, field graphql.Col
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.Name, nil
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			required, err := ec.unmarshalNBoolean2bool(ctx, true)
+			if err != nil {
+				return nil, err
+			}
+			return ec.directives.Validator(ctx, obj, directive0, required)
+		}
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, err
+		}
+		if data, ok := tmp.(*string); ok {
+			return data, nil
+		} else if tmp == nil {
+			return nil, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2240,7 +2301,7 @@ func (ec *executionContext) _Query_company(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Company(rctx, args["id"].(*string), args["q"].(*string))
+		return ec.resolvers.Query().Company(rctx, args["id"].(*string), args["q"].(*string), args["filter"].(*CompanyFilterType))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2322,7 +2383,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().User(rctx, args["id"].(*string), args["q"].(*string))
+		return ec.resolvers.Query().User(rctx, args["id"].(*string), args["q"].(*string), args["filter"].(*UserFilterType))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2404,7 +2465,7 @@ func (ec *executionContext) _Query_task(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Task(rctx, args["id"].(*string), args["q"].(*string))
+		return ec.resolvers.Query().Task(rctx, args["id"].(*string), args["q"].(*string), args["filter"].(*TaskFilterType))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

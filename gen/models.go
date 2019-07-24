@@ -32,6 +32,8 @@ type CompanyChanges struct {
 	CreatedAt time.Time
 	UpdatedBy *string
 	CreatedBy *string
+
+	EmployeesIDs []*string
 }
 
 type UserResultType struct {
@@ -64,6 +66,10 @@ type UserChanges struct {
 	CreatedAt time.Time
 	UpdatedBy *string
 	CreatedBy *string
+
+	TasksIDs     []*string
+	CompaniesIDs []*string
+	FriendsIDs   []*string
 }
 
 type TaskResultType struct {

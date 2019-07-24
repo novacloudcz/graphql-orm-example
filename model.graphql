@@ -1,5 +1,8 @@
+# custom directive example
+directive @validator(required: Boolean!) on FIELD_DEFINITION
+
 type Company {
-  name: String
+  name: String @validator(required: true)
 
   employees: [User!]! @relationship(inverse: "companies")
 }
