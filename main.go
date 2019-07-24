@@ -6,11 +6,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
-	"github.com/novacloudcz/graphql-orm-example/gen"
 	"github.com/novacloudcz/graphql-orm/events"
+	jwtgo "github.com/dgrijalva/jwt-go"
+	// "github.com/rs/cors"
+	"github.com/novacloudcz/graphql-orm-example/gen"
 )
 
 const (
@@ -18,6 +20,8 @@ const (
 )
 
 func main() {
+	mux := http.NewServeMux()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -36,16 +40,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	c := gen.Config{Resolvers: NewResolver(db, &eventController)}
-	c.Directives.Validator = func(ctx context.Context, obj interface{}, next graphql.Resolver, required bool) (interface{}, error) {
 
-		// or let it pass through
-		return next(ctx)
-	}
-	gqlHandler := handler.GraphQL(gen.NewExecutableSchema(c))
+	gqlHandler := handler.GraphQL(gen.NewExecutableSchema(gen.Config{Resolvers: NewResolver(db, &eventController)}))
 
 	playgroundHandler := handler.Playground("GraphQL playground", "/graphql")
-	http.HandleFunc("/graphql", func(res http.ResponseWriter, req *http.Request) {
+	mux.HandleFunc("/graphql", func(res http.ResponseWriter, req *http.Request) {
 		principalID := getPrincipalID(req)
 		ctx := context.WithValue(req.Context(), gen.KeyPrincipalID, principalID)
 		req = req.WithContext(ctx)
@@ -56,7 +55,7 @@ func main() {
 		}
 	})
 
-	http.HandleFunc("/healthcheck", func(res http.ResponseWriter, req *http.Request) {
+	mux.HandleFunc("/healthcheck", func(res http.ResponseWriter, req *http.Request) {
 		if err := db.Ping(); err != nil {
 			res.WriteHeader(400)
 			res.Write([]byte("ERROR"))
@@ -66,14 +65,49 @@ func main() {
 		res.Write([]byte("OK"))
 	})
 
+	handler := mux
+	// use this line to allow cors for all origins/methods/headers (for development)
+	// handler := cors.AllowAll().Handler(mux)
+	
 	log.Printf("connect to http://localhost:%s/graphql for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, handler))
+}
+
+func getPrincipalIDFromContext(ctx context.Context) *string {
+	v, _ := ctx.Value(gen.KeyPrincipalID).(*string)
+	return v
+}
+func getJWTClaimsFromContext(ctx context.Context) *JWTClaims {
+	v, _ := ctx.Value(gen.KeyJWTClaims).(*JWTClaims)
+	return v
 }
 
 func getPrincipalID(req *http.Request) *string {
 	pID := req.Header.Get("principal-id")
-	if pID == "" {
+	if pID != "" {
+		return &pID
+	}
+	c, _ := getJWTClaims(req)
+	if c == nil {
 		return nil
 	}
-	return &pID
+	return &c.Subject
+}
+
+type JWTClaims struct {
+	jwtgo.StandardClaims
+	Scope *string
+}
+
+func getJWTClaims(req *http.Request) (*JWTClaims, error) {
+	var p *JWTClaims
+
+	tokenStr := strings.Replace(req.Header.Get("authorization"), "Bearer ", "", 1)
+	if tokenStr == "" {
+		return p, nil
+	}
+
+	p = &JWTClaims{}
+	jwtgo.ParseWithClaims(tokenStr, p, nil)
+	return p, nil
 }
