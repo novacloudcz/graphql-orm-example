@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/novacloudcz/graphql-orm/events"
 	"github.com/novacloudcz/graphql-orm/resolvers"
 	uuid "github.com/satori/go.uuid"
+	"github.com/vektah/gqlparser/ast"
 )
 
 func getPrincipalID(ctx context.Context) *string {
@@ -554,13 +556,22 @@ func (r *GeneratedQueryResolver) Companies(ctx context.Context, offset *int, lim
 		_sort = append(_sort, s)
 	}
 	query := CompanyQueryFilter{q}
+
+	var selectionSet *ast.SelectionSet
+	for _, f := range graphql.CollectFieldsCtx(ctx, nil) {
+		if f.Field.Name == "items" {
+			selectionSet = &f.Field.SelectionSet
+		}
+	}
+
 	return &CompanyResultType{
 		EntityResultType: resolvers.EntityResultType{
-			Offset: offset,
-			Limit:  limit,
-			Query:  &query,
-			Sort:   _sort,
-			Filter: filter,
+			Offset:       offset,
+			Limit:        limit,
+			Query:        &query,
+			Sort:         _sort,
+			Filter:       filter,
+			SelectionSet: selectionSet,
 		},
 	}, nil
 }
@@ -620,13 +631,22 @@ func (r *GeneratedQueryResolver) Users(ctx context.Context, offset *int, limit *
 		_sort = append(_sort, s)
 	}
 	query := UserQueryFilter{q}
+
+	var selectionSet *ast.SelectionSet
+	for _, f := range graphql.CollectFieldsCtx(ctx, nil) {
+		if f.Field.Name == "items" {
+			selectionSet = &f.Field.SelectionSet
+		}
+	}
+
 	return &UserResultType{
 		EntityResultType: resolvers.EntityResultType{
-			Offset: offset,
-			Limit:  limit,
-			Query:  &query,
-			Sort:   _sort,
-			Filter: filter,
+			Offset:       offset,
+			Limit:        limit,
+			Query:        &query,
+			Sort:         _sort,
+			Filter:       filter,
+			SelectionSet: selectionSet,
 		},
 	}, nil
 }
@@ -704,13 +724,22 @@ func (r *GeneratedQueryResolver) Tasks(ctx context.Context, offset *int, limit *
 		_sort = append(_sort, s)
 	}
 	query := TaskQueryFilter{q}
+
+	var selectionSet *ast.SelectionSet
+	for _, f := range graphql.CollectFieldsCtx(ctx, nil) {
+		if f.Field.Name == "items" {
+			selectionSet = &f.Field.SelectionSet
+		}
+	}
+
 	return &TaskResultType{
 		EntityResultType: resolvers.EntityResultType{
-			Offset: offset,
-			Limit:  limit,
-			Query:  &query,
-			Sort:   _sort,
-			Filter: filter,
+			Offset:       offset,
+			Limit:        limit,
+			Query:        &query,
+			Sort:         _sort,
+			Filter:       filter,
+			SelectionSet: selectionSet,
 		},
 	}, nil
 }
