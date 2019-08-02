@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/handler"
-	"github.com/novacloudcz/graphql-orm/events"
 	jwtgo "github.com/dgrijalva/jwt-go"
-	// "github.com/rs/cors"
 	"github.com/novacloudcz/graphql-orm-example/gen"
+	"github.com/novacloudcz/graphql-orm/events"
+	"github.com/rs/cors"
 )
 
 const (
@@ -65,10 +65,10 @@ func main() {
 		res.Write([]byte("OK"))
 	})
 
-	handler := mux
+	// handler := mux
 	// use this line to allow cors for all origins/methods/headers (for development)
-	// handler := cors.AllowAll().Handler(mux)
-	
+	handler := cors.AllowAll().Handler(mux)
+
 	log.Printf("connect to http://localhost:%s/graphql for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
