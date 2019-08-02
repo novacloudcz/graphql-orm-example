@@ -22,7 +22,7 @@ type Company struct {
 	UpdatedBy *string    `json:"updatedBy" gorm:"column:updatedBy"`
 	CreatedBy *string    `json:"createdBy" gorm:"column:createdBy"`
 
-	Employees []*User `json:"employees" gorm:"many2many:company_employees;jointable_foreignkey:employee_id;association_jointable_foreignkey:company_id"`
+	Employees []*User `json:"employees" gorm:"many2many:company_employees;jointable_foreignkey:company_id;association_jointable_foreignkey:employee_id"`
 }
 
 type CompanyChanges struct {

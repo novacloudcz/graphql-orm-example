@@ -52,13 +52,14 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Company struct {
-		CreatedAt func(childComplexity int) int
-		CreatedBy func(childComplexity int) int
-		Employees func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Name      func(childComplexity int) int
-		UpdatedAt func(childComplexity int) int
-		UpdatedBy func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		CreatedBy    func(childComplexity int) int
+		Employees    func(childComplexity int) int
+		EmployeesIds func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Name         func(childComplexity int) int
+		UpdatedAt    func(childComplexity int) int
+		UpdatedBy    func(childComplexity int) int
 	}
 
 	CompanyResultType struct {
@@ -108,17 +109,20 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Companies func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		CreatedBy func(childComplexity int) int
-		Email     func(childComplexity int) int
-		FirstName func(childComplexity int) int
-		Friends   func(childComplexity int) int
-		ID        func(childComplexity int) int
-		LastName  func(childComplexity int) int
-		Tasks     func(childComplexity int) int
-		UpdatedAt func(childComplexity int) int
-		UpdatedBy func(childComplexity int) int
+		Companies    func(childComplexity int) int
+		CompaniesIds func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		CreatedBy    func(childComplexity int) int
+		Email        func(childComplexity int) int
+		FirstName    func(childComplexity int) int
+		Friends      func(childComplexity int) int
+		FriendsIds   func(childComplexity int) int
+		ID           func(childComplexity int) int
+		LastName     func(childComplexity int) int
+		Tasks        func(childComplexity int) int
+		TasksIds     func(childComplexity int) int
+		UpdatedAt    func(childComplexity int) int
+		UpdatedBy    func(childComplexity int) int
 	}
 
 	UserResultType struct {
@@ -129,6 +133,8 @@ type ComplexityRoot struct {
 
 type CompanyResolver interface {
 	Employees(ctx context.Context, obj *Company) ([]*User, error)
+
+	EmployeesIds(ctx context.Context, obj *Company) ([]string, error)
 }
 type CompanyResultTypeResolver interface {
 	Items(ctx context.Context, obj *CompanyResultType) ([]*Company, error)
@@ -164,6 +170,10 @@ type UserResolver interface {
 	Tasks(ctx context.Context, obj *User) ([]*Task, error)
 	Companies(ctx context.Context, obj *User) ([]*Company, error)
 	Friends(ctx context.Context, obj *User) ([]*User, error)
+
+	TasksIds(ctx context.Context, obj *User) ([]string, error)
+	CompaniesIds(ctx context.Context, obj *User) ([]string, error)
+	FriendsIds(ctx context.Context, obj *User) ([]string, error)
 }
 type UserResultTypeResolver interface {
 	Items(ctx context.Context, obj *UserResultType) ([]*User, error)
@@ -205,6 +215,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Company.Employees(childComplexity), true
+
+	case "Company.employeesIds":
+		if e.complexity.Company.EmployeesIds == nil {
+			break
+		}
+
+		return e.complexity.Company.EmployeesIds(childComplexity), true
 
 	case "Company.id":
 		if e.complexity.Company.ID == nil {
@@ -533,6 +550,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Companies(childComplexity), true
 
+	case "User.companiesIds":
+		if e.complexity.User.CompaniesIds == nil {
+			break
+		}
+
+		return e.complexity.User.CompaniesIds(childComplexity), true
+
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
 			break
@@ -568,6 +592,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Friends(childComplexity), true
 
+	case "User.friendsIds":
+		if e.complexity.User.FriendsIds == nil {
+			break
+		}
+
+		return e.complexity.User.FriendsIds(childComplexity), true
+
 	case "User.id":
 		if e.complexity.User.ID == nil {
 			break
@@ -588,6 +619,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Tasks(childComplexity), true
+
+	case "User.tasksIds":
+		if e.complexity.User.TasksIds == nil {
+			break
+		}
+
+		return e.complexity.User.TasksIds(childComplexity), true
 
 	case "User.updatedAt":
 		if e.complexity.User.UpdatedAt == nil {
@@ -719,6 +757,7 @@ type Company {
   createdAt: Time!
   updatedBy: ID
   createdBy: ID
+  employeesIds: [ID!]!
 }
 
 type User {
@@ -733,6 +772,9 @@ type User {
   createdAt: Time!
   updatedBy: ID
   createdBy: ID
+  tasksIds: [ID!]!
+  companiesIds: [ID!]!
+  friendsIds: [ID!]!
 }
 
 enum TaskType {
@@ -779,6 +821,8 @@ enum CompanySortType {
   UPDATED_BY_DESC
   CREATED_BY_ASC
   CREATED_BY_DESC
+  EMPLOYEES_IDS_ASC
+  EMPLOYEES_IDS_DESC
 }
 
 input CompanyFilterType {
@@ -829,6 +873,13 @@ input CompanyFilterType {
   createdBy_gte: ID
   createdBy_lte: ID
   createdBy_in: [ID!]
+  employeesIds: ID
+  employeesIds_ne: ID
+  employeesIds_gt: ID
+  employeesIds_lt: ID
+  employeesIds_gte: ID
+  employeesIds_lte: ID
+  employeesIds_in: [ID!]
   employees: UserFilterType
 }
 
@@ -873,6 +924,12 @@ enum UserSortType {
   UPDATED_BY_DESC
   CREATED_BY_ASC
   CREATED_BY_DESC
+  TASKS_IDS_ASC
+  TASKS_IDS_DESC
+  COMPANIES_IDS_ASC
+  COMPANIES_IDS_DESC
+  FRIENDS_IDS_ASC
+  FRIENDS_IDS_DESC
 }
 
 input UserFilterType {
@@ -943,6 +1000,27 @@ input UserFilterType {
   createdBy_gte: ID
   createdBy_lte: ID
   createdBy_in: [ID!]
+  tasksIds: ID
+  tasksIds_ne: ID
+  tasksIds_gt: ID
+  tasksIds_lt: ID
+  tasksIds_gte: ID
+  tasksIds_lte: ID
+  tasksIds_in: [ID!]
+  companiesIds: ID
+  companiesIds_ne: ID
+  companiesIds_gt: ID
+  companiesIds_lt: ID
+  companiesIds_gte: ID
+  companiesIds_lte: ID
+  companiesIds_in: [ID!]
+  friendsIds: ID
+  friendsIds_ne: ID
+  friendsIds_gt: ID
+  friendsIds_lt: ID
+  friendsIds_gte: ID
+  friendsIds_lte: ID
+  friendsIds_in: [ID!]
   tasks: TaskFilterType
   companies: CompanyFilterType
   friends: UserFilterType
@@ -1803,6 +1881,43 @@ func (ec *executionContext) _Company_createdBy(ctx context.Context, field graphq
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Company_employeesIds(ctx context.Context, field graphql.CollectedField, obj *Company) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Company",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Company().EmployeesIds(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2ᚕstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CompanyResultType_items(ctx context.Context, field graphql.CollectedField, obj *CompanyResultType) (ret graphql.Marshaler) {
@@ -3473,6 +3588,117 @@ func (ec *executionContext) _User_createdBy(ctx context.Context, field graphql.C
 	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _User_tasksIds(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().TasksIds(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2ᚕstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_companiesIds(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().CompaniesIds(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2ᚕstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_friendsIds(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().FriendsIds(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2ᚕstring(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _UserResultType_items(ctx context.Context, field graphql.CollectedField, obj *UserResultType) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -4986,6 +5212,48 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "employeesIds":
+			var err error
+			it.EmployeesIds, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employeesIds_ne":
+			var err error
+			it.EmployeesIdsNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employeesIds_gt":
+			var err error
+			it.EmployeesIdsGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employeesIds_lt":
+			var err error
+			it.EmployeesIdsLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employeesIds_gte":
+			var err error
+			it.EmployeesIdsGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employeesIds_lte":
+			var err error
+			it.EmployeesIdsLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employeesIds_in":
+			var err error
+			it.EmployeesIdsIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "employees":
 			var err error
 			it.Employees, err = ec.unmarshalOUserFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterType(ctx, v)
@@ -5934,6 +6202,132 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "tasksIds":
+			var err error
+			it.TasksIds, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tasksIds_ne":
+			var err error
+			it.TasksIdsNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tasksIds_gt":
+			var err error
+			it.TasksIdsGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tasksIds_lt":
+			var err error
+			it.TasksIdsLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tasksIds_gte":
+			var err error
+			it.TasksIdsGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tasksIds_lte":
+			var err error
+			it.TasksIdsLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tasksIds_in":
+			var err error
+			it.TasksIdsIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companiesIds":
+			var err error
+			it.CompaniesIds, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companiesIds_ne":
+			var err error
+			it.CompaniesIdsNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companiesIds_gt":
+			var err error
+			it.CompaniesIdsGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companiesIds_lt":
+			var err error
+			it.CompaniesIdsLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companiesIds_gte":
+			var err error
+			it.CompaniesIdsGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companiesIds_lte":
+			var err error
+			it.CompaniesIdsLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companiesIds_in":
+			var err error
+			it.CompaniesIdsIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "friendsIds":
+			var err error
+			it.FriendsIds, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "friendsIds_ne":
+			var err error
+			it.FriendsIdsNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "friendsIds_gt":
+			var err error
+			it.FriendsIdsGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "friendsIds_lt":
+			var err error
+			it.FriendsIdsLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "friendsIds_gte":
+			var err error
+			it.FriendsIdsGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "friendsIds_lte":
+			var err error
+			it.FriendsIdsLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "friendsIds_in":
+			var err error
+			it.FriendsIdsIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "tasks":
 			var err error
 			it.Tasks, err = ec.unmarshalOTaskFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskFilterType(ctx, v)
@@ -6009,6 +6403,20 @@ func (ec *executionContext) _Company(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Company_updatedBy(ctx, field, obj)
 		case "createdBy":
 			out.Values[i] = ec._Company_createdBy(ctx, field, obj)
+		case "employeesIds":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Company_employeesIds(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6423,6 +6831,48 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._User_updatedBy(ctx, field, obj)
 		case "createdBy":
 			out.Values[i] = ec._User_createdBy(ctx, field, obj)
+		case "tasksIds":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_tasksIds(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "companiesIds":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_companiesIds(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "friendsIds":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_friendsIds(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6841,6 +7291,35 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNID2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNID2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {

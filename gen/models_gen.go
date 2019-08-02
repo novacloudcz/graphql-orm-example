@@ -10,54 +10,61 @@ import (
 )
 
 type CompanyFilterType struct {
-	And          []*CompanyFilterType `json:"AND"`
-	Or           []*CompanyFilterType `json:"OR"`
-	ID           *string              `json:"id"`
-	IDNe         *string              `json:"id_ne"`
-	IDGt         *string              `json:"id_gt"`
-	IDLt         *string              `json:"id_lt"`
-	IDGte        *string              `json:"id_gte"`
-	IDLte        *string              `json:"id_lte"`
-	IDIn         []string             `json:"id_in"`
-	Name         *string              `json:"name"`
-	NameNe       *string              `json:"name_ne"`
-	NameGt       *string              `json:"name_gt"`
-	NameLt       *string              `json:"name_lt"`
-	NameGte      *string              `json:"name_gte"`
-	NameLte      *string              `json:"name_lte"`
-	NameIn       []string             `json:"name_in"`
-	NameLike     *string              `json:"name_like"`
-	NamePrefix   *string              `json:"name_prefix"`
-	NameSuffix   *string              `json:"name_suffix"`
-	UpdatedAt    *time.Time           `json:"updatedAt"`
-	UpdatedAtNe  *time.Time           `json:"updatedAt_ne"`
-	UpdatedAtGt  *time.Time           `json:"updatedAt_gt"`
-	UpdatedAtLt  *time.Time           `json:"updatedAt_lt"`
-	UpdatedAtGte *time.Time           `json:"updatedAt_gte"`
-	UpdatedAtLte *time.Time           `json:"updatedAt_lte"`
-	UpdatedAtIn  []*time.Time         `json:"updatedAt_in"`
-	CreatedAt    *time.Time           `json:"createdAt"`
-	CreatedAtNe  *time.Time           `json:"createdAt_ne"`
-	CreatedAtGt  *time.Time           `json:"createdAt_gt"`
-	CreatedAtLt  *time.Time           `json:"createdAt_lt"`
-	CreatedAtGte *time.Time           `json:"createdAt_gte"`
-	CreatedAtLte *time.Time           `json:"createdAt_lte"`
-	CreatedAtIn  []*time.Time         `json:"createdAt_in"`
-	UpdatedBy    *string              `json:"updatedBy"`
-	UpdatedByNe  *string              `json:"updatedBy_ne"`
-	UpdatedByGt  *string              `json:"updatedBy_gt"`
-	UpdatedByLt  *string              `json:"updatedBy_lt"`
-	UpdatedByGte *string              `json:"updatedBy_gte"`
-	UpdatedByLte *string              `json:"updatedBy_lte"`
-	UpdatedByIn  []string             `json:"updatedBy_in"`
-	CreatedBy    *string              `json:"createdBy"`
-	CreatedByNe  *string              `json:"createdBy_ne"`
-	CreatedByGt  *string              `json:"createdBy_gt"`
-	CreatedByLt  *string              `json:"createdBy_lt"`
-	CreatedByGte *string              `json:"createdBy_gte"`
-	CreatedByLte *string              `json:"createdBy_lte"`
-	CreatedByIn  []string             `json:"createdBy_in"`
-	Employees    *UserFilterType      `json:"employees"`
+	And             []*CompanyFilterType `json:"AND"`
+	Or              []*CompanyFilterType `json:"OR"`
+	ID              *string              `json:"id"`
+	IDNe            *string              `json:"id_ne"`
+	IDGt            *string              `json:"id_gt"`
+	IDLt            *string              `json:"id_lt"`
+	IDGte           *string              `json:"id_gte"`
+	IDLte           *string              `json:"id_lte"`
+	IDIn            []string             `json:"id_in"`
+	Name            *string              `json:"name"`
+	NameNe          *string              `json:"name_ne"`
+	NameGt          *string              `json:"name_gt"`
+	NameLt          *string              `json:"name_lt"`
+	NameGte         *string              `json:"name_gte"`
+	NameLte         *string              `json:"name_lte"`
+	NameIn          []string             `json:"name_in"`
+	NameLike        *string              `json:"name_like"`
+	NamePrefix      *string              `json:"name_prefix"`
+	NameSuffix      *string              `json:"name_suffix"`
+	UpdatedAt       *time.Time           `json:"updatedAt"`
+	UpdatedAtNe     *time.Time           `json:"updatedAt_ne"`
+	UpdatedAtGt     *time.Time           `json:"updatedAt_gt"`
+	UpdatedAtLt     *time.Time           `json:"updatedAt_lt"`
+	UpdatedAtGte    *time.Time           `json:"updatedAt_gte"`
+	UpdatedAtLte    *time.Time           `json:"updatedAt_lte"`
+	UpdatedAtIn     []*time.Time         `json:"updatedAt_in"`
+	CreatedAt       *time.Time           `json:"createdAt"`
+	CreatedAtNe     *time.Time           `json:"createdAt_ne"`
+	CreatedAtGt     *time.Time           `json:"createdAt_gt"`
+	CreatedAtLt     *time.Time           `json:"createdAt_lt"`
+	CreatedAtGte    *time.Time           `json:"createdAt_gte"`
+	CreatedAtLte    *time.Time           `json:"createdAt_lte"`
+	CreatedAtIn     []*time.Time         `json:"createdAt_in"`
+	UpdatedBy       *string              `json:"updatedBy"`
+	UpdatedByNe     *string              `json:"updatedBy_ne"`
+	UpdatedByGt     *string              `json:"updatedBy_gt"`
+	UpdatedByLt     *string              `json:"updatedBy_lt"`
+	UpdatedByGte    *string              `json:"updatedBy_gte"`
+	UpdatedByLte    *string              `json:"updatedBy_lte"`
+	UpdatedByIn     []string             `json:"updatedBy_in"`
+	CreatedBy       *string              `json:"createdBy"`
+	CreatedByNe     *string              `json:"createdBy_ne"`
+	CreatedByGt     *string              `json:"createdBy_gt"`
+	CreatedByLt     *string              `json:"createdBy_lt"`
+	CreatedByGte    *string              `json:"createdBy_gte"`
+	CreatedByLte    *string              `json:"createdBy_lte"`
+	CreatedByIn     []string             `json:"createdBy_in"`
+	EmployeesIds    *string              `json:"employeesIds"`
+	EmployeesIdsNe  *string              `json:"employeesIds_ne"`
+	EmployeesIdsGt  *string              `json:"employeesIds_gt"`
+	EmployeesIdsLt  *string              `json:"employeesIds_lt"`
+	EmployeesIdsGte *string              `json:"employeesIds_gte"`
+	EmployeesIdsLte *string              `json:"employeesIds_lte"`
+	EmployeesIdsIn  []string             `json:"employeesIds_in"`
+	Employees       *UserFilterType      `json:"employees"`
 }
 
 type TaskFilterType struct {
@@ -217,6 +224,27 @@ type UserFilterType struct {
 	CreatedByGte    *string            `json:"createdBy_gte"`
 	CreatedByLte    *string            `json:"createdBy_lte"`
 	CreatedByIn     []string           `json:"createdBy_in"`
+	TasksIds        *string            `json:"tasksIds"`
+	TasksIdsNe      *string            `json:"tasksIds_ne"`
+	TasksIdsGt      *string            `json:"tasksIds_gt"`
+	TasksIdsLt      *string            `json:"tasksIds_lt"`
+	TasksIdsGte     *string            `json:"tasksIds_gte"`
+	TasksIdsLte     *string            `json:"tasksIds_lte"`
+	TasksIdsIn      []string           `json:"tasksIds_in"`
+	CompaniesIds    *string            `json:"companiesIds"`
+	CompaniesIdsNe  *string            `json:"companiesIds_ne"`
+	CompaniesIdsGt  *string            `json:"companiesIds_gt"`
+	CompaniesIdsLt  *string            `json:"companiesIds_lt"`
+	CompaniesIdsGte *string            `json:"companiesIds_gte"`
+	CompaniesIdsLte *string            `json:"companiesIds_lte"`
+	CompaniesIdsIn  []string           `json:"companiesIds_in"`
+	FriendsIds      *string            `json:"friendsIds"`
+	FriendsIdsNe    *string            `json:"friendsIds_ne"`
+	FriendsIdsGt    *string            `json:"friendsIds_gt"`
+	FriendsIdsLt    *string            `json:"friendsIds_lt"`
+	FriendsIdsGte   *string            `json:"friendsIds_gte"`
+	FriendsIdsLte   *string            `json:"friendsIds_lte"`
+	FriendsIdsIn    []string           `json:"friendsIds_in"`
 	Tasks           *TaskFilterType    `json:"tasks"`
 	Companies       *CompanyFilterType `json:"companies"`
 	Friends         *UserFilterType    `json:"friends"`
@@ -225,18 +253,20 @@ type UserFilterType struct {
 type CompanySortType string
 
 const (
-	CompanySortTypeIDAsc         CompanySortType = "ID_ASC"
-	CompanySortTypeIDDesc        CompanySortType = "ID_DESC"
-	CompanySortTypeNameAsc       CompanySortType = "NAME_ASC"
-	CompanySortTypeNameDesc      CompanySortType = "NAME_DESC"
-	CompanySortTypeUpdatedAtAsc  CompanySortType = "UPDATED_AT_ASC"
-	CompanySortTypeUpdatedAtDesc CompanySortType = "UPDATED_AT_DESC"
-	CompanySortTypeCreatedAtAsc  CompanySortType = "CREATED_AT_ASC"
-	CompanySortTypeCreatedAtDesc CompanySortType = "CREATED_AT_DESC"
-	CompanySortTypeUpdatedByAsc  CompanySortType = "UPDATED_BY_ASC"
-	CompanySortTypeUpdatedByDesc CompanySortType = "UPDATED_BY_DESC"
-	CompanySortTypeCreatedByAsc  CompanySortType = "CREATED_BY_ASC"
-	CompanySortTypeCreatedByDesc CompanySortType = "CREATED_BY_DESC"
+	CompanySortTypeIDAsc            CompanySortType = "ID_ASC"
+	CompanySortTypeIDDesc           CompanySortType = "ID_DESC"
+	CompanySortTypeNameAsc          CompanySortType = "NAME_ASC"
+	CompanySortTypeNameDesc         CompanySortType = "NAME_DESC"
+	CompanySortTypeUpdatedAtAsc     CompanySortType = "UPDATED_AT_ASC"
+	CompanySortTypeUpdatedAtDesc    CompanySortType = "UPDATED_AT_DESC"
+	CompanySortTypeCreatedAtAsc     CompanySortType = "CREATED_AT_ASC"
+	CompanySortTypeCreatedAtDesc    CompanySortType = "CREATED_AT_DESC"
+	CompanySortTypeUpdatedByAsc     CompanySortType = "UPDATED_BY_ASC"
+	CompanySortTypeUpdatedByDesc    CompanySortType = "UPDATED_BY_DESC"
+	CompanySortTypeCreatedByAsc     CompanySortType = "CREATED_BY_ASC"
+	CompanySortTypeCreatedByDesc    CompanySortType = "CREATED_BY_DESC"
+	CompanySortTypeEmployeesIDSAsc  CompanySortType = "EMPLOYEES_IDS_ASC"
+	CompanySortTypeEmployeesIDSDesc CompanySortType = "EMPLOYEES_IDS_DESC"
 )
 
 var AllCompanySortType = []CompanySortType{
@@ -252,11 +282,13 @@ var AllCompanySortType = []CompanySortType{
 	CompanySortTypeUpdatedByDesc,
 	CompanySortTypeCreatedByAsc,
 	CompanySortTypeCreatedByDesc,
+	CompanySortTypeEmployeesIDSAsc,
+	CompanySortTypeEmployeesIDSDesc,
 }
 
 func (e CompanySortType) IsValid() bool {
 	switch e {
-	case CompanySortTypeIDAsc, CompanySortTypeIDDesc, CompanySortTypeNameAsc, CompanySortTypeNameDesc, CompanySortTypeUpdatedAtAsc, CompanySortTypeUpdatedAtDesc, CompanySortTypeCreatedAtAsc, CompanySortTypeCreatedAtDesc, CompanySortTypeUpdatedByAsc, CompanySortTypeUpdatedByDesc, CompanySortTypeCreatedByAsc, CompanySortTypeCreatedByDesc:
+	case CompanySortTypeIDAsc, CompanySortTypeIDDesc, CompanySortTypeNameAsc, CompanySortTypeNameDesc, CompanySortTypeUpdatedAtAsc, CompanySortTypeUpdatedAtDesc, CompanySortTypeCreatedAtAsc, CompanySortTypeCreatedAtDesc, CompanySortTypeUpdatedByAsc, CompanySortTypeUpdatedByDesc, CompanySortTypeCreatedByAsc, CompanySortTypeCreatedByDesc, CompanySortTypeEmployeesIDSAsc, CompanySortTypeEmployeesIDSDesc:
 		return true
 	}
 	return false
@@ -408,22 +440,28 @@ func (e TaskType) MarshalGQL(w io.Writer) {
 type UserSortType string
 
 const (
-	UserSortTypeIDAsc         UserSortType = "ID_ASC"
-	UserSortTypeIDDesc        UserSortType = "ID_DESC"
-	UserSortTypeEmailAsc      UserSortType = "EMAIL_ASC"
-	UserSortTypeEmailDesc     UserSortType = "EMAIL_DESC"
-	UserSortTypeFirstNameAsc  UserSortType = "FIRST_NAME_ASC"
-	UserSortTypeFirstNameDesc UserSortType = "FIRST_NAME_DESC"
-	UserSortTypeLastNameAsc   UserSortType = "LAST_NAME_ASC"
-	UserSortTypeLastNameDesc  UserSortType = "LAST_NAME_DESC"
-	UserSortTypeUpdatedAtAsc  UserSortType = "UPDATED_AT_ASC"
-	UserSortTypeUpdatedAtDesc UserSortType = "UPDATED_AT_DESC"
-	UserSortTypeCreatedAtAsc  UserSortType = "CREATED_AT_ASC"
-	UserSortTypeCreatedAtDesc UserSortType = "CREATED_AT_DESC"
-	UserSortTypeUpdatedByAsc  UserSortType = "UPDATED_BY_ASC"
-	UserSortTypeUpdatedByDesc UserSortType = "UPDATED_BY_DESC"
-	UserSortTypeCreatedByAsc  UserSortType = "CREATED_BY_ASC"
-	UserSortTypeCreatedByDesc UserSortType = "CREATED_BY_DESC"
+	UserSortTypeIDAsc            UserSortType = "ID_ASC"
+	UserSortTypeIDDesc           UserSortType = "ID_DESC"
+	UserSortTypeEmailAsc         UserSortType = "EMAIL_ASC"
+	UserSortTypeEmailDesc        UserSortType = "EMAIL_DESC"
+	UserSortTypeFirstNameAsc     UserSortType = "FIRST_NAME_ASC"
+	UserSortTypeFirstNameDesc    UserSortType = "FIRST_NAME_DESC"
+	UserSortTypeLastNameAsc      UserSortType = "LAST_NAME_ASC"
+	UserSortTypeLastNameDesc     UserSortType = "LAST_NAME_DESC"
+	UserSortTypeUpdatedAtAsc     UserSortType = "UPDATED_AT_ASC"
+	UserSortTypeUpdatedAtDesc    UserSortType = "UPDATED_AT_DESC"
+	UserSortTypeCreatedAtAsc     UserSortType = "CREATED_AT_ASC"
+	UserSortTypeCreatedAtDesc    UserSortType = "CREATED_AT_DESC"
+	UserSortTypeUpdatedByAsc     UserSortType = "UPDATED_BY_ASC"
+	UserSortTypeUpdatedByDesc    UserSortType = "UPDATED_BY_DESC"
+	UserSortTypeCreatedByAsc     UserSortType = "CREATED_BY_ASC"
+	UserSortTypeCreatedByDesc    UserSortType = "CREATED_BY_DESC"
+	UserSortTypeTasksIDSAsc      UserSortType = "TASKS_IDS_ASC"
+	UserSortTypeTasksIDSDesc     UserSortType = "TASKS_IDS_DESC"
+	UserSortTypeCompaniesIDSAsc  UserSortType = "COMPANIES_IDS_ASC"
+	UserSortTypeCompaniesIDSDesc UserSortType = "COMPANIES_IDS_DESC"
+	UserSortTypeFriendsIDSAsc    UserSortType = "FRIENDS_IDS_ASC"
+	UserSortTypeFriendsIDSDesc   UserSortType = "FRIENDS_IDS_DESC"
 )
 
 var AllUserSortType = []UserSortType{
@@ -443,11 +481,17 @@ var AllUserSortType = []UserSortType{
 	UserSortTypeUpdatedByDesc,
 	UserSortTypeCreatedByAsc,
 	UserSortTypeCreatedByDesc,
+	UserSortTypeTasksIDSAsc,
+	UserSortTypeTasksIDSDesc,
+	UserSortTypeCompaniesIDSAsc,
+	UserSortTypeCompaniesIDSDesc,
+	UserSortTypeFriendsIDSAsc,
+	UserSortTypeFriendsIDSDesc,
 }
 
 func (e UserSortType) IsValid() bool {
 	switch e {
-	case UserSortTypeIDAsc, UserSortTypeIDDesc, UserSortTypeEmailAsc, UserSortTypeEmailDesc, UserSortTypeFirstNameAsc, UserSortTypeFirstNameDesc, UserSortTypeLastNameAsc, UserSortTypeLastNameDesc, UserSortTypeUpdatedAtAsc, UserSortTypeUpdatedAtDesc, UserSortTypeCreatedAtAsc, UserSortTypeCreatedAtDesc, UserSortTypeUpdatedByAsc, UserSortTypeUpdatedByDesc, UserSortTypeCreatedByAsc, UserSortTypeCreatedByDesc:
+	case UserSortTypeIDAsc, UserSortTypeIDDesc, UserSortTypeEmailAsc, UserSortTypeEmailDesc, UserSortTypeFirstNameAsc, UserSortTypeFirstNameDesc, UserSortTypeLastNameAsc, UserSortTypeLastNameDesc, UserSortTypeUpdatedAtAsc, UserSortTypeUpdatedAtDesc, UserSortTypeCreatedAtAsc, UserSortTypeCreatedAtDesc, UserSortTypeUpdatedByAsc, UserSortTypeUpdatedByDesc, UserSortTypeCreatedByAsc, UserSortTypeCreatedByDesc, UserSortTypeTasksIDSAsc, UserSortTypeTasksIDSDesc, UserSortTypeCompaniesIDSAsc, UserSortTypeCompaniesIDSDesc, UserSortTypeFriendsIDSAsc, UserSortTypeFriendsIDSDesc:
 		return true
 	}
 	return false

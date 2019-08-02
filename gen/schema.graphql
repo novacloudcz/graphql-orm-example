@@ -38,6 +38,7 @@ type Company {
   createdAt: Time!
   updatedBy: ID
   createdBy: ID
+  employeesIds: [ID!]!
 }
 
 type User {
@@ -52,6 +53,9 @@ type User {
   createdAt: Time!
   updatedBy: ID
   createdBy: ID
+  tasksIds: [ID!]!
+  companiesIds: [ID!]!
+  friendsIds: [ID!]!
 }
 
 enum TaskType {
@@ -98,6 +102,8 @@ enum CompanySortType {
   UPDATED_BY_DESC
   CREATED_BY_ASC
   CREATED_BY_DESC
+  EMPLOYEES_IDS_ASC
+  EMPLOYEES_IDS_DESC
 }
 
 input CompanyFilterType {
@@ -148,6 +154,13 @@ input CompanyFilterType {
   createdBy_gte: ID
   createdBy_lte: ID
   createdBy_in: [ID!]
+  employeesIds: ID
+  employeesIds_ne: ID
+  employeesIds_gt: ID
+  employeesIds_lt: ID
+  employeesIds_gte: ID
+  employeesIds_lte: ID
+  employeesIds_in: [ID!]
   employees: UserFilterType
 }
 
@@ -192,6 +205,12 @@ enum UserSortType {
   UPDATED_BY_DESC
   CREATED_BY_ASC
   CREATED_BY_DESC
+  TASKS_IDS_ASC
+  TASKS_IDS_DESC
+  COMPANIES_IDS_ASC
+  COMPANIES_IDS_DESC
+  FRIENDS_IDS_ASC
+  FRIENDS_IDS_DESC
 }
 
 input UserFilterType {
@@ -262,6 +281,27 @@ input UserFilterType {
   createdBy_gte: ID
   createdBy_lte: ID
   createdBy_in: [ID!]
+  tasksIds: ID
+  tasksIds_ne: ID
+  tasksIds_gt: ID
+  tasksIds_lt: ID
+  tasksIds_gte: ID
+  tasksIds_lte: ID
+  tasksIds_in: [ID!]
+  companiesIds: ID
+  companiesIds_ne: ID
+  companiesIds_gt: ID
+  companiesIds_lt: ID
+  companiesIds_gte: ID
+  companiesIds_lte: ID
+  companiesIds_in: [ID!]
+  friendsIds: ID
+  friendsIds_ne: ID
+  friendsIds_gt: ID
+  friendsIds_lt: ID
+  friendsIds_gte: ID
+  friendsIds_lte: ID
+  friendsIds_in: [ID!]
   tasks: TaskFilterType
   companies: CompanyFilterType
   friends: UserFilterType

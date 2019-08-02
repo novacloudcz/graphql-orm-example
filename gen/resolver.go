@@ -116,9 +116,9 @@ func (r *GeneratedMutationResolver) UpdateCompany(ctx context.Context, id string
 	tx := r.DB.db.Begin()
 
 	event := events.NewEvent(events.EventMetadata{
-		Type:        events.EventTypeCreated,
+		Type:        events.EventTypeUpdated,
 		Entity:      "Company",
-		EntityID:    item.ID,
+		EntityID:    id,
 		Date:        now,
 		PrincipalID: principalID,
 	})
@@ -169,13 +169,36 @@ func (r *GeneratedMutationResolver) UpdateCompany(ctx context.Context, id string
 	return
 }
 func (r *GeneratedMutationResolver) DeleteCompany(ctx context.Context, id string) (item *Company, err error) {
+	principalID := getPrincipalID(ctx)
 	item = &Company{}
-	err = resolvers.GetItem(ctx, r.DB.Query(), item, &id)
+	now := time.Now()
+	tx := r.DB.db.Begin()
+
+	err = resolvers.GetItem(ctx, tx, item, &id)
 	if err != nil {
 		return
 	}
 
-	err = r.DB.Query().Delete(item, "companies.id = ?", id).Error
+	event := events.NewEvent(events.EventMetadata{
+		Type:        events.EventTypeDeleted,
+		Entity:      "Company",
+		EntityID:    id,
+		Date:        now,
+		PrincipalID: principalID,
+	})
+
+	err = tx.Delete(item, "companies.id = ?", id).Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+	err = tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = r.EventController.SendEvent(ctx, &event)
 
 	return
 }
@@ -265,9 +288,9 @@ func (r *GeneratedMutationResolver) UpdateUser(ctx context.Context, id string, i
 	tx := r.DB.db.Begin()
 
 	event := events.NewEvent(events.EventMetadata{
-		Type:        events.EventTypeCreated,
+		Type:        events.EventTypeUpdated,
 		Entity:      "User",
-		EntityID:    item.ID,
+		EntityID:    id,
 		Date:        now,
 		PrincipalID: principalID,
 	})
@@ -344,13 +367,36 @@ func (r *GeneratedMutationResolver) UpdateUser(ctx context.Context, id string, i
 	return
 }
 func (r *GeneratedMutationResolver) DeleteUser(ctx context.Context, id string) (item *User, err error) {
+	principalID := getPrincipalID(ctx)
 	item = &User{}
-	err = resolvers.GetItem(ctx, r.DB.Query(), item, &id)
+	now := time.Now()
+	tx := r.DB.db.Begin()
+
+	err = resolvers.GetItem(ctx, tx, item, &id)
 	if err != nil {
 		return
 	}
 
-	err = r.DB.Query().Delete(item, "users.id = ?", id).Error
+	event := events.NewEvent(events.EventMetadata{
+		Type:        events.EventTypeDeleted,
+		Entity:      "User",
+		EntityID:    id,
+		Date:        now,
+		PrincipalID: principalID,
+	})
+
+	err = tx.Delete(item, "users.id = ?", id).Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+	err = tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = r.EventController.SendEvent(ctx, &event)
 
 	return
 }
@@ -434,9 +480,9 @@ func (r *GeneratedMutationResolver) UpdateTask(ctx context.Context, id string, i
 	tx := r.DB.db.Begin()
 
 	event := events.NewEvent(events.EventMetadata{
-		Type:        events.EventTypeCreated,
+		Type:        events.EventTypeUpdated,
 		Entity:      "Task",
-		EntityID:    item.ID,
+		EntityID:    id,
 		Date:        now,
 		PrincipalID: principalID,
 	})
@@ -510,13 +556,36 @@ func (r *GeneratedMutationResolver) UpdateTask(ctx context.Context, id string, i
 	return
 }
 func (r *GeneratedMutationResolver) DeleteTask(ctx context.Context, id string) (item *Task, err error) {
+	principalID := getPrincipalID(ctx)
 	item = &Task{}
-	err = resolvers.GetItem(ctx, r.DB.Query(), item, &id)
+	now := time.Now()
+	tx := r.DB.db.Begin()
+
+	err = resolvers.GetItem(ctx, tx, item, &id)
 	if err != nil {
 		return
 	}
 
-	err = r.DB.Query().Delete(item, "tasks.id = ?", id).Error
+	event := events.NewEvent(events.EventMetadata{
+		Type:        events.EventTypeDeleted,
+		Entity:      "Task",
+		EntityID:    id,
+		Date:        now,
+		PrincipalID: principalID,
+	})
+
+	err = tx.Delete(item, "tasks.id = ?", id).Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+	err = tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = r.EventController.SendEvent(ctx, &event)
 
 	return
 }
@@ -546,7 +615,7 @@ func (r *GeneratedQueryResolver) Company(ctx context.Context, id *string, q *str
 		return nil, err
 	}
 	if len(items) == 0 {
-		return nil, fmt.Errorf("record not found")
+		return nil, fmt.Errorf("Company not found")
 	}
 	return items[0], err
 }
@@ -598,6 +667,19 @@ func (r *GeneratedCompanyResolver) Employees(ctx context.Context, obj *Company) 
 	return
 }
 
+func (r *GeneratedCompanyResolver) EmployeesIds(ctx context.Context, obj *Company) (ids []string, err error) {
+	ids = []string{}
+
+	items := []*User{}
+	err = r.DB.Query().Model(obj).Select("users.id").Related(&items, "Employees").Error
+
+	for _, item := range items {
+		ids = append(ids, item.ID)
+	}
+
+	return
+}
+
 func (r *GeneratedQueryResolver) User(ctx context.Context, id *string, q *string, filter *UserFilterType) (*User, error) {
 	query := UserQueryFilter{q}
 	offset := 0
@@ -621,7 +703,7 @@ func (r *GeneratedQueryResolver) User(ctx context.Context, id *string, q *string
 		return nil, err
 	}
 	if len(items) == 0 {
-		return nil, fmt.Errorf("record not found")
+		return nil, fmt.Errorf("User not found")
 	}
 	return items[0], err
 }
@@ -673,6 +755,19 @@ func (r *GeneratedUserResolver) Tasks(ctx context.Context, obj *User) (res []*Ta
 	return
 }
 
+func (r *GeneratedUserResolver) TasksIds(ctx context.Context, obj *User) (ids []string, err error) {
+	ids = []string{}
+
+	items := []*Task{}
+	err = r.DB.Query().Model(obj).Select("tasks.id").Related(&items, "Tasks").Error
+
+	for _, item := range items {
+		ids = append(ids, item.ID)
+	}
+
+	return
+}
+
 func (r *GeneratedUserResolver) Companies(ctx context.Context, obj *User) (res []*Company, err error) {
 
 	items := []*Company{}
@@ -682,11 +777,37 @@ func (r *GeneratedUserResolver) Companies(ctx context.Context, obj *User) (res [
 	return
 }
 
+func (r *GeneratedUserResolver) CompaniesIds(ctx context.Context, obj *User) (ids []string, err error) {
+	ids = []string{}
+
+	items := []*Company{}
+	err = r.DB.Query().Model(obj).Select("companies.id").Related(&items, "Companies").Error
+
+	for _, item := range items {
+		ids = append(ids, item.ID)
+	}
+
+	return
+}
+
 func (r *GeneratedUserResolver) Friends(ctx context.Context, obj *User) (res []*User, err error) {
 
 	items := []*User{}
 	err = r.DB.Query().Model(obj).Related(&items, "Friends").Error
 	res = items
+
+	return
+}
+
+func (r *GeneratedUserResolver) FriendsIds(ctx context.Context, obj *User) (ids []string, err error) {
+	ids = []string{}
+
+	items := []*User{}
+	err = r.DB.Query().Model(obj).Select("users.id").Related(&items, "Friends").Error
+
+	for _, item := range items {
+		ids = append(ids, item.ID)
+	}
 
 	return
 }
@@ -714,7 +835,7 @@ func (r *GeneratedQueryResolver) Task(ctx context.Context, id *string, q *string
 		return nil, err
 	}
 	if len(items) == 0 {
-		return nil, fmt.Errorf("record not found")
+		return nil, fmt.Errorf("Task not found")
 	}
 	return items[0], err
 }
