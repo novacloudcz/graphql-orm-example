@@ -25,6 +25,8 @@ type Company struct {
 	Employees []*User `json:"employees" gorm:"many2many:company_employees;jointable_foreignkey:company_id;association_jointable_foreignkey:employee_id"`
 }
 
+func (m *Company) Is_Entity() {}
+
 type CompanyChanges struct {
 	ID        string
 	Name      *string
@@ -56,6 +58,8 @@ type User struct {
 
 	Friends []*User `json:"friends" gorm:"many2many:user_friends;jointable_foreignkey:user_id;association_jointable_foreignkey:friend_id"`
 }
+
+func (m *User) Is_Entity() {}
 
 type UserChanges struct {
 	ID        string
@@ -91,6 +95,8 @@ type Task struct {
 
 	Assignee *User `json:"assignee"`
 }
+
+func (m *Task) Is_Entity() {}
 
 type TaskChanges struct {
 	ID          string

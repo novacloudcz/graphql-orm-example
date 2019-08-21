@@ -29,10 +29,9 @@ func (qf *CompanyQueryFilter) Apply(ctx context.Context, dialect gorm.Dialect, s
 		return fmt.Errorf("Cannot query with 'q' attribute without items field.")
 	}
 
-	ors := []string{}
-
 	queryParts := strings.Split(*qf.Query, " ")
 	for _, part := range queryParts {
+		ors := []string{}
 		if err := qf.applyQueryWithFields(dialect, fields, part, "companies", &ors, values, joins); err != nil {
 			return err
 		}
@@ -46,9 +45,9 @@ func (qf *CompanyQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields 
 		return nil
 	}
 
-	fieldsMap := map[string]*ast.Field{}
+	fieldsMap := map[string][]*ast.Field{}
 	for _, f := range fields {
-		fieldsMap[f.Name] = f
+		fieldsMap[f.Name] = append(fieldsMap[f.Name], f)
 	}
 
 	if _, ok := fieldsMap["name"]; ok {
@@ -56,14 +55,16 @@ func (qf *CompanyQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields 
 		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
 	}
 
-	if f, ok := fieldsMap["employees"]; ok {
+	if fs, ok := fieldsMap["employees"]; ok {
 		_fields := []*ast.Field{}
 		_alias := alias + "_employees"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("company_employees")+" "+dialect.Quote(_alias)+"_jointable ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" = "+dialect.Quote(_alias)+".id")
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("company_employees")+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" = "+dialect.Quote(_alias)+".id")
 
-		for _, s := range f.SelectionSet {
-			if f, ok := s.(*ast.Field); ok {
-				_fields = append(_fields, f)
+		for _, f := range fs {
+			for _, s := range f.SelectionSet {
+				if f, ok := s.(*ast.Field); ok {
+					_fields = append(_fields, f)
+				}
 			}
 		}
 		q := UserQueryFilter{qf.Query}
@@ -96,10 +97,9 @@ func (qf *UserQueryFilter) Apply(ctx context.Context, dialect gorm.Dialect, sele
 		return fmt.Errorf("Cannot query with 'q' attribute without items field.")
 	}
 
-	ors := []string{}
-
 	queryParts := strings.Split(*qf.Query, " ")
 	for _, part := range queryParts {
+		ors := []string{}
 		if err := qf.applyQueryWithFields(dialect, fields, part, "users", &ors, values, joins); err != nil {
 			return err
 		}
@@ -113,9 +113,9 @@ func (qf *UserQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields []*
 		return nil
 	}
 
-	fieldsMap := map[string]*ast.Field{}
+	fieldsMap := map[string][]*ast.Field{}
 	for _, f := range fields {
-		fieldsMap[f.Name] = f
+		fieldsMap[f.Name] = append(fieldsMap[f.Name], f)
 	}
 
 	if _, ok := fieldsMap["email"]; ok {
@@ -133,14 +133,16 @@ func (qf *UserQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields []*
 		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
 	}
 
-	if f, ok := fieldsMap["tasks"]; ok {
+	if fs, ok := fieldsMap["tasks"]; ok {
 		_fields := []*ast.Field{}
 		_alias := alias + "_tasks"
 		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("tasks")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias)+"."+dialect.Quote("assigneeId")+" = "+dialect.Quote(alias)+".id")
 
-		for _, s := range f.SelectionSet {
-			if f, ok := s.(*ast.Field); ok {
-				_fields = append(_fields, f)
+		for _, f := range fs {
+			for _, s := range f.SelectionSet {
+				if f, ok := s.(*ast.Field); ok {
+					_fields = append(_fields, f)
+				}
 			}
 		}
 		q := TaskQueryFilter{qf.Query}
@@ -150,14 +152,16 @@ func (qf *UserQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields []*
 		}
 	}
 
-	if f, ok := fieldsMap["companies"]; ok {
+	if fs, ok := fieldsMap["companies"]; ok {
 		_fields := []*ast.Field{}
 		_alias := alias + "_companies"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("company_employees")+" "+dialect.Quote(_alias)+"_jointable ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" LEFT JOIN "+dialect.Quote("companies")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" = "+dialect.Quote(_alias)+".id")
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("company_employees")+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" LEFT JOIN "+dialect.Quote("companies")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" = "+dialect.Quote(_alias)+".id")
 
-		for _, s := range f.SelectionSet {
-			if f, ok := s.(*ast.Field); ok {
-				_fields = append(_fields, f)
+		for _, f := range fs {
+			for _, s := range f.SelectionSet {
+				if f, ok := s.(*ast.Field); ok {
+					_fields = append(_fields, f)
+				}
 			}
 		}
 		q := CompanyQueryFilter{qf.Query}
@@ -167,14 +171,16 @@ func (qf *UserQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields []*
 		}
 	}
 
-	if f, ok := fieldsMap["friends"]; ok {
+	if fs, ok := fieldsMap["friends"]; ok {
 		_fields := []*ast.Field{}
 		_alias := alias + "_friends"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("user_friends")+" "+dialect.Quote(_alias)+"_jointable ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" = "+dialect.Quote(_alias)+".id")
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("user_friends")+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" = "+dialect.Quote(_alias)+".id")
 
-		for _, s := range f.SelectionSet {
-			if f, ok := s.(*ast.Field); ok {
-				_fields = append(_fields, f)
+		for _, f := range fs {
+			for _, s := range f.SelectionSet {
+				if f, ok := s.(*ast.Field); ok {
+					_fields = append(_fields, f)
+				}
 			}
 		}
 		q := UserQueryFilter{qf.Query}
@@ -207,10 +213,9 @@ func (qf *TaskQueryFilter) Apply(ctx context.Context, dialect gorm.Dialect, sele
 		return fmt.Errorf("Cannot query with 'q' attribute without items field.")
 	}
 
-	ors := []string{}
-
 	queryParts := strings.Split(*qf.Query, " ")
 	for _, part := range queryParts {
+		ors := []string{}
 		if err := qf.applyQueryWithFields(dialect, fields, part, "tasks", &ors, values, joins); err != nil {
 			return err
 		}
@@ -224,9 +229,9 @@ func (qf *TaskQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields []*
 		return nil
 	}
 
-	fieldsMap := map[string]*ast.Field{}
+	fieldsMap := map[string][]*ast.Field{}
 	for _, f := range fields {
-		fieldsMap[f.Name] = f
+		fieldsMap[f.Name] = append(fieldsMap[f.Name], f)
 	}
 
 	if _, ok := fieldsMap["title"]; ok {
@@ -239,14 +244,16 @@ func (qf *TaskQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields []*
 		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
 	}
 
-	if f, ok := fieldsMap["assignee"]; ok {
+	if fs, ok := fieldsMap["assignee"]; ok {
 		_fields := []*ast.Field{}
 		_alias := alias + "_assignee"
 		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias)+".id = "+alias+"."+dialect.Quote("assigneeId"))
 
-		for _, s := range f.SelectionSet {
-			if f, ok := s.(*ast.Field); ok {
-				_fields = append(_fields, f)
+		for _, f := range fs {
+			for _, s := range f.SelectionSet {
+				if f, ok := s.(*ast.Field); ok {
+					_fields = append(_fields, f)
+				}
 			}
 		}
 		q := UserQueryFilter{qf.Query}

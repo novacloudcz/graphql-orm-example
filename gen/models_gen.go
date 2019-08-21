@@ -10,61 +10,54 @@ import (
 )
 
 type CompanyFilterType struct {
-	And             []*CompanyFilterType `json:"AND"`
-	Or              []*CompanyFilterType `json:"OR"`
-	ID              *string              `json:"id"`
-	IDNe            *string              `json:"id_ne"`
-	IDGt            *string              `json:"id_gt"`
-	IDLt            *string              `json:"id_lt"`
-	IDGte           *string              `json:"id_gte"`
-	IDLte           *string              `json:"id_lte"`
-	IDIn            []string             `json:"id_in"`
-	Name            *string              `json:"name"`
-	NameNe          *string              `json:"name_ne"`
-	NameGt          *string              `json:"name_gt"`
-	NameLt          *string              `json:"name_lt"`
-	NameGte         *string              `json:"name_gte"`
-	NameLte         *string              `json:"name_lte"`
-	NameIn          []string             `json:"name_in"`
-	NameLike        *string              `json:"name_like"`
-	NamePrefix      *string              `json:"name_prefix"`
-	NameSuffix      *string              `json:"name_suffix"`
-	UpdatedAt       *time.Time           `json:"updatedAt"`
-	UpdatedAtNe     *time.Time           `json:"updatedAt_ne"`
-	UpdatedAtGt     *time.Time           `json:"updatedAt_gt"`
-	UpdatedAtLt     *time.Time           `json:"updatedAt_lt"`
-	UpdatedAtGte    *time.Time           `json:"updatedAt_gte"`
-	UpdatedAtLte    *time.Time           `json:"updatedAt_lte"`
-	UpdatedAtIn     []*time.Time         `json:"updatedAt_in"`
-	CreatedAt       *time.Time           `json:"createdAt"`
-	CreatedAtNe     *time.Time           `json:"createdAt_ne"`
-	CreatedAtGt     *time.Time           `json:"createdAt_gt"`
-	CreatedAtLt     *time.Time           `json:"createdAt_lt"`
-	CreatedAtGte    *time.Time           `json:"createdAt_gte"`
-	CreatedAtLte    *time.Time           `json:"createdAt_lte"`
-	CreatedAtIn     []*time.Time         `json:"createdAt_in"`
-	UpdatedBy       *string              `json:"updatedBy"`
-	UpdatedByNe     *string              `json:"updatedBy_ne"`
-	UpdatedByGt     *string              `json:"updatedBy_gt"`
-	UpdatedByLt     *string              `json:"updatedBy_lt"`
-	UpdatedByGte    *string              `json:"updatedBy_gte"`
-	UpdatedByLte    *string              `json:"updatedBy_lte"`
-	UpdatedByIn     []string             `json:"updatedBy_in"`
-	CreatedBy       *string              `json:"createdBy"`
-	CreatedByNe     *string              `json:"createdBy_ne"`
-	CreatedByGt     *string              `json:"createdBy_gt"`
-	CreatedByLt     *string              `json:"createdBy_lt"`
-	CreatedByGte    *string              `json:"createdBy_gte"`
-	CreatedByLte    *string              `json:"createdBy_lte"`
-	CreatedByIn     []string             `json:"createdBy_in"`
-	EmployeesIds    *string              `json:"employeesIds"`
-	EmployeesIdsNe  *string              `json:"employeesIds_ne"`
-	EmployeesIdsGt  *string              `json:"employeesIds_gt"`
-	EmployeesIdsLt  *string              `json:"employeesIds_lt"`
-	EmployeesIdsGte *string              `json:"employeesIds_gte"`
-	EmployeesIdsLte *string              `json:"employeesIds_lte"`
-	EmployeesIdsIn  []string             `json:"employeesIds_in"`
-	Employees       *UserFilterType      `json:"employees"`
+	And          []*CompanyFilterType `json:"AND"`
+	Or           []*CompanyFilterType `json:"OR"`
+	ID           *string              `json:"id"`
+	IDNe         *string              `json:"id_ne"`
+	IDGt         *string              `json:"id_gt"`
+	IDLt         *string              `json:"id_lt"`
+	IDGte        *string              `json:"id_gte"`
+	IDLte        *string              `json:"id_lte"`
+	IDIn         []string             `json:"id_in"`
+	Name         *string              `json:"name"`
+	NameNe       *string              `json:"name_ne"`
+	NameGt       *string              `json:"name_gt"`
+	NameLt       *string              `json:"name_lt"`
+	NameGte      *string              `json:"name_gte"`
+	NameLte      *string              `json:"name_lte"`
+	NameIn       []string             `json:"name_in"`
+	NameLike     *string              `json:"name_like"`
+	NamePrefix   *string              `json:"name_prefix"`
+	NameSuffix   *string              `json:"name_suffix"`
+	UpdatedAt    *time.Time           `json:"updatedAt"`
+	UpdatedAtNe  *time.Time           `json:"updatedAt_ne"`
+	UpdatedAtGt  *time.Time           `json:"updatedAt_gt"`
+	UpdatedAtLt  *time.Time           `json:"updatedAt_lt"`
+	UpdatedAtGte *time.Time           `json:"updatedAt_gte"`
+	UpdatedAtLte *time.Time           `json:"updatedAt_lte"`
+	UpdatedAtIn  []*time.Time         `json:"updatedAt_in"`
+	CreatedAt    *time.Time           `json:"createdAt"`
+	CreatedAtNe  *time.Time           `json:"createdAt_ne"`
+	CreatedAtGt  *time.Time           `json:"createdAt_gt"`
+	CreatedAtLt  *time.Time           `json:"createdAt_lt"`
+	CreatedAtGte *time.Time           `json:"createdAt_gte"`
+	CreatedAtLte *time.Time           `json:"createdAt_lte"`
+	CreatedAtIn  []*time.Time         `json:"createdAt_in"`
+	UpdatedBy    *string              `json:"updatedBy"`
+	UpdatedByNe  *string              `json:"updatedBy_ne"`
+	UpdatedByGt  *string              `json:"updatedBy_gt"`
+	UpdatedByLt  *string              `json:"updatedBy_lt"`
+	UpdatedByGte *string              `json:"updatedBy_gte"`
+	UpdatedByLte *string              `json:"updatedBy_lte"`
+	UpdatedByIn  []string             `json:"updatedBy_in"`
+	CreatedBy    *string              `json:"createdBy"`
+	CreatedByNe  *string              `json:"createdBy_ne"`
+	CreatedByGt  *string              `json:"createdBy_gt"`
+	CreatedByLt  *string              `json:"createdBy_lt"`
+	CreatedByGte *string              `json:"createdBy_gte"`
+	CreatedByLte *string              `json:"createdBy_lte"`
+	CreatedByIn  []string             `json:"createdBy_in"`
+	Employees    *UserFilterType      `json:"employees"`
 }
 
 type TaskFilterType struct {
@@ -224,30 +217,13 @@ type UserFilterType struct {
 	CreatedByGte    *string            `json:"createdBy_gte"`
 	CreatedByLte    *string            `json:"createdBy_lte"`
 	CreatedByIn     []string           `json:"createdBy_in"`
-	TasksIds        *string            `json:"tasksIds"`
-	TasksIdsNe      *string            `json:"tasksIds_ne"`
-	TasksIdsGt      *string            `json:"tasksIds_gt"`
-	TasksIdsLt      *string            `json:"tasksIds_lt"`
-	TasksIdsGte     *string            `json:"tasksIds_gte"`
-	TasksIdsLte     *string            `json:"tasksIds_lte"`
-	TasksIdsIn      []string           `json:"tasksIds_in"`
-	CompaniesIds    *string            `json:"companiesIds"`
-	CompaniesIdsNe  *string            `json:"companiesIds_ne"`
-	CompaniesIdsGt  *string            `json:"companiesIds_gt"`
-	CompaniesIdsLt  *string            `json:"companiesIds_lt"`
-	CompaniesIdsGte *string            `json:"companiesIds_gte"`
-	CompaniesIdsLte *string            `json:"companiesIds_lte"`
-	CompaniesIdsIn  []string           `json:"companiesIds_in"`
-	FriendsIds      *string            `json:"friendsIds"`
-	FriendsIdsNe    *string            `json:"friendsIds_ne"`
-	FriendsIdsGt    *string            `json:"friendsIds_gt"`
-	FriendsIdsLt    *string            `json:"friendsIds_lt"`
-	FriendsIdsGte   *string            `json:"friendsIds_gte"`
-	FriendsIdsLte   *string            `json:"friendsIds_lte"`
-	FriendsIdsIn    []string           `json:"friendsIds_in"`
 	Tasks           *TaskFilterType    `json:"tasks"`
 	Companies       *CompanyFilterType `json:"companies"`
 	Friends         *UserFilterType    `json:"friends"`
+}
+
+type _Service struct {
+	Sdl *string `json:"sdl"`
 }
 
 type CompanySortType string

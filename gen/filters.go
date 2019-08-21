@@ -56,7 +56,7 @@ func (f *CompanyFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dia
 
 	if f.Employees != nil {
 		_alias := alias + "_employees"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("company_employees")+" "+dialect.Quote(_alias)+"_jointable ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" = "+dialect.Quote(_alias)+".id")
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("company_employees")+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" = "+dialect.Quote(_alias)+".id")
 		err := f.Employees.ApplyWithAlias(ctx, dialect, _alias, wheres, values, joins)
 		if err != nil {
 			return err
@@ -348,7 +348,7 @@ func (f *UserFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dialec
 
 	if f.Companies != nil {
 		_alias := alias + "_companies"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("company_employees")+" "+dialect.Quote(_alias)+"_jointable ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" LEFT JOIN "+dialect.Quote("companies")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" = "+dialect.Quote(_alias)+".id")
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("company_employees")+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" LEFT JOIN "+dialect.Quote("companies")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" = "+dialect.Quote(_alias)+".id")
 		err := f.Companies.ApplyWithAlias(ctx, dialect, _alias, wheres, values, joins)
 		if err != nil {
 			return err
@@ -357,7 +357,7 @@ func (f *UserFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dialec
 
 	if f.Friends != nil {
 		_alias := alias + "_friends"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("user_friends")+" "+dialect.Quote(_alias)+"_jointable ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" = "+dialect.Quote(_alias)+".id")
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("user_friends")+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" = "+dialect.Quote(_alias)+".id")
 		err := f.Friends.ApplyWithAlias(ctx, dialect, _alias, wheres, values, joins)
 		if err != nil {
 			return err

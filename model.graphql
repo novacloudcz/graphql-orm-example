@@ -1,6 +1,10 @@
 # custom directive example
 directive @validator(required: Boolean!) on FIELD_DEFINITION
 
+extend type Query {
+  hello: String!
+}
+
 type Company {
   name: String @validator(required: true)
 

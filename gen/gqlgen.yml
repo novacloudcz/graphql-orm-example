@@ -15,6 +15,11 @@ resolver:
 
 models:
   
+  Company:
+    model: github.com/novacloudcz/graphql-orm-example/gen.Company
+    fields:
+      employees:
+        resolver: true
   CompanyResultType:
     model: github.com/novacloudcz/graphql-orm-example/gen.CompanyResultType
     fields:
@@ -22,23 +27,11 @@ models:
         resolver: true
       items:
         resolver: true
-  Company:
-    model: github.com/novacloudcz/graphql-orm-example/gen.Company
-    fields:
-      employees:
-        resolver: true
   CompanyCreateInput:
     model: "map[string]interface{}"
   CompanyUpdateInput:
     model: "map[string]interface{}"
   
-  UserResultType:
-    model: github.com/novacloudcz/graphql-orm-example/gen.UserResultType
-    fields:
-      count:
-        resolver: true
-      items:
-        resolver: true
   User:
     model: github.com/novacloudcz/graphql-orm-example/gen.User
     fields:
@@ -48,11 +41,23 @@ models:
         resolver: true
       friends:
         resolver: true
+  UserResultType:
+    model: github.com/novacloudcz/graphql-orm-example/gen.UserResultType
+    fields:
+      count:
+        resolver: true
+      items:
+        resolver: true
   UserCreateInput:
     model: "map[string]interface{}"
   UserUpdateInput:
     model: "map[string]interface{}"
   
+  Task:
+    model: github.com/novacloudcz/graphql-orm-example/gen.Task
+    fields:
+      assignee:
+        resolver: true
   TaskResultType:
     model: github.com/novacloudcz/graphql-orm-example/gen.TaskResultType
     fields:
@@ -60,13 +65,12 @@ models:
         resolver: true
       items:
         resolver: true
-  Task:
-    model: github.com/novacloudcz/graphql-orm-example/gen.Task
-    fields:
-      assignee:
-        resolver: true
   TaskCreateInput:
     model: "map[string]interface{}"
   TaskUpdateInput:
     model: "map[string]interface{}"
   
+  
+  
+  _Any:
+    model: github.com/novacloudcz/graphql-orm-example/gen._Any
