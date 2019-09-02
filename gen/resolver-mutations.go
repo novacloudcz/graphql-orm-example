@@ -44,6 +44,12 @@ func CreateCompanyHandler(ctx context.Context, r *GeneratedResolver, input map[s
 		event.AddNewValue("name", changes.Name)
 	}
 
+	err = tx.Create(item).Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
 	if ids, ok := input["employeesIds"].([]interface{}); ok {
 		items := []User{}
 		tx.Find(&items, "id IN (?)", ids)
@@ -51,11 +57,6 @@ func CreateCompanyHandler(ctx context.Context, r *GeneratedResolver, input map[s
 		association.Replace(items)
 	}
 
-	err = tx.Create(item).Error
-	if err != nil {
-		tx.Rollback()
-		return
-	}
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()
@@ -104,6 +105,12 @@ func UpdateCompanyHandler(ctx context.Context, r *GeneratedResolver, id string, 
 		item.Name = changes.Name
 	}
 
+	err = tx.Save(item).Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
 	if ids, ok := input["employeesIds"].([]interface{}); ok {
 		items := []User{}
 		tx.Find(&items, "id IN (?)", ids)
@@ -111,11 +118,6 @@ func UpdateCompanyHandler(ctx context.Context, r *GeneratedResolver, id string, 
 		association.Replace(items)
 	}
 
-	err = tx.Save(item).Error
-	if err != nil {
-		tx.Rollback()
-		return
-	}
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()
@@ -218,6 +220,12 @@ func CreateUserHandler(ctx context.Context, r *GeneratedResolver, input map[stri
 		event.AddNewValue("lastName", changes.LastName)
 	}
 
+	err = tx.Create(item).Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
 	if ids, ok := input["tasksIds"].([]interface{}); ok {
 		items := []Task{}
 		tx.Find(&items, "id IN (?)", ids)
@@ -239,11 +247,6 @@ func CreateUserHandler(ctx context.Context, r *GeneratedResolver, input map[stri
 		association.Replace(items)
 	}
 
-	err = tx.Create(item).Error
-	if err != nil {
-		tx.Rollback()
-		return
-	}
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()
@@ -304,6 +307,12 @@ func UpdateUserHandler(ctx context.Context, r *GeneratedResolver, id string, inp
 		item.LastName = changes.LastName
 	}
 
+	err = tx.Save(item).Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
 	if ids, ok := input["tasksIds"].([]interface{}); ok {
 		items := []Task{}
 		tx.Find(&items, "id IN (?)", ids)
@@ -325,11 +334,6 @@ func UpdateUserHandler(ctx context.Context, r *GeneratedResolver, id string, inp
 		association.Replace(items)
 	}
 
-	err = tx.Save(item).Error
-	if err != nil {
-		tx.Rollback()
-		return
-	}
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()
@@ -452,6 +456,7 @@ func CreateTaskHandler(ctx context.Context, r *GeneratedResolver, input map[stri
 		tx.Rollback()
 		return
 	}
+
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()
@@ -535,6 +540,7 @@ func UpdateTaskHandler(ctx context.Context, r *GeneratedResolver, id string, inp
 		tx.Rollback()
 		return
 	}
+
 	err = tx.Commit().Error
 	if err != nil {
 		tx.Rollback()

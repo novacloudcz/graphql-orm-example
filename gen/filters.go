@@ -8,6 +8,16 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+func (f *CompanyFilterType) IsEmpty(ctx context.Context, dialect gorm.Dialect) bool {
+	wheres := []string{}
+	values := []interface{}{}
+	joins := []string{}
+	err := f.ApplyWithAlias(ctx, dialect, "companies", &wheres, &values, &joins)
+	if err != nil {
+		panic(err)
+	}
+	return len(wheres) == 0
+}
 func (f *CompanyFilterType) Apply(ctx context.Context, dialect gorm.Dialect, wheres *[]string, values *[]interface{}, joins *[]string) error {
 	return f.ApplyWithAlias(ctx, dialect, "companies", wheres, values, joins)
 }
@@ -291,6 +301,16 @@ func (f *CompanyFilterType) OrWith(f2 ...*CompanyFilterType) *CompanyFilterType 
 	}
 }
 
+func (f *UserFilterType) IsEmpty(ctx context.Context, dialect gorm.Dialect) bool {
+	wheres := []string{}
+	values := []interface{}{}
+	joins := []string{}
+	err := f.ApplyWithAlias(ctx, dialect, "companies", &wheres, &values, &joins)
+	if err != nil {
+		panic(err)
+	}
+	return len(wheres) == 0
+}
 func (f *UserFilterType) Apply(ctx context.Context, dialect gorm.Dialect, wheres *[]string, values *[]interface{}, joins *[]string) error {
 	return f.ApplyWithAlias(ctx, dialect, "users", wheres, values, joins)
 }
@@ -674,6 +694,16 @@ func (f *UserFilterType) OrWith(f2 ...*UserFilterType) *UserFilterType {
 	}
 }
 
+func (f *TaskFilterType) IsEmpty(ctx context.Context, dialect gorm.Dialect) bool {
+	wheres := []string{}
+	values := []interface{}{}
+	joins := []string{}
+	err := f.ApplyWithAlias(ctx, dialect, "companies", &wheres, &values, &joins)
+	if err != nil {
+		panic(err)
+	}
+	return len(wheres) == 0
+}
 func (f *TaskFilterType) Apply(ctx context.Context, dialect gorm.Dialect, wheres *[]string, values *[]interface{}, joins *[]string) error {
 	return f.ApplyWithAlias(ctx, dialect, "tasks", wheres, values, joins)
 }

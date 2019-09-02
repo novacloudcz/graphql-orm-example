@@ -2,7 +2,6 @@ package gen
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/graph-gophers/dataloader"
@@ -49,7 +48,7 @@ func QueryCompanyHandler(ctx context.Context, r *GeneratedResolver, opts QueryCo
 		return nil, err
 	}
 	if len(items) == 0 {
-		return nil, fmt.Errorf("Company not found")
+		return nil, &NotFoundError{Entity: "Company"}
 	}
 	return items[0], err
 }
@@ -173,7 +172,7 @@ func QueryUserHandler(ctx context.Context, r *GeneratedResolver, opts QueryUserH
 		return nil, err
 	}
 	if len(items) == 0 {
-		return nil, fmt.Errorf("User not found")
+		return nil, &NotFoundError{Entity: "User"}
 	}
 	return items[0], err
 }
@@ -347,7 +346,7 @@ func QueryTaskHandler(ctx context.Context, r *GeneratedResolver, opts QueryTaskH
 		return nil, err
 	}
 	if len(items) == 0 {
-		return nil, fmt.Errorf("Task not found")
+		return nil, &NotFoundError{Entity: "Task"}
 	}
 	return items[0], err
 }
@@ -418,6 +417,7 @@ func TaskAssigneeHandler(ctx context.Context, r *GeneratedTaskResolver, obj *Tas
 	if obj.AssigneeID != nil {
 		item, _err := loaders["User"].Load(ctx, dataloader.StringKey(*obj.AssigneeID))()
 		res, _ = item.(*User)
+
 		err = _err
 	}
 
