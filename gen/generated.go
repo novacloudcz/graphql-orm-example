@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -817,7 +816,7 @@ extend type Query {
 
 type Company {
   id: ID!
-  name: String @validator(required: true)
+  name: String
   employees: [User!]!
   updatedAt: Time
   createdAt: Time!
@@ -1714,25 +1713,8 @@ func (ec *executionContext) _Company_name(ctx context.Context, field graphql.Col
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return obj.Name, nil
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalNBoolean2bool(ctx, true)
-			if err != nil {
-				return nil, err
-			}
-			return ec.directives.Validator(ctx, obj, directive0, required)
-		}
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if data, ok := tmp.(*string); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)

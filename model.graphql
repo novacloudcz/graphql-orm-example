@@ -6,8 +6,7 @@ extend type Query {
 }
 
 type Company {
-  name: String @validator(required: true)
-
+  name: String # TODO: @validator(required: true)
   employees: [User!]! @relationship(inverse: "companies")
 }
 

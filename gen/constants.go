@@ -41,7 +41,7 @@ extend type Query {
 
 type Company {
   id: ID!
-  name: String @validator(required: true)
+  name: String
   employees: [User!]!
   updatedAt: Time
   createdAt: Time!
