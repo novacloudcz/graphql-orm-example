@@ -4,8 +4,7 @@ ENV GO111MODULE=on
 WORKDIR /go/src/github.com/novacloudcz/graphql-orm-example
 
 COPY . .
-RUN go get ./... 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o /tmp/app *.go
+RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o /tmp/app *.go
 
 FROM jakubknejzlik/wait-for as wait-for
 
@@ -22,4 +21,4 @@ COPY --from=builder /tmp/app /usr/local/bin/app
 RUN chmod +x /usr/local/bin/app
 
 ENTRYPOINT []
-CMD [ "/bin/sh", "-c", "wait-for ${DATABASE_URL} && app"]
+CMD [ "/bin/sh", "-c", "wait-for ${DATABASE_URL} && app start"]

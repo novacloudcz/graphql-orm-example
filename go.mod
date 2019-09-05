@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/99designs/gqlgen v0.9.1
+	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/graph-gophers/dataloader v5.0.0+incompatible
