@@ -5,15 +5,15 @@ extend type Query {
   hello: String!
 }
 
-type Company {
-  name: String # TODO: @validator(required: true)
+type Company @entity {
+  name: String @column # TODO: @validator(required: true)
   employees: [User!]! @relationship(inverse: "companies")
 }
 
-type User {
-  email: String
-  firstName: String
-  lastName: String
+type User @entity {
+  email: String @column
+  firstName: String @column
+  lastName: String @column
 
   tasks: [Task!]! @relationship(inverse: "assignee")
   companies: [Company!]! @relationship(inverse: "employees")
@@ -24,11 +24,11 @@ enum TaskType {
   BUG
   TASK
 }
-type Task {
-  title: String
-  completed: Boolean
-  dueDate: Time
-  type: TaskType
+type Task @entity {
+  title: String @column
+  completed: Boolean @column
+  dueDate: Time @column
+  type: TaskType @column
   # type: text is forwarded to gorm tags, which is then used for db engine column type
   description: String @column(type: "text")
 

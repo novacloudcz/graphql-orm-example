@@ -19,7 +19,7 @@ func (f *CompanyFilterType) IsEmpty(ctx context.Context, dialect gorm.Dialect) b
 	return len(wheres) == 0
 }
 func (f *CompanyFilterType) Apply(ctx context.Context, dialect gorm.Dialect, wheres *[]string, values *[]interface{}, joins *[]string) error {
-	return f.ApplyWithAlias(ctx, dialect, "companies", wheres, values, joins)
+	return f.ApplyWithAlias(ctx, dialect, TableName("companies"), wheres, values, joins)
 }
 func (f *CompanyFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dialect, alias string, wheres *[]string, values *[]interface{}, joins *[]string) error {
 	if f == nil {
@@ -66,7 +66,7 @@ func (f *CompanyFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dia
 
 	if f.Employees != nil {
 		_alias := alias + "_employees"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("company_employees")+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" = "+dialect.Quote(_alias)+".id")
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote(TableName("company_employees"))+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" = "+dialect.Quote(_alias)+".id")
 		err := f.Employees.ApplyWithAlias(ctx, dialect, _alias, wheres, values, joins)
 		if err != nil {
 			return err
@@ -312,7 +312,7 @@ func (f *UserFilterType) IsEmpty(ctx context.Context, dialect gorm.Dialect) bool
 	return len(wheres) == 0
 }
 func (f *UserFilterType) Apply(ctx context.Context, dialect gorm.Dialect, wheres *[]string, values *[]interface{}, joins *[]string) error {
-	return f.ApplyWithAlias(ctx, dialect, "users", wheres, values, joins)
+	return f.ApplyWithAlias(ctx, dialect, TableName("users"), wheres, values, joins)
 }
 func (f *UserFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dialect, alias string, wheres *[]string, values *[]interface{}, joins *[]string) error {
 	if f == nil {
@@ -359,7 +359,7 @@ func (f *UserFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dialec
 
 	if f.Tasks != nil {
 		_alias := alias + "_tasks"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("tasks")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias)+"."+dialect.Quote("assigneeId")+" = "+dialect.Quote(alias)+".id")
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote(TableName("tasks"))+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias)+"."+dialect.Quote("assigneeId")+" = "+dialect.Quote(alias)+".id")
 		err := f.Tasks.ApplyWithAlias(ctx, dialect, _alias, wheres, values, joins)
 		if err != nil {
 			return err
@@ -368,7 +368,7 @@ func (f *UserFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dialec
 
 	if f.Companies != nil {
 		_alias := alias + "_companies"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("company_employees")+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" LEFT JOIN "+dialect.Quote("companies")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" = "+dialect.Quote(_alias)+".id")
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote(TableName("company_employees"))+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("employee_id")+" LEFT JOIN "+dialect.Quote("companies")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("company_id")+" = "+dialect.Quote(_alias)+".id")
 		err := f.Companies.ApplyWithAlias(ctx, dialect, _alias, wheres, values, joins)
 		if err != nil {
 			return err
@@ -377,7 +377,7 @@ func (f *UserFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dialec
 
 	if f.Friends != nil {
 		_alias := alias + "_friends"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("user_friends")+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" = "+dialect.Quote(_alias)+".id")
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote(TableName("user_friends"))+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" = "+dialect.Quote(_alias)+".id")
 		err := f.Friends.ApplyWithAlias(ctx, dialect, _alias, wheres, values, joins)
 		if err != nil {
 			return err
@@ -705,7 +705,7 @@ func (f *TaskFilterType) IsEmpty(ctx context.Context, dialect gorm.Dialect) bool
 	return len(wheres) == 0
 }
 func (f *TaskFilterType) Apply(ctx context.Context, dialect gorm.Dialect, wheres *[]string, values *[]interface{}, joins *[]string) error {
-	return f.ApplyWithAlias(ctx, dialect, "tasks", wheres, values, joins)
+	return f.ApplyWithAlias(ctx, dialect, TableName("tasks"), wheres, values, joins)
 }
 func (f *TaskFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dialect, alias string, wheres *[]string, values *[]interface{}, joins *[]string) error {
 	if f == nil {
@@ -752,7 +752,7 @@ func (f *TaskFilterType) ApplyWithAlias(ctx context.Context, dialect gorm.Dialec
 
 	if f.Assignee != nil {
 		_alias := alias + "_assignee"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote("users")+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias)+".id = "+alias+"."+dialect.Quote("assigneeId"))
+		*joins = append(*joins, "LEFT JOIN "+dialect.Quote(TableName("users"))+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias)+".id = "+alias+"."+dialect.Quote("assigneeId"))
 		err := f.Assignee.ApplyWithAlias(ctx, dialect, _alias, wheres, values, joins)
 		if err != nil {
 			return err

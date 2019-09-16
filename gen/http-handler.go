@@ -35,7 +35,7 @@ func GetHTTPServeMux(r ResolverRoot, db *DB) *http.ServeMux {
 	return handler
 }
 
-func getPrincipalIDFromContext(ctx context.Context) *string {
+func GetPrincipalIDFromContext(ctx context.Context) *string {
 	v, _ := ctx.Value(KeyPrincipalID).(*string)
 	return v
 }
@@ -45,10 +45,6 @@ func getJWTClaimsFromContext(ctx context.Context) *JWTClaims {
 }
 
 func getPrincipalID(req *http.Request) *string {
-	pID := req.Header.Get("principal-id")
-	if pID != "" {
-		return &pID
-	}
 	c, _ := getJWTClaims(req)
 	if c == nil {
 		return nil

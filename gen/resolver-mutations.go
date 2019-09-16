@@ -15,7 +15,7 @@ func (r *GeneratedMutationResolver) CreateCompany(ctx context.Context, input map
 	return r.Handlers.CreateCompany(ctx, r.GeneratedResolver, input)
 }
 func CreateCompanyHandler(ctx context.Context, r *GeneratedResolver, input map[string]interface{}) (item *Company, err error) {
-	principalID := getPrincipalIDFromContext(ctx)
+	principalID := GetPrincipalIDFromContext(ctx)
 	now := time.Now()
 	item = &Company{ID: uuid.Must(uuid.NewV4()).String(), CreatedAt: now, CreatedBy: principalID}
 	tx := r.DB.db.Begin()
@@ -73,7 +73,7 @@ func (r *GeneratedMutationResolver) UpdateCompany(ctx context.Context, id string
 	return r.Handlers.UpdateCompany(ctx, r.GeneratedResolver, id, input)
 }
 func UpdateCompanyHandler(ctx context.Context, r *GeneratedResolver, id string, input map[string]interface{}) (item *Company, err error) {
-	principalID := getPrincipalIDFromContext(ctx)
+	principalID := GetPrincipalIDFromContext(ctx)
 	item = &Company{}
 	now := time.Now()
 	tx := r.DB.db.Begin()
@@ -136,7 +136,7 @@ func (r *GeneratedMutationResolver) DeleteCompany(ctx context.Context, id string
 	return r.Handlers.DeleteCompany(ctx, r.GeneratedResolver, id)
 }
 func DeleteCompanyHandler(ctx context.Context, r *GeneratedResolver, id string) (item *Company, err error) {
-	principalID := getPrincipalIDFromContext(ctx)
+	principalID := GetPrincipalIDFromContext(ctx)
 	item = &Company{}
 	now := time.Now()
 	tx := r.DB.db.Begin()
@@ -154,7 +154,7 @@ func DeleteCompanyHandler(ctx context.Context, r *GeneratedResolver, id string) 
 		PrincipalID: principalID,
 	})
 
-	err = tx.Delete(item, "companies.id = ?", id).Error
+	err = tx.Delete(item, TableName("companies")+".id = ?", id).Error
 	if err != nil {
 		tx.Rollback()
 		return
@@ -181,7 +181,7 @@ func (r *GeneratedMutationResolver) CreateUser(ctx context.Context, input map[st
 	return r.Handlers.CreateUser(ctx, r.GeneratedResolver, input)
 }
 func CreateUserHandler(ctx context.Context, r *GeneratedResolver, input map[string]interface{}) (item *User, err error) {
-	principalID := getPrincipalIDFromContext(ctx)
+	principalID := GetPrincipalIDFromContext(ctx)
 	now := time.Now()
 	item = &User{ID: uuid.Must(uuid.NewV4()).String(), CreatedAt: now, CreatedBy: principalID}
 	tx := r.DB.db.Begin()
@@ -263,7 +263,7 @@ func (r *GeneratedMutationResolver) UpdateUser(ctx context.Context, id string, i
 	return r.Handlers.UpdateUser(ctx, r.GeneratedResolver, id, input)
 }
 func UpdateUserHandler(ctx context.Context, r *GeneratedResolver, id string, input map[string]interface{}) (item *User, err error) {
-	principalID := getPrincipalIDFromContext(ctx)
+	principalID := GetPrincipalIDFromContext(ctx)
 	item = &User{}
 	now := time.Now()
 	tx := r.DB.db.Begin()
@@ -352,7 +352,7 @@ func (r *GeneratedMutationResolver) DeleteUser(ctx context.Context, id string) (
 	return r.Handlers.DeleteUser(ctx, r.GeneratedResolver, id)
 }
 func DeleteUserHandler(ctx context.Context, r *GeneratedResolver, id string) (item *User, err error) {
-	principalID := getPrincipalIDFromContext(ctx)
+	principalID := GetPrincipalIDFromContext(ctx)
 	item = &User{}
 	now := time.Now()
 	tx := r.DB.db.Begin()
@@ -370,7 +370,7 @@ func DeleteUserHandler(ctx context.Context, r *GeneratedResolver, id string) (it
 		PrincipalID: principalID,
 	})
 
-	err = tx.Delete(item, "users.id = ?", id).Error
+	err = tx.Delete(item, TableName("users")+".id = ?", id).Error
 	if err != nil {
 		tx.Rollback()
 		return
@@ -397,7 +397,7 @@ func (r *GeneratedMutationResolver) CreateTask(ctx context.Context, input map[st
 	return r.Handlers.CreateTask(ctx, r.GeneratedResolver, input)
 }
 func CreateTaskHandler(ctx context.Context, r *GeneratedResolver, input map[string]interface{}) (item *Task, err error) {
-	principalID := getPrincipalIDFromContext(ctx)
+	principalID := GetPrincipalIDFromContext(ctx)
 	now := time.Now()
 	item = &Task{ID: uuid.Must(uuid.NewV4()).String(), CreatedAt: now, CreatedBy: principalID}
 	tx := r.DB.db.Begin()
@@ -473,7 +473,7 @@ func (r *GeneratedMutationResolver) UpdateTask(ctx context.Context, id string, i
 	return r.Handlers.UpdateTask(ctx, r.GeneratedResolver, id, input)
 }
 func UpdateTaskHandler(ctx context.Context, r *GeneratedResolver, id string, input map[string]interface{}) (item *Task, err error) {
-	principalID := getPrincipalIDFromContext(ctx)
+	principalID := GetPrincipalIDFromContext(ctx)
 	item = &Task{}
 	now := time.Now()
 	tx := r.DB.db.Begin()
@@ -559,7 +559,7 @@ func (r *GeneratedMutationResolver) DeleteTask(ctx context.Context, id string) (
 	return r.Handlers.DeleteTask(ctx, r.GeneratedResolver, id)
 }
 func DeleteTaskHandler(ctx context.Context, r *GeneratedResolver, id string) (item *Task, err error) {
-	principalID := getPrincipalIDFromContext(ctx)
+	principalID := GetPrincipalIDFromContext(ctx)
 	item = &Task{}
 	now := time.Now()
 	tx := r.DB.db.Begin()
@@ -577,7 +577,7 @@ func DeleteTaskHandler(ctx context.Context, r *GeneratedResolver, id string) (it
 		PrincipalID: principalID,
 	})
 
-	err = tx.Delete(item, "tasks.id = ?", id).Error
+	err = tx.Delete(item, TableName("tasks")+".id = ?", id).Error
 	if err != nil {
 		tx.Rollback()
 		return

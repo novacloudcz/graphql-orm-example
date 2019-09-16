@@ -39,11 +39,11 @@ func QueryCompanyHandler(ctx context.Context, r *GeneratedResolver, opts QueryCo
 	}
 	qb := r.DB.Query()
 	if opts.ID != nil {
-		qb = qb.Where("companies.id = ?", *opts.ID)
+		qb = qb.Where(TableName("companies")+".id = ?", *opts.ID)
 	}
 
 	var items []*Company
-	err := rt.GetItems(ctx, qb, "companies", &items)
+	err := rt.GetItems(ctx, qb, TableName("companies"), &items)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func QueryCompaniesHandler(ctx context.Context, r *GeneratedResolver, opts Query
 type GeneratedCompanyResultTypeResolver struct{ *GeneratedResolver }
 
 func (r *GeneratedCompanyResultTypeResolver) Items(ctx context.Context, obj *CompanyResultType) (items []*Company, err error) {
-	err = obj.GetItems(ctx, r.DB.db, "companies", &items)
+	err = obj.GetItems(ctx, r.DB.db, TableName("companies"), &items)
 	return
 }
 
@@ -126,7 +126,7 @@ func (r *GeneratedCompanyResolver) EmployeesIds(ctx context.Context, obj *Compan
 	ids = []string{}
 
 	items := []*User{}
-	err = r.DB.Query().Model(obj).Select("users.id").Related(&items, "Employees").Error
+	err = r.DB.Query().Model(obj).Select(TableName("users")+".id").Related(&items, "Employees").Error
 
 	for _, item := range items {
 		ids = append(ids, item.ID)
@@ -163,11 +163,11 @@ func QueryUserHandler(ctx context.Context, r *GeneratedResolver, opts QueryUserH
 	}
 	qb := r.DB.Query()
 	if opts.ID != nil {
-		qb = qb.Where("users.id = ?", *opts.ID)
+		qb = qb.Where(TableName("users")+".id = ?", *opts.ID)
 	}
 
 	var items []*User
-	err := rt.GetItems(ctx, qb, "users", &items)
+	err := rt.GetItems(ctx, qb, TableName("users"), &items)
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +224,7 @@ func QueryUsersHandler(ctx context.Context, r *GeneratedResolver, opts QueryUser
 type GeneratedUserResultTypeResolver struct{ *GeneratedResolver }
 
 func (r *GeneratedUserResultTypeResolver) Items(ctx context.Context, obj *UserResultType) (items []*User, err error) {
-	err = obj.GetItems(ctx, r.DB.db, "users", &items)
+	err = obj.GetItems(ctx, r.DB.db, TableName("users"), &items)
 	return
 }
 
@@ -250,7 +250,7 @@ func (r *GeneratedUserResolver) TasksIds(ctx context.Context, obj *User) (ids []
 	ids = []string{}
 
 	items := []*Task{}
-	err = r.DB.Query().Model(obj).Select("tasks.id").Related(&items, "Tasks").Error
+	err = r.DB.Query().Model(obj).Select(TableName("tasks")+".id").Related(&items, "Tasks").Error
 
 	for _, item := range items {
 		ids = append(ids, item.ID)
@@ -275,7 +275,7 @@ func (r *GeneratedUserResolver) CompaniesIds(ctx context.Context, obj *User) (id
 	ids = []string{}
 
 	items := []*Company{}
-	err = r.DB.Query().Model(obj).Select("companies.id").Related(&items, "Companies").Error
+	err = r.DB.Query().Model(obj).Select(TableName("companies")+".id").Related(&items, "Companies").Error
 
 	for _, item := range items {
 		ids = append(ids, item.ID)
@@ -300,7 +300,7 @@ func (r *GeneratedUserResolver) FriendsIds(ctx context.Context, obj *User) (ids 
 	ids = []string{}
 
 	items := []*User{}
-	err = r.DB.Query().Model(obj).Select("users.id").Related(&items, "Friends").Error
+	err = r.DB.Query().Model(obj).Select(TableName("users")+".id").Related(&items, "Friends").Error
 
 	for _, item := range items {
 		ids = append(ids, item.ID)
@@ -337,11 +337,11 @@ func QueryTaskHandler(ctx context.Context, r *GeneratedResolver, opts QueryTaskH
 	}
 	qb := r.DB.Query()
 	if opts.ID != nil {
-		qb = qb.Where("tasks.id = ?", *opts.ID)
+		qb = qb.Where(TableName("tasks")+".id = ?", *opts.ID)
 	}
 
 	var items []*Task
-	err := rt.GetItems(ctx, qb, "tasks", &items)
+	err := rt.GetItems(ctx, qb, TableName("tasks"), &items)
 	if err != nil {
 		return nil, err
 	}
@@ -398,7 +398,7 @@ func QueryTasksHandler(ctx context.Context, r *GeneratedResolver, opts QueryTask
 type GeneratedTaskResultTypeResolver struct{ *GeneratedResolver }
 
 func (r *GeneratedTaskResultTypeResolver) Items(ctx context.Context, obj *TaskResultType) (items []*Task, err error) {
-	err = obj.GetItems(ctx, r.DB.db, "tasks", &items)
+	err = obj.GetItems(ctx, r.DB.db, TableName("tasks"), &items)
 	return
 }
 
