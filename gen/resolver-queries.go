@@ -5,7 +5,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/graph-gophers/dataloader"
-	"github.com/novacloudcz/graphql-orm/resolvers"
 	"github.com/vektah/gqlparser/ast"
 )
 
@@ -30,7 +29,7 @@ func QueryCompanyHandler(ctx context.Context, r *GeneratedResolver, opts QueryCo
 	offset := 0
 	limit := 1
 	rt := &CompanyResultType{
-		EntityResultType: resolvers.EntityResultType{
+		EntityResultType: EntityResultType{
 			Offset: &offset,
 			Limit:  &limit,
 			Query:  &query,
@@ -43,7 +42,11 @@ func QueryCompanyHandler(ctx context.Context, r *GeneratedResolver, opts QueryCo
 	}
 
 	var items []*Company
-	err := rt.GetItems(ctx, qb, TableName("companies"), &items)
+	giOpts := GetItemsOptions{
+		Alias:      TableName("companies"),
+		Preloaders: []string{},
+	}
+	err := rt.GetItems(ctx, qb, giOpts, &items)
 	if err != nil {
 		return nil, err
 	}
@@ -57,11 +60,11 @@ type QueryCompaniesHandlerOptions struct {
 	Offset *int
 	Limit  *int
 	Q      *string
-	Sort   []CompanySortType
+	Sort   []*CompanySortType
 	Filter *CompanyFilterType
 }
 
-func (r *GeneratedQueryResolver) Companies(ctx context.Context, offset *int, limit *int, q *string, sort []CompanySortType, filter *CompanyFilterType) (*CompanyResultType, error) {
+func (r *GeneratedQueryResolver) Companies(ctx context.Context, offset *int, limit *int, q *string, sort []*CompanySortType, filter *CompanyFilterType) (*CompanyResultType, error) {
 	opts := QueryCompaniesHandlerOptions{
 		Offset: offset,
 		Limit:  limit,
@@ -72,10 +75,6 @@ func (r *GeneratedQueryResolver) Companies(ctx context.Context, offset *int, lim
 	return r.Handlers.QueryCompanies(ctx, r.GeneratedResolver, opts)
 }
 func QueryCompaniesHandler(ctx context.Context, r *GeneratedResolver, opts QueryCompaniesHandlerOptions) (*CompanyResultType, error) {
-	_sort := []resolvers.EntitySort{}
-	for _, s := range opts.Sort {
-		_sort = append(_sort, s)
-	}
 	query := CompanyQueryFilter{opts.Q}
 
 	var selectionSet *ast.SelectionSet
@@ -85,8 +84,13 @@ func QueryCompaniesHandler(ctx context.Context, r *GeneratedResolver, opts Query
 		}
 	}
 
+	_sort := []EntitySort{}
+	for _, sort := range opts.Sort {
+		_sort = append(_sort, sort)
+	}
+
 	return &CompanyResultType{
-		EntityResultType: resolvers.EntityResultType{
+		EntityResultType: EntityResultType{
 			Offset:       opts.Offset,
 			Limit:        opts.Limit,
 			Query:        &query,
@@ -100,7 +104,12 @@ func QueryCompaniesHandler(ctx context.Context, r *GeneratedResolver, opts Query
 type GeneratedCompanyResultTypeResolver struct{ *GeneratedResolver }
 
 func (r *GeneratedCompanyResultTypeResolver) Items(ctx context.Context, obj *CompanyResultType) (items []*Company, err error) {
-	err = obj.GetItems(ctx, r.DB.db, TableName("companies"), &items)
+	giOpts := GetItemsOptions{
+		Alias:      TableName("companies"),
+		Preloaders: []string{},
+	}
+	err = obj.GetItems(ctx, r.DB.db, giOpts, &items)
+
 	return
 }
 
@@ -154,7 +163,7 @@ func QueryUserHandler(ctx context.Context, r *GeneratedResolver, opts QueryUserH
 	offset := 0
 	limit := 1
 	rt := &UserResultType{
-		EntityResultType: resolvers.EntityResultType{
+		EntityResultType: EntityResultType{
 			Offset: &offset,
 			Limit:  &limit,
 			Query:  &query,
@@ -167,7 +176,11 @@ func QueryUserHandler(ctx context.Context, r *GeneratedResolver, opts QueryUserH
 	}
 
 	var items []*User
-	err := rt.GetItems(ctx, qb, TableName("users"), &items)
+	giOpts := GetItemsOptions{
+		Alias:      TableName("users"),
+		Preloaders: []string{},
+	}
+	err := rt.GetItems(ctx, qb, giOpts, &items)
 	if err != nil {
 		return nil, err
 	}
@@ -181,11 +194,11 @@ type QueryUsersHandlerOptions struct {
 	Offset *int
 	Limit  *int
 	Q      *string
-	Sort   []UserSortType
+	Sort   []*UserSortType
 	Filter *UserFilterType
 }
 
-func (r *GeneratedQueryResolver) Users(ctx context.Context, offset *int, limit *int, q *string, sort []UserSortType, filter *UserFilterType) (*UserResultType, error) {
+func (r *GeneratedQueryResolver) Users(ctx context.Context, offset *int, limit *int, q *string, sort []*UserSortType, filter *UserFilterType) (*UserResultType, error) {
 	opts := QueryUsersHandlerOptions{
 		Offset: offset,
 		Limit:  limit,
@@ -196,10 +209,6 @@ func (r *GeneratedQueryResolver) Users(ctx context.Context, offset *int, limit *
 	return r.Handlers.QueryUsers(ctx, r.GeneratedResolver, opts)
 }
 func QueryUsersHandler(ctx context.Context, r *GeneratedResolver, opts QueryUsersHandlerOptions) (*UserResultType, error) {
-	_sort := []resolvers.EntitySort{}
-	for _, s := range opts.Sort {
-		_sort = append(_sort, s)
-	}
 	query := UserQueryFilter{opts.Q}
 
 	var selectionSet *ast.SelectionSet
@@ -209,8 +218,13 @@ func QueryUsersHandler(ctx context.Context, r *GeneratedResolver, opts QueryUser
 		}
 	}
 
+	_sort := []EntitySort{}
+	for _, sort := range opts.Sort {
+		_sort = append(_sort, sort)
+	}
+
 	return &UserResultType{
-		EntityResultType: resolvers.EntityResultType{
+		EntityResultType: EntityResultType{
 			Offset:       opts.Offset,
 			Limit:        opts.Limit,
 			Query:        &query,
@@ -224,7 +238,12 @@ func QueryUsersHandler(ctx context.Context, r *GeneratedResolver, opts QueryUser
 type GeneratedUserResultTypeResolver struct{ *GeneratedResolver }
 
 func (r *GeneratedUserResultTypeResolver) Items(ctx context.Context, obj *UserResultType) (items []*User, err error) {
-	err = obj.GetItems(ctx, r.DB.db, TableName("users"), &items)
+	giOpts := GetItemsOptions{
+		Alias:      TableName("users"),
+		Preloaders: []string{},
+	}
+	err = obj.GetItems(ctx, r.DB.db, giOpts, &items)
+
 	return
 }
 
@@ -328,7 +347,7 @@ func QueryTaskHandler(ctx context.Context, r *GeneratedResolver, opts QueryTaskH
 	offset := 0
 	limit := 1
 	rt := &TaskResultType{
-		EntityResultType: resolvers.EntityResultType{
+		EntityResultType: EntityResultType{
 			Offset: &offset,
 			Limit:  &limit,
 			Query:  &query,
@@ -341,7 +360,11 @@ func QueryTaskHandler(ctx context.Context, r *GeneratedResolver, opts QueryTaskH
 	}
 
 	var items []*Task
-	err := rt.GetItems(ctx, qb, TableName("tasks"), &items)
+	giOpts := GetItemsOptions{
+		Alias:      TableName("tasks"),
+		Preloaders: []string{},
+	}
+	err := rt.GetItems(ctx, qb, giOpts, &items)
 	if err != nil {
 		return nil, err
 	}
@@ -355,11 +378,11 @@ type QueryTasksHandlerOptions struct {
 	Offset *int
 	Limit  *int
 	Q      *string
-	Sort   []TaskSortType
+	Sort   []*TaskSortType
 	Filter *TaskFilterType
 }
 
-func (r *GeneratedQueryResolver) Tasks(ctx context.Context, offset *int, limit *int, q *string, sort []TaskSortType, filter *TaskFilterType) (*TaskResultType, error) {
+func (r *GeneratedQueryResolver) Tasks(ctx context.Context, offset *int, limit *int, q *string, sort []*TaskSortType, filter *TaskFilterType) (*TaskResultType, error) {
 	opts := QueryTasksHandlerOptions{
 		Offset: offset,
 		Limit:  limit,
@@ -370,10 +393,6 @@ func (r *GeneratedQueryResolver) Tasks(ctx context.Context, offset *int, limit *
 	return r.Handlers.QueryTasks(ctx, r.GeneratedResolver, opts)
 }
 func QueryTasksHandler(ctx context.Context, r *GeneratedResolver, opts QueryTasksHandlerOptions) (*TaskResultType, error) {
-	_sort := []resolvers.EntitySort{}
-	for _, s := range opts.Sort {
-		_sort = append(_sort, s)
-	}
 	query := TaskQueryFilter{opts.Q}
 
 	var selectionSet *ast.SelectionSet
@@ -383,8 +402,13 @@ func QueryTasksHandler(ctx context.Context, r *GeneratedResolver, opts QueryTask
 		}
 	}
 
+	_sort := []EntitySort{}
+	for _, sort := range opts.Sort {
+		_sort = append(_sort, sort)
+	}
+
 	return &TaskResultType{
-		EntityResultType: resolvers.EntityResultType{
+		EntityResultType: EntityResultType{
 			Offset:       opts.Offset,
 			Limit:        opts.Limit,
 			Query:        &query,
@@ -398,7 +422,12 @@ func QueryTasksHandler(ctx context.Context, r *GeneratedResolver, opts QueryTask
 type GeneratedTaskResultTypeResolver struct{ *GeneratedResolver }
 
 func (r *GeneratedTaskResultTypeResolver) Items(ctx context.Context, obj *TaskResultType) (items []*Task, err error) {
-	err = obj.GetItems(ctx, r.DB.db, TableName("tasks"), &items)
+	giOpts := GetItemsOptions{
+		Alias:      TableName("tasks"),
+		Preloaders: []string{},
+	}
+	err = obj.GetItems(ctx, r.DB.db, giOpts, &items)
+
 	return
 }
 

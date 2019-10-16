@@ -60,6 +60,17 @@ type CompanyFilterType struct {
 	Employees    *UserFilterType      `json:"employees"`
 }
 
+type CompanySortType struct {
+	ID           *ObjectSortType `json:"id"`
+	Name         *ObjectSortType `json:"name"`
+	UpdatedAt    *ObjectSortType `json:"updatedAt"`
+	CreatedAt    *ObjectSortType `json:"createdAt"`
+	UpdatedBy    *ObjectSortType `json:"updatedBy"`
+	CreatedBy    *ObjectSortType `json:"createdBy"`
+	EmployeesIds *ObjectSortType `json:"employeesIds"`
+	Employees    *UserSortType   `json:"employees"`
+}
+
 type TaskFilterType struct {
 	And               []*TaskFilterType `json:"AND"`
 	Or                []*TaskFilterType `json:"OR"`
@@ -149,6 +160,21 @@ type TaskFilterType struct {
 	Assignee          *UserFilterType   `json:"assignee"`
 }
 
+type TaskSortType struct {
+	ID          *ObjectSortType `json:"id"`
+	Title       *ObjectSortType `json:"title"`
+	Completed   *ObjectSortType `json:"completed"`
+	DueDate     *ObjectSortType `json:"dueDate"`
+	Type        *ObjectSortType `json:"type"`
+	Description *ObjectSortType `json:"description"`
+	AssigneeID  *ObjectSortType `json:"assigneeId"`
+	UpdatedAt   *ObjectSortType `json:"updatedAt"`
+	CreatedAt   *ObjectSortType `json:"createdAt"`
+	UpdatedBy   *ObjectSortType `json:"updatedBy"`
+	CreatedBy   *ObjectSortType `json:"createdBy"`
+	Assignee    *UserSortType   `json:"assignee"`
+}
+
 type UserFilterType struct {
 	And             []*UserFilterType  `json:"AND"`
 	Or              []*UserFilterType  `json:"OR"`
@@ -222,153 +248,65 @@ type UserFilterType struct {
 	Friends         *UserFilterType    `json:"friends"`
 }
 
+type UserSortType struct {
+	ID           *ObjectSortType  `json:"id"`
+	Email        *ObjectSortType  `json:"email"`
+	FirstName    *ObjectSortType  `json:"firstName"`
+	LastName     *ObjectSortType  `json:"lastName"`
+	UpdatedAt    *ObjectSortType  `json:"updatedAt"`
+	CreatedAt    *ObjectSortType  `json:"createdAt"`
+	UpdatedBy    *ObjectSortType  `json:"updatedBy"`
+	CreatedBy    *ObjectSortType  `json:"createdBy"`
+	TasksIds     *ObjectSortType  `json:"tasksIds"`
+	CompaniesIds *ObjectSortType  `json:"companiesIds"`
+	FriendsIds   *ObjectSortType  `json:"friendsIds"`
+	Tasks        *TaskSortType    `json:"tasks"`
+	Companies    *CompanySortType `json:"companies"`
+	Friends      *UserSortType    `json:"friends"`
+}
+
 type _Service struct {
 	Sdl *string `json:"sdl"`
 }
 
-type CompanySortType string
+type ObjectSortType string
 
 const (
-	CompanySortTypeIDAsc            CompanySortType = "ID_ASC"
-	CompanySortTypeIDDesc           CompanySortType = "ID_DESC"
-	CompanySortTypeNameAsc          CompanySortType = "NAME_ASC"
-	CompanySortTypeNameDesc         CompanySortType = "NAME_DESC"
-	CompanySortTypeUpdatedAtAsc     CompanySortType = "UPDATED_AT_ASC"
-	CompanySortTypeUpdatedAtDesc    CompanySortType = "UPDATED_AT_DESC"
-	CompanySortTypeCreatedAtAsc     CompanySortType = "CREATED_AT_ASC"
-	CompanySortTypeCreatedAtDesc    CompanySortType = "CREATED_AT_DESC"
-	CompanySortTypeUpdatedByAsc     CompanySortType = "UPDATED_BY_ASC"
-	CompanySortTypeUpdatedByDesc    CompanySortType = "UPDATED_BY_DESC"
-	CompanySortTypeCreatedByAsc     CompanySortType = "CREATED_BY_ASC"
-	CompanySortTypeCreatedByDesc    CompanySortType = "CREATED_BY_DESC"
-	CompanySortTypeEmployeesIDSAsc  CompanySortType = "EMPLOYEES_IDS_ASC"
-	CompanySortTypeEmployeesIDSDesc CompanySortType = "EMPLOYEES_IDS_DESC"
+	ObjectSortTypeAsc  ObjectSortType = "ASC"
+	ObjectSortTypeDesc ObjectSortType = "DESC"
 )
 
-var AllCompanySortType = []CompanySortType{
-	CompanySortTypeIDAsc,
-	CompanySortTypeIDDesc,
-	CompanySortTypeNameAsc,
-	CompanySortTypeNameDesc,
-	CompanySortTypeUpdatedAtAsc,
-	CompanySortTypeUpdatedAtDesc,
-	CompanySortTypeCreatedAtAsc,
-	CompanySortTypeCreatedAtDesc,
-	CompanySortTypeUpdatedByAsc,
-	CompanySortTypeUpdatedByDesc,
-	CompanySortTypeCreatedByAsc,
-	CompanySortTypeCreatedByDesc,
-	CompanySortTypeEmployeesIDSAsc,
-	CompanySortTypeEmployeesIDSDesc,
+var AllObjectSortType = []ObjectSortType{
+	ObjectSortTypeAsc,
+	ObjectSortTypeDesc,
 }
 
-func (e CompanySortType) IsValid() bool {
+func (e ObjectSortType) IsValid() bool {
 	switch e {
-	case CompanySortTypeIDAsc, CompanySortTypeIDDesc, CompanySortTypeNameAsc, CompanySortTypeNameDesc, CompanySortTypeUpdatedAtAsc, CompanySortTypeUpdatedAtDesc, CompanySortTypeCreatedAtAsc, CompanySortTypeCreatedAtDesc, CompanySortTypeUpdatedByAsc, CompanySortTypeUpdatedByDesc, CompanySortTypeCreatedByAsc, CompanySortTypeCreatedByDesc, CompanySortTypeEmployeesIDSAsc, CompanySortTypeEmployeesIDSDesc:
+	case ObjectSortTypeAsc, ObjectSortTypeDesc:
 		return true
 	}
 	return false
 }
 
-func (e CompanySortType) String() string {
+func (e ObjectSortType) String() string {
 	return string(e)
 }
 
-func (e *CompanySortType) UnmarshalGQL(v interface{}) error {
+func (e *ObjectSortType) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = CompanySortType(str)
+	*e = ObjectSortType(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid CompanySortType", str)
+		return fmt.Errorf("%s is not a valid ObjectSortType", str)
 	}
 	return nil
 }
 
-func (e CompanySortType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type TaskSortType string
-
-const (
-	TaskSortTypeIDAsc           TaskSortType = "ID_ASC"
-	TaskSortTypeIDDesc          TaskSortType = "ID_DESC"
-	TaskSortTypeTitleAsc        TaskSortType = "TITLE_ASC"
-	TaskSortTypeTitleDesc       TaskSortType = "TITLE_DESC"
-	TaskSortTypeCompletedAsc    TaskSortType = "COMPLETED_ASC"
-	TaskSortTypeCompletedDesc   TaskSortType = "COMPLETED_DESC"
-	TaskSortTypeDueDateAsc      TaskSortType = "DUE_DATE_ASC"
-	TaskSortTypeDueDateDesc     TaskSortType = "DUE_DATE_DESC"
-	TaskSortTypeTypeAsc         TaskSortType = "TYPE_ASC"
-	TaskSortTypeTypeDesc        TaskSortType = "TYPE_DESC"
-	TaskSortTypeDescriptionAsc  TaskSortType = "DESCRIPTION_ASC"
-	TaskSortTypeDescriptionDesc TaskSortType = "DESCRIPTION_DESC"
-	TaskSortTypeAssigneeIDAsc   TaskSortType = "ASSIGNEE_ID_ASC"
-	TaskSortTypeAssigneeIDDesc  TaskSortType = "ASSIGNEE_ID_DESC"
-	TaskSortTypeUpdatedAtAsc    TaskSortType = "UPDATED_AT_ASC"
-	TaskSortTypeUpdatedAtDesc   TaskSortType = "UPDATED_AT_DESC"
-	TaskSortTypeCreatedAtAsc    TaskSortType = "CREATED_AT_ASC"
-	TaskSortTypeCreatedAtDesc   TaskSortType = "CREATED_AT_DESC"
-	TaskSortTypeUpdatedByAsc    TaskSortType = "UPDATED_BY_ASC"
-	TaskSortTypeUpdatedByDesc   TaskSortType = "UPDATED_BY_DESC"
-	TaskSortTypeCreatedByAsc    TaskSortType = "CREATED_BY_ASC"
-	TaskSortTypeCreatedByDesc   TaskSortType = "CREATED_BY_DESC"
-)
-
-var AllTaskSortType = []TaskSortType{
-	TaskSortTypeIDAsc,
-	TaskSortTypeIDDesc,
-	TaskSortTypeTitleAsc,
-	TaskSortTypeTitleDesc,
-	TaskSortTypeCompletedAsc,
-	TaskSortTypeCompletedDesc,
-	TaskSortTypeDueDateAsc,
-	TaskSortTypeDueDateDesc,
-	TaskSortTypeTypeAsc,
-	TaskSortTypeTypeDesc,
-	TaskSortTypeDescriptionAsc,
-	TaskSortTypeDescriptionDesc,
-	TaskSortTypeAssigneeIDAsc,
-	TaskSortTypeAssigneeIDDesc,
-	TaskSortTypeUpdatedAtAsc,
-	TaskSortTypeUpdatedAtDesc,
-	TaskSortTypeCreatedAtAsc,
-	TaskSortTypeCreatedAtDesc,
-	TaskSortTypeUpdatedByAsc,
-	TaskSortTypeUpdatedByDesc,
-	TaskSortTypeCreatedByAsc,
-	TaskSortTypeCreatedByDesc,
-}
-
-func (e TaskSortType) IsValid() bool {
-	switch e {
-	case TaskSortTypeIDAsc, TaskSortTypeIDDesc, TaskSortTypeTitleAsc, TaskSortTypeTitleDesc, TaskSortTypeCompletedAsc, TaskSortTypeCompletedDesc, TaskSortTypeDueDateAsc, TaskSortTypeDueDateDesc, TaskSortTypeTypeAsc, TaskSortTypeTypeDesc, TaskSortTypeDescriptionAsc, TaskSortTypeDescriptionDesc, TaskSortTypeAssigneeIDAsc, TaskSortTypeAssigneeIDDesc, TaskSortTypeUpdatedAtAsc, TaskSortTypeUpdatedAtDesc, TaskSortTypeCreatedAtAsc, TaskSortTypeCreatedAtDesc, TaskSortTypeUpdatedByAsc, TaskSortTypeUpdatedByDesc, TaskSortTypeCreatedByAsc, TaskSortTypeCreatedByDesc:
-		return true
-	}
-	return false
-}
-
-func (e TaskSortType) String() string {
-	return string(e)
-}
-
-func (e *TaskSortType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = TaskSortType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid TaskSortType", str)
-	}
-	return nil
-}
-
-func (e TaskSortType) MarshalGQL(w io.Writer) {
+func (e ObjectSortType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -410,86 +348,5 @@ func (e *TaskType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e TaskType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type UserSortType string
-
-const (
-	UserSortTypeIDAsc            UserSortType = "ID_ASC"
-	UserSortTypeIDDesc           UserSortType = "ID_DESC"
-	UserSortTypeEmailAsc         UserSortType = "EMAIL_ASC"
-	UserSortTypeEmailDesc        UserSortType = "EMAIL_DESC"
-	UserSortTypeFirstNameAsc     UserSortType = "FIRST_NAME_ASC"
-	UserSortTypeFirstNameDesc    UserSortType = "FIRST_NAME_DESC"
-	UserSortTypeLastNameAsc      UserSortType = "LAST_NAME_ASC"
-	UserSortTypeLastNameDesc     UserSortType = "LAST_NAME_DESC"
-	UserSortTypeUpdatedAtAsc     UserSortType = "UPDATED_AT_ASC"
-	UserSortTypeUpdatedAtDesc    UserSortType = "UPDATED_AT_DESC"
-	UserSortTypeCreatedAtAsc     UserSortType = "CREATED_AT_ASC"
-	UserSortTypeCreatedAtDesc    UserSortType = "CREATED_AT_DESC"
-	UserSortTypeUpdatedByAsc     UserSortType = "UPDATED_BY_ASC"
-	UserSortTypeUpdatedByDesc    UserSortType = "UPDATED_BY_DESC"
-	UserSortTypeCreatedByAsc     UserSortType = "CREATED_BY_ASC"
-	UserSortTypeCreatedByDesc    UserSortType = "CREATED_BY_DESC"
-	UserSortTypeTasksIDSAsc      UserSortType = "TASKS_IDS_ASC"
-	UserSortTypeTasksIDSDesc     UserSortType = "TASKS_IDS_DESC"
-	UserSortTypeCompaniesIDSAsc  UserSortType = "COMPANIES_IDS_ASC"
-	UserSortTypeCompaniesIDSDesc UserSortType = "COMPANIES_IDS_DESC"
-	UserSortTypeFriendsIDSAsc    UserSortType = "FRIENDS_IDS_ASC"
-	UserSortTypeFriendsIDSDesc   UserSortType = "FRIENDS_IDS_DESC"
-)
-
-var AllUserSortType = []UserSortType{
-	UserSortTypeIDAsc,
-	UserSortTypeIDDesc,
-	UserSortTypeEmailAsc,
-	UserSortTypeEmailDesc,
-	UserSortTypeFirstNameAsc,
-	UserSortTypeFirstNameDesc,
-	UserSortTypeLastNameAsc,
-	UserSortTypeLastNameDesc,
-	UserSortTypeUpdatedAtAsc,
-	UserSortTypeUpdatedAtDesc,
-	UserSortTypeCreatedAtAsc,
-	UserSortTypeCreatedAtDesc,
-	UserSortTypeUpdatedByAsc,
-	UserSortTypeUpdatedByDesc,
-	UserSortTypeCreatedByAsc,
-	UserSortTypeCreatedByDesc,
-	UserSortTypeTasksIDSAsc,
-	UserSortTypeTasksIDSDesc,
-	UserSortTypeCompaniesIDSAsc,
-	UserSortTypeCompaniesIDSDesc,
-	UserSortTypeFriendsIDSAsc,
-	UserSortTypeFriendsIDSDesc,
-}
-
-func (e UserSortType) IsValid() bool {
-	switch e {
-	case UserSortTypeIDAsc, UserSortTypeIDDesc, UserSortTypeEmailAsc, UserSortTypeEmailDesc, UserSortTypeFirstNameAsc, UserSortTypeFirstNameDesc, UserSortTypeLastNameAsc, UserSortTypeLastNameDesc, UserSortTypeUpdatedAtAsc, UserSortTypeUpdatedAtDesc, UserSortTypeCreatedAtAsc, UserSortTypeCreatedAtDesc, UserSortTypeUpdatedByAsc, UserSortTypeUpdatedByDesc, UserSortTypeCreatedByAsc, UserSortTypeCreatedByDesc, UserSortTypeTasksIDSAsc, UserSortTypeTasksIDSDesc, UserSortTypeCompaniesIDSAsc, UserSortTypeCompaniesIDSDesc, UserSortTypeFriendsIDSAsc, UserSortTypeFriendsIDSDesc:
-		return true
-	}
-	return false
-}
-
-func (e UserSortType) String() string {
-	return string(e)
-}
-
-func (e *UserSortType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = UserSortType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid UserSortType", str)
-	}
-	return nil
-}
-
-func (e UserSortType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

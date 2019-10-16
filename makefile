@@ -8,7 +8,7 @@ migrate:
 	DATABASE_URL=sqlite3://test.db PORT=8080 go run *.go migrate
 
 run:
-	DATABASE_URL=sqlite3://test.db PORT=8080 go run *.go start --cors
+	GO111MODULE=on DATABASE_URL=sqlite3://test.db PORT=8080 go run *.go start --cors
 
 voyager:
 	docker run --rm -v `pwd`/gen/schema.graphql:/app/schema.graphql -p 8080:80 graphql/voyager

@@ -34,6 +34,11 @@ type Mutation {
   deleteAllTasks: Boolean!
 }
 
+enum ObjectSortType {
+  ASC
+  DESC
+}
+
 directive @validator(required: Boolean!) on FIELD_DEFINITION
 
 extend type Query {
@@ -99,21 +104,15 @@ input CompanyUpdateInput {
   employeesIds: [ID!]
 }
 
-enum CompanySortType {
-  ID_ASC
-  ID_DESC
-  NAME_ASC
-  NAME_DESC
-  UPDATED_AT_ASC
-  UPDATED_AT_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
-  UPDATED_BY_ASC
-  UPDATED_BY_DESC
-  CREATED_BY_ASC
-  CREATED_BY_DESC
-  EMPLOYEES_IDS_ASC
-  EMPLOYEES_IDS_DESC
+input CompanySortType {
+  id: ObjectSortType
+  name: ObjectSortType
+  updatedAt: ObjectSortType
+  createdAt: ObjectSortType
+  updatedBy: ObjectSortType
+  createdBy: ObjectSortType
+  employeesIds: ObjectSortType
+  employees: UserSortType
 }
 
 input CompanyFilterType {
@@ -191,29 +190,21 @@ input UserUpdateInput {
   friendsIds: [ID!]
 }
 
-enum UserSortType {
-  ID_ASC
-  ID_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  FIRST_NAME_ASC
-  FIRST_NAME_DESC
-  LAST_NAME_ASC
-  LAST_NAME_DESC
-  UPDATED_AT_ASC
-  UPDATED_AT_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
-  UPDATED_BY_ASC
-  UPDATED_BY_DESC
-  CREATED_BY_ASC
-  CREATED_BY_DESC
-  TASKS_IDS_ASC
-  TASKS_IDS_DESC
-  COMPANIES_IDS_ASC
-  COMPANIES_IDS_DESC
-  FRIENDS_IDS_ASC
-  FRIENDS_IDS_DESC
+input UserSortType {
+  id: ObjectSortType
+  email: ObjectSortType
+  firstName: ObjectSortType
+  lastName: ObjectSortType
+  updatedAt: ObjectSortType
+  createdAt: ObjectSortType
+  updatedBy: ObjectSortType
+  createdBy: ObjectSortType
+  tasksIds: ObjectSortType
+  companiesIds: ObjectSortType
+  friendsIds: ObjectSortType
+  tasks: TaskSortType
+  companies: CompanySortType
+  friends: UserSortType
 }
 
 input UserFilterType {
@@ -313,29 +304,19 @@ input TaskUpdateInput {
   assigneeId: ID
 }
 
-enum TaskSortType {
-  ID_ASC
-  ID_DESC
-  TITLE_ASC
-  TITLE_DESC
-  COMPLETED_ASC
-  COMPLETED_DESC
-  DUE_DATE_ASC
-  DUE_DATE_DESC
-  TYPE_ASC
-  TYPE_DESC
-  DESCRIPTION_ASC
-  DESCRIPTION_DESC
-  ASSIGNEE_ID_ASC
-  ASSIGNEE_ID_DESC
-  UPDATED_AT_ASC
-  UPDATED_AT_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
-  UPDATED_BY_ASC
-  UPDATED_BY_DESC
-  CREATED_BY_ASC
-  CREATED_BY_DESC
+input TaskSortType {
+  id: ObjectSortType
+  title: ObjectSortType
+  completed: ObjectSortType
+  dueDate: ObjectSortType
+  type: ObjectSortType
+  description: ObjectSortType
+  assigneeId: ObjectSortType
+  updatedAt: ObjectSortType
+  createdAt: ObjectSortType
+  updatedBy: ObjectSortType
+  createdBy: ObjectSortType
+  assignee: UserSortType
 }
 
 input TaskFilterType {

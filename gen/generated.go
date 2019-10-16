@@ -82,13 +82,13 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Companies func(childComplexity int, offset *int, limit *int, q *string, sort []CompanySortType, filter *CompanyFilterType) int
+		Companies func(childComplexity int, offset *int, limit *int, q *string, sort []*CompanySortType, filter *CompanyFilterType) int
 		Company   func(childComplexity int, id *string, q *string, filter *CompanyFilterType) int
 		Hello     func(childComplexity int) int
 		Task      func(childComplexity int, id *string, q *string, filter *TaskFilterType) int
-		Tasks     func(childComplexity int, offset *int, limit *int, q *string, sort []TaskSortType, filter *TaskFilterType) int
+		Tasks     func(childComplexity int, offset *int, limit *int, q *string, sort []*TaskSortType, filter *TaskFilterType) int
 		User      func(childComplexity int, id *string, q *string, filter *UserFilterType) int
-		Users     func(childComplexity int, offset *int, limit *int, q *string, sort []UserSortType, filter *UserFilterType) int
+		Users     func(childComplexity int, offset *int, limit *int, q *string, sort []*UserSortType, filter *UserFilterType) int
 		_service  func(childComplexity int) int
 	}
 
@@ -165,11 +165,11 @@ type MutationResolver interface {
 type QueryResolver interface {
 	_service(ctx context.Context) (*_Service, error)
 	Company(ctx context.Context, id *string, q *string, filter *CompanyFilterType) (*Company, error)
-	Companies(ctx context.Context, offset *int, limit *int, q *string, sort []CompanySortType, filter *CompanyFilterType) (*CompanyResultType, error)
+	Companies(ctx context.Context, offset *int, limit *int, q *string, sort []*CompanySortType, filter *CompanyFilterType) (*CompanyResultType, error)
 	User(ctx context.Context, id *string, q *string, filter *UserFilterType) (*User, error)
-	Users(ctx context.Context, offset *int, limit *int, q *string, sort []UserSortType, filter *UserFilterType) (*UserResultType, error)
+	Users(ctx context.Context, offset *int, limit *int, q *string, sort []*UserSortType, filter *UserFilterType) (*UserResultType, error)
 	Task(ctx context.Context, id *string, q *string, filter *TaskFilterType) (*Task, error)
-	Tasks(ctx context.Context, offset *int, limit *int, q *string, sort []TaskSortType, filter *TaskFilterType) (*TaskResultType, error)
+	Tasks(ctx context.Context, offset *int, limit *int, q *string, sort []*TaskSortType, filter *TaskFilterType) (*TaskResultType, error)
 	Hello(ctx context.Context) (string, error)
 }
 type TaskResolver interface {
@@ -417,7 +417,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Companies(childComplexity, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]CompanySortType), args["filter"].(*CompanyFilterType)), true
+		return e.complexity.Query.Companies(childComplexity, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*CompanySortType), args["filter"].(*CompanyFilterType)), true
 
 	case "Query.company":
 		if e.complexity.Query.Company == nil {
@@ -460,7 +460,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Tasks(childComplexity, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]TaskSortType), args["filter"].(*TaskFilterType)), true
+		return e.complexity.Query.Tasks(childComplexity, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*TaskSortType), args["filter"].(*TaskFilterType)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -484,7 +484,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Users(childComplexity, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]UserSortType), args["filter"].(*UserFilterType)), true
+		return e.complexity.Query.Users(childComplexity, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*UserSortType), args["filter"].(*UserFilterType)), true
 
 	case "Query._service":
 		if e.complexity.Query._service == nil {
@@ -808,6 +808,11 @@ type Mutation {
   deleteAllTasks: Boolean!
 }
 
+enum ObjectSortType {
+  ASC
+  DESC
+}
+
 directive @validator(required: Boolean!) on FIELD_DEFINITION
 
 extend type Query {
@@ -873,21 +878,15 @@ input CompanyUpdateInput {
   employeesIds: [ID!]
 }
 
-enum CompanySortType {
-  ID_ASC
-  ID_DESC
-  NAME_ASC
-  NAME_DESC
-  UPDATED_AT_ASC
-  UPDATED_AT_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
-  UPDATED_BY_ASC
-  UPDATED_BY_DESC
-  CREATED_BY_ASC
-  CREATED_BY_DESC
-  EMPLOYEES_IDS_ASC
-  EMPLOYEES_IDS_DESC
+input CompanySortType {
+  id: ObjectSortType
+  name: ObjectSortType
+  updatedAt: ObjectSortType
+  createdAt: ObjectSortType
+  updatedBy: ObjectSortType
+  createdBy: ObjectSortType
+  employeesIds: ObjectSortType
+  employees: UserSortType
 }
 
 input CompanyFilterType {
@@ -965,29 +964,21 @@ input UserUpdateInput {
   friendsIds: [ID!]
 }
 
-enum UserSortType {
-  ID_ASC
-  ID_DESC
-  EMAIL_ASC
-  EMAIL_DESC
-  FIRST_NAME_ASC
-  FIRST_NAME_DESC
-  LAST_NAME_ASC
-  LAST_NAME_DESC
-  UPDATED_AT_ASC
-  UPDATED_AT_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
-  UPDATED_BY_ASC
-  UPDATED_BY_DESC
-  CREATED_BY_ASC
-  CREATED_BY_DESC
-  TASKS_IDS_ASC
-  TASKS_IDS_DESC
-  COMPANIES_IDS_ASC
-  COMPANIES_IDS_DESC
-  FRIENDS_IDS_ASC
-  FRIENDS_IDS_DESC
+input UserSortType {
+  id: ObjectSortType
+  email: ObjectSortType
+  firstName: ObjectSortType
+  lastName: ObjectSortType
+  updatedAt: ObjectSortType
+  createdAt: ObjectSortType
+  updatedBy: ObjectSortType
+  createdBy: ObjectSortType
+  tasksIds: ObjectSortType
+  companiesIds: ObjectSortType
+  friendsIds: ObjectSortType
+  tasks: TaskSortType
+  companies: CompanySortType
+  friends: UserSortType
 }
 
 input UserFilterType {
@@ -1087,29 +1078,19 @@ input TaskUpdateInput {
   assigneeId: ID
 }
 
-enum TaskSortType {
-  ID_ASC
-  ID_DESC
-  TITLE_ASC
-  TITLE_DESC
-  COMPLETED_ASC
-  COMPLETED_DESC
-  DUE_DATE_ASC
-  DUE_DATE_DESC
-  TYPE_ASC
-  TYPE_DESC
-  DESCRIPTION_ASC
-  DESCRIPTION_DESC
-  ASSIGNEE_ID_ASC
-  ASSIGNEE_ID_DESC
-  UPDATED_AT_ASC
-  UPDATED_AT_DESC
-  CREATED_AT_ASC
-  CREATED_AT_DESC
-  UPDATED_BY_ASC
-  UPDATED_BY_DESC
-  CREATED_BY_ASC
-  CREATED_BY_DESC
+input TaskSortType {
+  id: ObjectSortType
+  title: ObjectSortType
+  completed: ObjectSortType
+  dueDate: ObjectSortType
+  type: ObjectSortType
+  description: ObjectSortType
+  assigneeId: ObjectSortType
+  updatedAt: ObjectSortType
+  createdAt: ObjectSortType
+  updatedBy: ObjectSortType
+  createdBy: ObjectSortType
+  assignee: UserSortType
 }
 
 input TaskFilterType {
@@ -1421,9 +1402,9 @@ func (ec *executionContext) field_Query_companies_args(ctx context.Context, rawA
 		}
 	}
 	args["q"] = arg2
-	var arg3 []CompanySortType
+	var arg3 []*CompanySortType
 	if tmp, ok := rawArgs["sort"]; ok {
-		arg3, err = ec.unmarshalOCompanySortType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx, tmp)
+		arg3, err = ec.unmarshalOCompanySortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1527,9 +1508,9 @@ func (ec *executionContext) field_Query_tasks_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["q"] = arg2
-	var arg3 []TaskSortType
+	var arg3 []*TaskSortType
 	if tmp, ok := rawArgs["sort"]; ok {
-		arg3, err = ec.unmarshalOTaskSortType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx, tmp)
+		arg3, err = ec.unmarshalOTaskSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1603,9 +1584,9 @@ func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["q"] = arg2
-	var arg3 []UserSortType
+	var arg3 []*UserSortType
 	if tmp, ok := rawArgs["sort"]; ok {
-		arg3, err = ec.unmarshalOUserSortType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, tmp)
+		arg3, err = ec.unmarshalOUserSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2627,7 +2608,7 @@ func (ec *executionContext) _Query_companies(ctx context.Context, field graphql.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Companies(rctx, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]CompanySortType), args["filter"].(*CompanyFilterType))
+		return ec.resolvers.Query().Companies(rctx, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*CompanySortType), args["filter"].(*CompanyFilterType))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2709,7 +2690,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Users(rctx, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]UserSortType), args["filter"].(*UserFilterType))
+		return ec.resolvers.Query().Users(rctx, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*UserSortType), args["filter"].(*UserFilterType))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2791,7 +2772,7 @@ func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.Coll
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Tasks(rctx, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]TaskSortType), args["filter"].(*TaskFilterType))
+		return ec.resolvers.Query().Tasks(rctx, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*TaskSortType), args["filter"].(*TaskFilterType))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5465,6 +5446,66 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCompanySortType(ctx context.Context, obj interface{}) (CompanySortType, error) {
+	var it CompanySortType
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAt":
+			var err error
+			it.UpdatedAt, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAt":
+			var err error
+			it.CreatedAt, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedBy":
+			var err error
+			it.UpdatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdBy":
+			var err error
+			it.CreatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employeesIds":
+			var err error
+			it.EmployeesIds, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employees":
+			var err error
+			it.Employees, err = ec.unmarshalOUserSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, obj interface{}) (TaskFilterType, error) {
 	var it TaskFilterType
 	var asMap = obj.(map[string]interface{})
@@ -5993,6 +6034,90 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputTaskSortType(ctx context.Context, obj interface{}) (TaskSortType, error) {
+	var it TaskSortType
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+			it.Title, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completed":
+			var err error
+			it.Completed, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDate":
+			var err error
+			it.DueDate, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "type":
+			var err error
+			it.Type, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+			it.Description, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeId":
+			var err error
+			it.AssigneeID, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAt":
+			var err error
+			it.UpdatedAt, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAt":
+			var err error
+			it.CreatedAt, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedBy":
+			var err error
+			it.UpdatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdBy":
+			var err error
+			it.CreatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assignee":
+			var err error
+			it.Assignee, err = ec.unmarshalOUserSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, obj interface{}) (UserFilterType, error) {
 	var it UserFilterType
 	var asMap = obj.(map[string]interface{})
@@ -6416,6 +6541,102 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 		case "friends":
 			var err error
 			it.Friends, err = ec.unmarshalOUserFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUserSortType(ctx context.Context, obj interface{}) (UserSortType, error) {
+	var it UserSortType
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+			it.ID, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email":
+			var err error
+			it.Email, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstName":
+			var err error
+			it.FirstName, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastName":
+			var err error
+			it.LastName, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAt":
+			var err error
+			it.UpdatedAt, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAt":
+			var err error
+			it.CreatedAt, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedBy":
+			var err error
+			it.UpdatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdBy":
+			var err error
+			it.CreatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tasksIds":
+			var err error
+			it.TasksIds, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companiesIds":
+			var err error
+			it.CompaniesIds, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "friendsIds":
+			var err error
+			it.FriendsIds, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tasks":
+			var err error
+			it.Tasks, err = ec.unmarshalOTaskSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companies":
+			var err error
+			it.Companies, err = ec.unmarshalOCompanySortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "friends":
+			var err error
+			it.Friends, err = ec.unmarshalOUserSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -7404,12 +7625,15 @@ func (ec *executionContext) unmarshalNCompanyFilterType2ᚖgithubᚗcomᚋnovacl
 }
 
 func (ec *executionContext) unmarshalNCompanySortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, v interface{}) (CompanySortType, error) {
-	var res CompanySortType
-	return res, res.UnmarshalGQL(v)
+	return ec.unmarshalInputCompanySortType(ctx, v)
 }
 
-func (ec *executionContext) marshalNCompanySortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, sel ast.SelectionSet, v CompanySortType) graphql.Marshaler {
-	return v
+func (ec *executionContext) unmarshalNCompanySortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, v interface{}) (*CompanySortType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNCompanySortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalNCompanyUpdateInput2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
@@ -7561,12 +7785,15 @@ func (ec *executionContext) unmarshalNTaskFilterType2ᚖgithubᚗcomᚋnovacloud
 }
 
 func (ec *executionContext) unmarshalNTaskSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, v interface{}) (TaskSortType, error) {
-	var res TaskSortType
-	return res, res.UnmarshalGQL(v)
+	return ec.unmarshalInputTaskSortType(ctx, v)
 }
 
-func (ec *executionContext) marshalNTaskSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, sel ast.SelectionSet, v TaskSortType) graphql.Marshaler {
-	return v
+func (ec *executionContext) unmarshalNTaskSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, v interface{}) (*TaskSortType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNTaskSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalNTaskType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx context.Context, v interface{}) (TaskType, error) {
@@ -7688,12 +7915,15 @@ func (ec *executionContext) unmarshalNUserFilterType2ᚖgithubᚗcomᚋnovacloud
 }
 
 func (ec *executionContext) unmarshalNUserSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, v interface{}) (UserSortType, error) {
-	var res UserSortType
-	return res, res.UnmarshalGQL(v)
+	return ec.unmarshalInputUserSortType(ctx, v)
 }
 
-func (ec *executionContext) marshalNUserSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, sel ast.SelectionSet, v UserSortType) graphql.Marshaler {
-	return v
+func (ec *executionContext) unmarshalNUserSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, v interface{}) (*UserSortType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNUserSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalNUserUpdateInput2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
@@ -8052,7 +8282,11 @@ func (ec *executionContext) marshalOCompanyResultType2ᚖgithubᚗcomᚋnovaclou
 	return ec._CompanyResultType(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOCompanySortType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, v interface{}) ([]CompanySortType, error) {
+func (ec *executionContext) unmarshalOCompanySortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, v interface{}) (CompanySortType, error) {
+	return ec.unmarshalInputCompanySortType(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOCompanySortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, v interface{}) ([]*CompanySortType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8062,9 +8296,9 @@ func (ec *executionContext) unmarshalOCompanySortType2ᚕgithubᚗcomᚋnovaclou
 		}
 	}
 	var err error
-	res := make([]CompanySortType, len(vSlice))
+	res := make([]*CompanySortType, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNCompanySortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNCompanySortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -8072,44 +8306,12 @@ func (ec *executionContext) unmarshalOCompanySortType2ᚕgithubᚗcomᚋnovaclou
 	return res, nil
 }
 
-func (ec *executionContext) marshalOCompanySortType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, sel ast.SelectionSet, v []CompanySortType) graphql.Marshaler {
+func (ec *executionContext) unmarshalOCompanySortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, v interface{}) (*CompanySortType, error) {
 	if v == nil {
-		return graphql.Null
+		return nil, nil
 	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		rctx := &graphql.ResolverContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNCompanySortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
+	res, err := ec.unmarshalOCompanySortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalOID2string(ctx context.Context, v interface{}) (string, error) {
@@ -8188,6 +8390,30 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return ec.marshalOInt2int(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalOObjectSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx context.Context, v interface{}) (ObjectSortType, error) {
+	var res ObjectSortType
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalOObjectSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx context.Context, sel ast.SelectionSet, v ObjectSortType) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx context.Context, v interface{}) (*ObjectSortType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOObjectSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx context.Context, sel ast.SelectionSet, v *ObjectSortType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
@@ -8299,7 +8525,11 @@ func (ec *executionContext) marshalOTaskResultType2ᚖgithubᚗcomᚋnovacloudcz
 	return ec._TaskResultType(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOTaskSortType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, v interface{}) ([]TaskSortType, error) {
+func (ec *executionContext) unmarshalOTaskSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, v interface{}) (TaskSortType, error) {
+	return ec.unmarshalInputTaskSortType(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOTaskSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, v interface{}) ([]*TaskSortType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8309,9 +8539,9 @@ func (ec *executionContext) unmarshalOTaskSortType2ᚕgithubᚗcomᚋnovacloudcz
 		}
 	}
 	var err error
-	res := make([]TaskSortType, len(vSlice))
+	res := make([]*TaskSortType, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNTaskSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNTaskSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -8319,44 +8549,12 @@ func (ec *executionContext) unmarshalOTaskSortType2ᚕgithubᚗcomᚋnovacloudcz
 	return res, nil
 }
 
-func (ec *executionContext) marshalOTaskSortType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, sel ast.SelectionSet, v []TaskSortType) graphql.Marshaler {
+func (ec *executionContext) unmarshalOTaskSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, v interface{}) (*TaskSortType, error) {
 	if v == nil {
-		return graphql.Null
+		return nil, nil
 	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		rctx := &graphql.ResolverContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNTaskSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
+	res, err := ec.unmarshalOTaskSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) unmarshalOTaskType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx context.Context, v interface{}) (TaskType, error) {
@@ -8552,7 +8750,11 @@ func (ec *executionContext) marshalOUserResultType2ᚖgithubᚗcomᚋnovacloudcz
 	return ec._UserResultType(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOUserSortType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, v interface{}) ([]UserSortType, error) {
+func (ec *executionContext) unmarshalOUserSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, v interface{}) (UserSortType, error) {
+	return ec.unmarshalInputUserSortType(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOUserSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, v interface{}) ([]*UserSortType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8562,9 +8764,9 @@ func (ec *executionContext) unmarshalOUserSortType2ᚕgithubᚗcomᚋnovacloudcz
 		}
 	}
 	var err error
-	res := make([]UserSortType, len(vSlice))
+	res := make([]*UserSortType, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalNUserSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNUserSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -8572,44 +8774,12 @@ func (ec *executionContext) unmarshalOUserSortType2ᚕgithubᚗcomᚋnovacloudcz
 	return res, nil
 }
 
-func (ec *executionContext) marshalOUserSortType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, sel ast.SelectionSet, v []UserSortType) graphql.Marshaler {
+func (ec *executionContext) unmarshalOUserSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, v interface{}) (*UserSortType, error) {
 	if v == nil {
-		return graphql.Null
+		return nil, nil
 	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		rctx := &graphql.ResolverContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUserSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
+	res, err := ec.unmarshalOUserSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

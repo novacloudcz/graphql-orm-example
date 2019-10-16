@@ -51,8 +51,11 @@ func (qf *CompanyQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields 
 	}
 
 	if _, ok := fieldsMap["name"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]s"+dialect.Quote("name")+" LIKE ? OR %[1]s"+dialect.Quote("name")+" LIKE ?", dialect.Quote(alias)+"."))
-		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
+
+		column := dialect.Quote(alias) + "." + dialect.Quote("name")
+
+		*ors = append(*ors, fmt.Sprintf("%[1]s LIKE ? OR %[1]s LIKE ?", column))
+		*values = append(*values, query+"%", "% "+query+"%")
 	}
 
 	if fs, ok := fieldsMap["employees"]; ok {
@@ -119,18 +122,27 @@ func (qf *UserQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields []*
 	}
 
 	if _, ok := fieldsMap["email"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]s"+dialect.Quote("email")+" LIKE ? OR %[1]s"+dialect.Quote("email")+" LIKE ?", dialect.Quote(alias)+"."))
-		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
+
+		column := dialect.Quote(alias) + "." + dialect.Quote("email")
+
+		*ors = append(*ors, fmt.Sprintf("%[1]s LIKE ? OR %[1]s LIKE ?", column))
+		*values = append(*values, query+"%", "% "+query+"%")
 	}
 
 	if _, ok := fieldsMap["firstName"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]s"+dialect.Quote("firstName")+" LIKE ? OR %[1]s"+dialect.Quote("firstName")+" LIKE ?", dialect.Quote(alias)+"."))
-		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
+
+		column := dialect.Quote(alias) + "." + dialect.Quote("firstName")
+
+		*ors = append(*ors, fmt.Sprintf("%[1]s LIKE ? OR %[1]s LIKE ?", column))
+		*values = append(*values, query+"%", "% "+query+"%")
 	}
 
 	if _, ok := fieldsMap["lastName"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]s"+dialect.Quote("lastName")+" LIKE ? OR %[1]s"+dialect.Quote("lastName")+" LIKE ?", dialect.Quote(alias)+"."))
-		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
+
+		column := dialect.Quote(alias) + "." + dialect.Quote("lastName")
+
+		*ors = append(*ors, fmt.Sprintf("%[1]s LIKE ? OR %[1]s LIKE ?", column))
+		*values = append(*values, query+"%", "% "+query+"%")
 	}
 
 	if fs, ok := fieldsMap["tasks"]; ok {
@@ -235,13 +247,19 @@ func (qf *TaskQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields []*
 	}
 
 	if _, ok := fieldsMap["title"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]s"+dialect.Quote("title")+" LIKE ? OR %[1]s"+dialect.Quote("title")+" LIKE ?", dialect.Quote(alias)+"."))
-		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
+
+		column := dialect.Quote(alias) + "." + dialect.Quote("title")
+
+		*ors = append(*ors, fmt.Sprintf("%[1]s LIKE ? OR %[1]s LIKE ?", column))
+		*values = append(*values, query+"%", "% "+query+"%")
 	}
 
 	if _, ok := fieldsMap["description"]; ok {
-		*ors = append(*ors, fmt.Sprintf("%[1]s"+dialect.Quote("description")+" LIKE ? OR %[1]s"+dialect.Quote("description")+" LIKE ?", dialect.Quote(alias)+"."))
-		*values = append(*values, fmt.Sprintf("%s%%", query), fmt.Sprintf("%% %s%%", query))
+
+		column := dialect.Quote(alias) + "." + dialect.Quote("description")
+
+		*ors = append(*ors, fmt.Sprintf("%[1]s LIKE ? OR %[1]s LIKE ?", column))
+		*values = append(*values, query+"%", "% "+query+"%")
 	}
 
 	if fs, ok := fieldsMap["assignee"]; ok {
