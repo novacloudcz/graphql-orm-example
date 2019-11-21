@@ -1,5 +1,5 @@
 # custom directive example
-directive @validator(required: Boolean!) on FIELD_DEFINITION
+# directive @validator(required: Boolean!) on FIELD_DEFINITION
 
 extend type Query {
   hello: String!

@@ -10,54 +10,60 @@ import (
 )
 
 type CompanyFilterType struct {
-	And          []*CompanyFilterType `json:"AND"`
-	Or           []*CompanyFilterType `json:"OR"`
-	ID           *string              `json:"id"`
-	IDNe         *string              `json:"id_ne"`
-	IDGt         *string              `json:"id_gt"`
-	IDLt         *string              `json:"id_lt"`
-	IDGte        *string              `json:"id_gte"`
-	IDLte        *string              `json:"id_lte"`
-	IDIn         []string             `json:"id_in"`
-	Name         *string              `json:"name"`
-	NameNe       *string              `json:"name_ne"`
-	NameGt       *string              `json:"name_gt"`
-	NameLt       *string              `json:"name_lt"`
-	NameGte      *string              `json:"name_gte"`
-	NameLte      *string              `json:"name_lte"`
-	NameIn       []string             `json:"name_in"`
-	NameLike     *string              `json:"name_like"`
-	NamePrefix   *string              `json:"name_prefix"`
-	NameSuffix   *string              `json:"name_suffix"`
-	UpdatedAt    *time.Time           `json:"updatedAt"`
-	UpdatedAtNe  *time.Time           `json:"updatedAt_ne"`
-	UpdatedAtGt  *time.Time           `json:"updatedAt_gt"`
-	UpdatedAtLt  *time.Time           `json:"updatedAt_lt"`
-	UpdatedAtGte *time.Time           `json:"updatedAt_gte"`
-	UpdatedAtLte *time.Time           `json:"updatedAt_lte"`
-	UpdatedAtIn  []*time.Time         `json:"updatedAt_in"`
-	CreatedAt    *time.Time           `json:"createdAt"`
-	CreatedAtNe  *time.Time           `json:"createdAt_ne"`
-	CreatedAtGt  *time.Time           `json:"createdAt_gt"`
-	CreatedAtLt  *time.Time           `json:"createdAt_lt"`
-	CreatedAtGte *time.Time           `json:"createdAt_gte"`
-	CreatedAtLte *time.Time           `json:"createdAt_lte"`
-	CreatedAtIn  []*time.Time         `json:"createdAt_in"`
-	UpdatedBy    *string              `json:"updatedBy"`
-	UpdatedByNe  *string              `json:"updatedBy_ne"`
-	UpdatedByGt  *string              `json:"updatedBy_gt"`
-	UpdatedByLt  *string              `json:"updatedBy_lt"`
-	UpdatedByGte *string              `json:"updatedBy_gte"`
-	UpdatedByLte *string              `json:"updatedBy_lte"`
-	UpdatedByIn  []string             `json:"updatedBy_in"`
-	CreatedBy    *string              `json:"createdBy"`
-	CreatedByNe  *string              `json:"createdBy_ne"`
-	CreatedByGt  *string              `json:"createdBy_gt"`
-	CreatedByLt  *string              `json:"createdBy_lt"`
-	CreatedByGte *string              `json:"createdBy_gte"`
-	CreatedByLte *string              `json:"createdBy_lte"`
-	CreatedByIn  []string             `json:"createdBy_in"`
-	Employees    *UserFilterType      `json:"employees"`
+	And           []*CompanyFilterType `json:"AND"`
+	Or            []*CompanyFilterType `json:"OR"`
+	ID            *string              `json:"id"`
+	IDNe          *string              `json:"id_ne"`
+	IDGt          *string              `json:"id_gt"`
+	IDLt          *string              `json:"id_lt"`
+	IDGte         *string              `json:"id_gte"`
+	IDLte         *string              `json:"id_lte"`
+	IDIn          []string             `json:"id_in"`
+	IDNull        *bool                `json:"id_null"`
+	Name          *string              `json:"name"`
+	NameNe        *string              `json:"name_ne"`
+	NameGt        *string              `json:"name_gt"`
+	NameLt        *string              `json:"name_lt"`
+	NameGte       *string              `json:"name_gte"`
+	NameLte       *string              `json:"name_lte"`
+	NameIn        []string             `json:"name_in"`
+	NameLike      *string              `json:"name_like"`
+	NamePrefix    *string              `json:"name_prefix"`
+	NameSuffix    *string              `json:"name_suffix"`
+	NameNull      *bool                `json:"name_null"`
+	UpdatedAt     *time.Time           `json:"updatedAt"`
+	UpdatedAtNe   *time.Time           `json:"updatedAt_ne"`
+	UpdatedAtGt   *time.Time           `json:"updatedAt_gt"`
+	UpdatedAtLt   *time.Time           `json:"updatedAt_lt"`
+	UpdatedAtGte  *time.Time           `json:"updatedAt_gte"`
+	UpdatedAtLte  *time.Time           `json:"updatedAt_lte"`
+	UpdatedAtIn   []*time.Time         `json:"updatedAt_in"`
+	UpdatedAtNull *bool                `json:"updatedAt_null"`
+	CreatedAt     *time.Time           `json:"createdAt"`
+	CreatedAtNe   *time.Time           `json:"createdAt_ne"`
+	CreatedAtGt   *time.Time           `json:"createdAt_gt"`
+	CreatedAtLt   *time.Time           `json:"createdAt_lt"`
+	CreatedAtGte  *time.Time           `json:"createdAt_gte"`
+	CreatedAtLte  *time.Time           `json:"createdAt_lte"`
+	CreatedAtIn   []*time.Time         `json:"createdAt_in"`
+	CreatedAtNull *bool                `json:"createdAt_null"`
+	UpdatedBy     *string              `json:"updatedBy"`
+	UpdatedByNe   *string              `json:"updatedBy_ne"`
+	UpdatedByGt   *string              `json:"updatedBy_gt"`
+	UpdatedByLt   *string              `json:"updatedBy_lt"`
+	UpdatedByGte  *string              `json:"updatedBy_gte"`
+	UpdatedByLte  *string              `json:"updatedBy_lte"`
+	UpdatedByIn   []string             `json:"updatedBy_in"`
+	UpdatedByNull *bool                `json:"updatedBy_null"`
+	CreatedBy     *string              `json:"createdBy"`
+	CreatedByNe   *string              `json:"createdBy_ne"`
+	CreatedByGt   *string              `json:"createdBy_gt"`
+	CreatedByLt   *string              `json:"createdBy_lt"`
+	CreatedByGte  *string              `json:"createdBy_gte"`
+	CreatedByLte  *string              `json:"createdBy_lte"`
+	CreatedByIn   []string             `json:"createdBy_in"`
+	CreatedByNull *bool                `json:"createdBy_null"`
+	Employees     *UserFilterType      `json:"employees"`
 }
 
 type CompanySortType struct {
@@ -81,6 +87,7 @@ type TaskFilterType struct {
 	IDGte             *string           `json:"id_gte"`
 	IDLte             *string           `json:"id_lte"`
 	IDIn              []string          `json:"id_in"`
+	IDNull            *bool             `json:"id_null"`
 	Title             *string           `json:"title"`
 	TitleNe           *string           `json:"title_ne"`
 	TitleGt           *string           `json:"title_gt"`
@@ -91,6 +98,7 @@ type TaskFilterType struct {
 	TitleLike         *string           `json:"title_like"`
 	TitlePrefix       *string           `json:"title_prefix"`
 	TitleSuffix       *string           `json:"title_suffix"`
+	TitleNull         *bool             `json:"title_null"`
 	Completed         *bool             `json:"completed"`
 	CompletedNe       *bool             `json:"completed_ne"`
 	CompletedGt       *bool             `json:"completed_gt"`
@@ -98,6 +106,7 @@ type TaskFilterType struct {
 	CompletedGte      *bool             `json:"completed_gte"`
 	CompletedLte      *bool             `json:"completed_lte"`
 	CompletedIn       []bool            `json:"completed_in"`
+	CompletedNull     *bool             `json:"completed_null"`
 	DueDate           *time.Time        `json:"dueDate"`
 	DueDateNe         *time.Time        `json:"dueDate_ne"`
 	DueDateGt         *time.Time        `json:"dueDate_gt"`
@@ -105,6 +114,7 @@ type TaskFilterType struct {
 	DueDateGte        *time.Time        `json:"dueDate_gte"`
 	DueDateLte        *time.Time        `json:"dueDate_lte"`
 	DueDateIn         []*time.Time      `json:"dueDate_in"`
+	DueDateNull       *bool             `json:"dueDate_null"`
 	Type              *TaskType         `json:"type"`
 	TypeNe            *TaskType         `json:"type_ne"`
 	TypeGt            *TaskType         `json:"type_gt"`
@@ -112,6 +122,7 @@ type TaskFilterType struct {
 	TypeGte           *TaskType         `json:"type_gte"`
 	TypeLte           *TaskType         `json:"type_lte"`
 	TypeIn            []TaskType        `json:"type_in"`
+	TypeNull          *bool             `json:"type_null"`
 	Description       *string           `json:"description"`
 	DescriptionNe     *string           `json:"description_ne"`
 	DescriptionGt     *string           `json:"description_gt"`
@@ -122,6 +133,7 @@ type TaskFilterType struct {
 	DescriptionLike   *string           `json:"description_like"`
 	DescriptionPrefix *string           `json:"description_prefix"`
 	DescriptionSuffix *string           `json:"description_suffix"`
+	DescriptionNull   *bool             `json:"description_null"`
 	AssigneeID        *string           `json:"assigneeId"`
 	AssigneeIDNe      *string           `json:"assigneeId_ne"`
 	AssigneeIDGt      *string           `json:"assigneeId_gt"`
@@ -129,6 +141,7 @@ type TaskFilterType struct {
 	AssigneeIDGte     *string           `json:"assigneeId_gte"`
 	AssigneeIDLte     *string           `json:"assigneeId_lte"`
 	AssigneeIDIn      []string          `json:"assigneeId_in"`
+	AssigneeIDNull    *bool             `json:"assigneeId_null"`
 	UpdatedAt         *time.Time        `json:"updatedAt"`
 	UpdatedAtNe       *time.Time        `json:"updatedAt_ne"`
 	UpdatedAtGt       *time.Time        `json:"updatedAt_gt"`
@@ -136,6 +149,7 @@ type TaskFilterType struct {
 	UpdatedAtGte      *time.Time        `json:"updatedAt_gte"`
 	UpdatedAtLte      *time.Time        `json:"updatedAt_lte"`
 	UpdatedAtIn       []*time.Time      `json:"updatedAt_in"`
+	UpdatedAtNull     *bool             `json:"updatedAt_null"`
 	CreatedAt         *time.Time        `json:"createdAt"`
 	CreatedAtNe       *time.Time        `json:"createdAt_ne"`
 	CreatedAtGt       *time.Time        `json:"createdAt_gt"`
@@ -143,6 +157,7 @@ type TaskFilterType struct {
 	CreatedAtGte      *time.Time        `json:"createdAt_gte"`
 	CreatedAtLte      *time.Time        `json:"createdAt_lte"`
 	CreatedAtIn       []*time.Time      `json:"createdAt_in"`
+	CreatedAtNull     *bool             `json:"createdAt_null"`
 	UpdatedBy         *string           `json:"updatedBy"`
 	UpdatedByNe       *string           `json:"updatedBy_ne"`
 	UpdatedByGt       *string           `json:"updatedBy_gt"`
@@ -150,6 +165,7 @@ type TaskFilterType struct {
 	UpdatedByGte      *string           `json:"updatedBy_gte"`
 	UpdatedByLte      *string           `json:"updatedBy_lte"`
 	UpdatedByIn       []string          `json:"updatedBy_in"`
+	UpdatedByNull     *bool             `json:"updatedBy_null"`
 	CreatedBy         *string           `json:"createdBy"`
 	CreatedByNe       *string           `json:"createdBy_ne"`
 	CreatedByGt       *string           `json:"createdBy_gt"`
@@ -157,6 +173,7 @@ type TaskFilterType struct {
 	CreatedByGte      *string           `json:"createdBy_gte"`
 	CreatedByLte      *string           `json:"createdBy_lte"`
 	CreatedByIn       []string          `json:"createdBy_in"`
+	CreatedByNull     *bool             `json:"createdBy_null"`
 	Assignee          *UserFilterType   `json:"assignee"`
 }
 
@@ -185,6 +202,7 @@ type UserFilterType struct {
 	IDGte           *string            `json:"id_gte"`
 	IDLte           *string            `json:"id_lte"`
 	IDIn            []string           `json:"id_in"`
+	IDNull          *bool              `json:"id_null"`
 	Email           *string            `json:"email"`
 	EmailNe         *string            `json:"email_ne"`
 	EmailGt         *string            `json:"email_gt"`
@@ -195,6 +213,7 @@ type UserFilterType struct {
 	EmailLike       *string            `json:"email_like"`
 	EmailPrefix     *string            `json:"email_prefix"`
 	EmailSuffix     *string            `json:"email_suffix"`
+	EmailNull       *bool              `json:"email_null"`
 	FirstName       *string            `json:"firstName"`
 	FirstNameNe     *string            `json:"firstName_ne"`
 	FirstNameGt     *string            `json:"firstName_gt"`
@@ -205,6 +224,7 @@ type UserFilterType struct {
 	FirstNameLike   *string            `json:"firstName_like"`
 	FirstNamePrefix *string            `json:"firstName_prefix"`
 	FirstNameSuffix *string            `json:"firstName_suffix"`
+	FirstNameNull   *bool              `json:"firstName_null"`
 	LastName        *string            `json:"lastName"`
 	LastNameNe      *string            `json:"lastName_ne"`
 	LastNameGt      *string            `json:"lastName_gt"`
@@ -215,6 +235,7 @@ type UserFilterType struct {
 	LastNameLike    *string            `json:"lastName_like"`
 	LastNamePrefix  *string            `json:"lastName_prefix"`
 	LastNameSuffix  *string            `json:"lastName_suffix"`
+	LastNameNull    *bool              `json:"lastName_null"`
 	UpdatedAt       *time.Time         `json:"updatedAt"`
 	UpdatedAtNe     *time.Time         `json:"updatedAt_ne"`
 	UpdatedAtGt     *time.Time         `json:"updatedAt_gt"`
@@ -222,6 +243,7 @@ type UserFilterType struct {
 	UpdatedAtGte    *time.Time         `json:"updatedAt_gte"`
 	UpdatedAtLte    *time.Time         `json:"updatedAt_lte"`
 	UpdatedAtIn     []*time.Time       `json:"updatedAt_in"`
+	UpdatedAtNull   *bool              `json:"updatedAt_null"`
 	CreatedAt       *time.Time         `json:"createdAt"`
 	CreatedAtNe     *time.Time         `json:"createdAt_ne"`
 	CreatedAtGt     *time.Time         `json:"createdAt_gt"`
@@ -229,6 +251,7 @@ type UserFilterType struct {
 	CreatedAtGte    *time.Time         `json:"createdAt_gte"`
 	CreatedAtLte    *time.Time         `json:"createdAt_lte"`
 	CreatedAtIn     []*time.Time       `json:"createdAt_in"`
+	CreatedAtNull   *bool              `json:"createdAt_null"`
 	UpdatedBy       *string            `json:"updatedBy"`
 	UpdatedByNe     *string            `json:"updatedBy_ne"`
 	UpdatedByGt     *string            `json:"updatedBy_gt"`
@@ -236,6 +259,7 @@ type UserFilterType struct {
 	UpdatedByGte    *string            `json:"updatedBy_gte"`
 	UpdatedByLte    *string            `json:"updatedBy_lte"`
 	UpdatedByIn     []string           `json:"updatedBy_in"`
+	UpdatedByNull   *bool              `json:"updatedBy_null"`
 	CreatedBy       *string            `json:"createdBy"`
 	CreatedByNe     *string            `json:"createdBy_ne"`
 	CreatedByGt     *string            `json:"createdBy_gt"`
@@ -243,6 +267,7 @@ type UserFilterType struct {
 	CreatedByGte    *string            `json:"createdBy_gte"`
 	CreatedByLte    *string            `json:"createdBy_lte"`
 	CreatedByIn     []string           `json:"createdBy_in"`
+	CreatedByNull   *bool              `json:"createdBy_null"`
 	Tasks           *TaskFilterType    `json:"tasks"`
 	Companies       *CompanyFilterType `json:"companies"`
 	Friends         *UserFilterType    `json:"friends"`

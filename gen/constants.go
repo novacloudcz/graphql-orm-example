@@ -38,8 +38,6 @@ enum ObjectSortType {
   DESC
 }
 
-directive @validator(required: Boolean!) on FIELD_DEFINITION
-
 extend type Query {
   hello: String!
 }
@@ -124,6 +122,7 @@ input CompanyFilterType {
   id_gte: ID
   id_lte: ID
   id_in: [ID!]
+  id_null: Boolean
   name: String
   name_ne: String
   name_gt: String
@@ -134,6 +133,7 @@ input CompanyFilterType {
   name_like: String
   name_prefix: String
   name_suffix: String
+  name_null: Boolean
   updatedAt: Time
   updatedAt_ne: Time
   updatedAt_gt: Time
@@ -141,6 +141,7 @@ input CompanyFilterType {
   updatedAt_gte: Time
   updatedAt_lte: Time
   updatedAt_in: [Time!]
+  updatedAt_null: Boolean
   createdAt: Time
   createdAt_ne: Time
   createdAt_gt: Time
@@ -148,6 +149,7 @@ input CompanyFilterType {
   createdAt_gte: Time
   createdAt_lte: Time
   createdAt_in: [Time!]
+  createdAt_null: Boolean
   updatedBy: ID
   updatedBy_ne: ID
   updatedBy_gt: ID
@@ -155,6 +157,7 @@ input CompanyFilterType {
   updatedBy_gte: ID
   updatedBy_lte: ID
   updatedBy_in: [ID!]
+  updatedBy_null: Boolean
   createdBy: ID
   createdBy_ne: ID
   createdBy_gt: ID
@@ -162,6 +165,7 @@ input CompanyFilterType {
   createdBy_gte: ID
   createdBy_lte: ID
   createdBy_in: [ID!]
+  createdBy_null: Boolean
   employees: UserFilterType
 }
 
@@ -216,6 +220,7 @@ input UserFilterType {
   id_gte: ID
   id_lte: ID
   id_in: [ID!]
+  id_null: Boolean
   email: String
   email_ne: String
   email_gt: String
@@ -226,6 +231,7 @@ input UserFilterType {
   email_like: String
   email_prefix: String
   email_suffix: String
+  email_null: Boolean
   firstName: String
   firstName_ne: String
   firstName_gt: String
@@ -236,6 +242,7 @@ input UserFilterType {
   firstName_like: String
   firstName_prefix: String
   firstName_suffix: String
+  firstName_null: Boolean
   lastName: String
   lastName_ne: String
   lastName_gt: String
@@ -246,6 +253,7 @@ input UserFilterType {
   lastName_like: String
   lastName_prefix: String
   lastName_suffix: String
+  lastName_null: Boolean
   updatedAt: Time
   updatedAt_ne: Time
   updatedAt_gt: Time
@@ -253,6 +261,7 @@ input UserFilterType {
   updatedAt_gte: Time
   updatedAt_lte: Time
   updatedAt_in: [Time!]
+  updatedAt_null: Boolean
   createdAt: Time
   createdAt_ne: Time
   createdAt_gt: Time
@@ -260,6 +269,7 @@ input UserFilterType {
   createdAt_gte: Time
   createdAt_lte: Time
   createdAt_in: [Time!]
+  createdAt_null: Boolean
   updatedBy: ID
   updatedBy_ne: ID
   updatedBy_gt: ID
@@ -267,6 +277,7 @@ input UserFilterType {
   updatedBy_gte: ID
   updatedBy_lte: ID
   updatedBy_in: [ID!]
+  updatedBy_null: Boolean
   createdBy: ID
   createdBy_ne: ID
   createdBy_gt: ID
@@ -274,6 +285,7 @@ input UserFilterType {
   createdBy_gte: ID
   createdBy_lte: ID
   createdBy_in: [ID!]
+  createdBy_null: Boolean
   tasks: TaskFilterType
   companies: CompanyFilterType
   friends: UserFilterType
@@ -328,6 +340,7 @@ input TaskFilterType {
   id_gte: ID
   id_lte: ID
   id_in: [ID!]
+  id_null: Boolean
   title: String
   title_ne: String
   title_gt: String
@@ -338,6 +351,7 @@ input TaskFilterType {
   title_like: String
   title_prefix: String
   title_suffix: String
+  title_null: Boolean
   completed: Boolean
   completed_ne: Boolean
   completed_gt: Boolean
@@ -345,6 +359,7 @@ input TaskFilterType {
   completed_gte: Boolean
   completed_lte: Boolean
   completed_in: [Boolean!]
+  completed_null: Boolean
   dueDate: Time
   dueDate_ne: Time
   dueDate_gt: Time
@@ -352,6 +367,7 @@ input TaskFilterType {
   dueDate_gte: Time
   dueDate_lte: Time
   dueDate_in: [Time!]
+  dueDate_null: Boolean
   type: TaskType
   type_ne: TaskType
   type_gt: TaskType
@@ -359,6 +375,7 @@ input TaskFilterType {
   type_gte: TaskType
   type_lte: TaskType
   type_in: [TaskType!]
+  type_null: Boolean
   description: String
   description_ne: String
   description_gt: String
@@ -369,6 +386,7 @@ input TaskFilterType {
   description_like: String
   description_prefix: String
   description_suffix: String
+  description_null: Boolean
   assigneeId: ID
   assigneeId_ne: ID
   assigneeId_gt: ID
@@ -376,6 +394,7 @@ input TaskFilterType {
   assigneeId_gte: ID
   assigneeId_lte: ID
   assigneeId_in: [ID!]
+  assigneeId_null: Boolean
   updatedAt: Time
   updatedAt_ne: Time
   updatedAt_gt: Time
@@ -383,6 +402,7 @@ input TaskFilterType {
   updatedAt_gte: Time
   updatedAt_lte: Time
   updatedAt_in: [Time!]
+  updatedAt_null: Boolean
   createdAt: Time
   createdAt_ne: Time
   createdAt_gt: Time
@@ -390,6 +410,7 @@ input TaskFilterType {
   createdAt_gte: Time
   createdAt_lte: Time
   createdAt_in: [Time!]
+  createdAt_null: Boolean
   updatedBy: ID
   updatedBy_ne: ID
   updatedBy_gt: ID
@@ -397,6 +418,7 @@ input TaskFilterType {
   updatedBy_gte: ID
   updatedBy_lte: ID
   updatedBy_in: [ID!]
+  updatedBy_null: Boolean
   createdBy: ID
   createdBy_ne: ID
   createdBy_gt: ID
@@ -404,6 +426,7 @@ input TaskFilterType {
   createdBy_gte: ID
   createdBy_lte: ID
   createdBy_in: [ID!]
+  createdBy_null: Boolean
   assignee: UserFilterType
 }
 

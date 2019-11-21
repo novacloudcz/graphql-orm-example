@@ -35,11 +35,13 @@ func CreateCompanyHandler(ctx context.Context, r *GeneratedResolver, input map[s
 
 	if _, ok := input["id"]; ok && (item.ID != changes.ID) {
 		item.ID = changes.ID
+		event.EntityID = item.ID
 		event.AddNewValue("id", changes.ID)
 	}
 
 	if _, ok := input["name"]; ok && (item.Name != changes.Name) && (item.Name == nil || changes.Name == nil || *item.Name != *changes.Name) {
 		item.Name = changes.Name
+
 		event.AddNewValue("name", changes.Name)
 	}
 
@@ -49,7 +51,7 @@ func CreateCompanyHandler(ctx context.Context, r *GeneratedResolver, input map[s
 		return
 	}
 
-	if ids, ok := input["employeesIds"].([]interface{}); ok {
+	if ids, exists := input["employeesIds"]; exists {
 		items := []User{}
 		tx.Find(&items, "id IN (?)", ids)
 		association := tx.Model(&item).Association("Employees")
@@ -63,6 +65,10 @@ func CreateCompanyHandler(ctx context.Context, r *GeneratedResolver, input map[s
 	}
 
 	if len(event.Changes) > 0 {
+		err = r.Handlers.OnEvent(ctx, r, &event)
+		if err != nil {
+			return
+		}
 		err = r.EventController.SendEvent(ctx, &event)
 	}
 
@@ -110,7 +116,7 @@ func UpdateCompanyHandler(ctx context.Context, r *GeneratedResolver, id string, 
 		return
 	}
 
-	if ids, ok := input["employeesIds"].([]interface{}); ok {
+	if ids, exists := input["employeesIds"]; exists {
 		items := []User{}
 		tx.Find(&items, "id IN (?)", ids)
 		association := tx.Model(&item).Association("Employees")
@@ -124,6 +130,10 @@ func UpdateCompanyHandler(ctx context.Context, r *GeneratedResolver, id string, 
 	}
 
 	if len(event.Changes) > 0 {
+		err = r.Handlers.OnEvent(ctx, r, &event)
+		if err != nil {
+			return
+		}
 		err = r.EventController.SendEvent(ctx, &event)
 		// data, _ := json.Marshal(event)
 		// fmt.Println("?",string(data))
@@ -164,6 +174,10 @@ func DeleteCompanyHandler(ctx context.Context, r *GeneratedResolver, id string) 
 		return
 	}
 
+	err = r.Handlers.OnEvent(ctx, r, &event)
+	if err != nil {
+		return
+	}
 	err = r.EventController.SendEvent(ctx, &event)
 
 	return
@@ -201,21 +215,25 @@ func CreateUserHandler(ctx context.Context, r *GeneratedResolver, input map[stri
 
 	if _, ok := input["id"]; ok && (item.ID != changes.ID) {
 		item.ID = changes.ID
+		event.EntityID = item.ID
 		event.AddNewValue("id", changes.ID)
 	}
 
 	if _, ok := input["email"]; ok && (item.Email != changes.Email) && (item.Email == nil || changes.Email == nil || *item.Email != *changes.Email) {
 		item.Email = changes.Email
+
 		event.AddNewValue("email", changes.Email)
 	}
 
 	if _, ok := input["firstName"]; ok && (item.FirstName != changes.FirstName) && (item.FirstName == nil || changes.FirstName == nil || *item.FirstName != *changes.FirstName) {
 		item.FirstName = changes.FirstName
+
 		event.AddNewValue("firstName", changes.FirstName)
 	}
 
 	if _, ok := input["lastName"]; ok && (item.LastName != changes.LastName) && (item.LastName == nil || changes.LastName == nil || *item.LastName != *changes.LastName) {
 		item.LastName = changes.LastName
+
 		event.AddNewValue("lastName", changes.LastName)
 	}
 
@@ -225,21 +243,21 @@ func CreateUserHandler(ctx context.Context, r *GeneratedResolver, input map[stri
 		return
 	}
 
-	if ids, ok := input["tasksIds"].([]interface{}); ok {
+	if ids, exists := input["tasksIds"]; exists {
 		items := []Task{}
 		tx.Find(&items, "id IN (?)", ids)
 		association := tx.Model(&item).Association("Tasks")
 		association.Replace(items)
 	}
 
-	if ids, ok := input["companiesIds"].([]interface{}); ok {
+	if ids, exists := input["companiesIds"]; exists {
 		items := []Company{}
 		tx.Find(&items, "id IN (?)", ids)
 		association := tx.Model(&item).Association("Companies")
 		association.Replace(items)
 	}
 
-	if ids, ok := input["friendsIds"].([]interface{}); ok {
+	if ids, exists := input["friendsIds"]; exists {
 		items := []User{}
 		tx.Find(&items, "id IN (?)", ids)
 		association := tx.Model(&item).Association("Friends")
@@ -253,6 +271,10 @@ func CreateUserHandler(ctx context.Context, r *GeneratedResolver, input map[stri
 	}
 
 	if len(event.Changes) > 0 {
+		err = r.Handlers.OnEvent(ctx, r, &event)
+		if err != nil {
+			return
+		}
 		err = r.EventController.SendEvent(ctx, &event)
 	}
 
@@ -312,21 +334,21 @@ func UpdateUserHandler(ctx context.Context, r *GeneratedResolver, id string, inp
 		return
 	}
 
-	if ids, ok := input["tasksIds"].([]interface{}); ok {
+	if ids, exists := input["tasksIds"]; exists {
 		items := []Task{}
 		tx.Find(&items, "id IN (?)", ids)
 		association := tx.Model(&item).Association("Tasks")
 		association.Replace(items)
 	}
 
-	if ids, ok := input["companiesIds"].([]interface{}); ok {
+	if ids, exists := input["companiesIds"]; exists {
 		items := []Company{}
 		tx.Find(&items, "id IN (?)", ids)
 		association := tx.Model(&item).Association("Companies")
 		association.Replace(items)
 	}
 
-	if ids, ok := input["friendsIds"].([]interface{}); ok {
+	if ids, exists := input["friendsIds"]; exists {
 		items := []User{}
 		tx.Find(&items, "id IN (?)", ids)
 		association := tx.Model(&item).Association("Friends")
@@ -340,6 +362,10 @@ func UpdateUserHandler(ctx context.Context, r *GeneratedResolver, id string, inp
 	}
 
 	if len(event.Changes) > 0 {
+		err = r.Handlers.OnEvent(ctx, r, &event)
+		if err != nil {
+			return
+		}
 		err = r.EventController.SendEvent(ctx, &event)
 		// data, _ := json.Marshal(event)
 		// fmt.Println("?",string(data))
@@ -380,6 +406,10 @@ func DeleteUserHandler(ctx context.Context, r *GeneratedResolver, id string) (it
 		return
 	}
 
+	err = r.Handlers.OnEvent(ctx, r, &event)
+	if err != nil {
+		return
+	}
 	err = r.EventController.SendEvent(ctx, &event)
 
 	return
@@ -417,36 +447,43 @@ func CreateTaskHandler(ctx context.Context, r *GeneratedResolver, input map[stri
 
 	if _, ok := input["id"]; ok && (item.ID != changes.ID) {
 		item.ID = changes.ID
+		event.EntityID = item.ID
 		event.AddNewValue("id", changes.ID)
 	}
 
 	if _, ok := input["title"]; ok && (item.Title != changes.Title) && (item.Title == nil || changes.Title == nil || *item.Title != *changes.Title) {
 		item.Title = changes.Title
+
 		event.AddNewValue("title", changes.Title)
 	}
 
 	if _, ok := input["completed"]; ok && (item.Completed != changes.Completed) && (item.Completed == nil || changes.Completed == nil || *item.Completed != *changes.Completed) {
 		item.Completed = changes.Completed
+
 		event.AddNewValue("completed", changes.Completed)
 	}
 
 	if _, ok := input["dueDate"]; ok && (item.DueDate != changes.DueDate) && (item.DueDate == nil || changes.DueDate == nil || *item.DueDate != *changes.DueDate) {
 		item.DueDate = changes.DueDate
+
 		event.AddNewValue("dueDate", changes.DueDate)
 	}
 
 	if _, ok := input["type"]; ok && (item.Type != changes.Type) && (item.Type == nil || changes.Type == nil || *item.Type != *changes.Type) {
 		item.Type = changes.Type
+
 		event.AddNewValue("type", changes.Type)
 	}
 
 	if _, ok := input["description"]; ok && (item.Description != changes.Description) && (item.Description == nil || changes.Description == nil || *item.Description != *changes.Description) {
 		item.Description = changes.Description
+
 		event.AddNewValue("description", changes.Description)
 	}
 
 	if _, ok := input["assigneeId"]; ok && (item.AssigneeID != changes.AssigneeID) && (item.AssigneeID == nil || changes.AssigneeID == nil || *item.AssigneeID != *changes.AssigneeID) {
 		item.AssigneeID = changes.AssigneeID
+
 		event.AddNewValue("assigneeId", changes.AssigneeID)
 	}
 
@@ -463,6 +500,10 @@ func CreateTaskHandler(ctx context.Context, r *GeneratedResolver, input map[stri
 	}
 
 	if len(event.Changes) > 0 {
+		err = r.Handlers.OnEvent(ctx, r, &event)
+		if err != nil {
+			return
+		}
 		err = r.EventController.SendEvent(ctx, &event)
 	}
 
@@ -547,6 +588,10 @@ func UpdateTaskHandler(ctx context.Context, r *GeneratedResolver, id string, inp
 	}
 
 	if len(event.Changes) > 0 {
+		err = r.Handlers.OnEvent(ctx, r, &event)
+		if err != nil {
+			return
+		}
 		err = r.EventController.SendEvent(ctx, &event)
 		// data, _ := json.Marshal(event)
 		// fmt.Println("?",string(data))
@@ -587,6 +632,10 @@ func DeleteTaskHandler(ctx context.Context, r *GeneratedResolver, id string) (it
 		return
 	}
 
+	err = r.Handlers.OnEvent(ctx, r, &event)
+	if err != nil {
+		return
+	}
 	err = r.EventController.SendEvent(ctx, &event)
 
 	return

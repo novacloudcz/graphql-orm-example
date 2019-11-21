@@ -7,6 +7,8 @@ import (
 )
 
 type ResolutionHandlers struct {
+	OnEvent func(ctx context.Context, r *GeneratedResolver, e *events.Event) error
+
 	CreateCompany      func(ctx context.Context, r *GeneratedResolver, input map[string]interface{}) (item *Company, err error)
 	UpdateCompany      func(ctx context.Context, r *GeneratedResolver, id string, input map[string]interface{}) (item *Company, err error)
 	DeleteCompany      func(ctx context.Context, r *GeneratedResolver, id string) (item *Company, err error)
@@ -41,6 +43,7 @@ type ResolutionHandlers struct {
 
 func DefaultResolutionHandlers() ResolutionHandlers {
 	handlers := ResolutionHandlers{
+		OnEvent: func(ctx context.Context, r *GeneratedResolver, e *events.Event) error { return nil },
 
 		CreateCompany:      CreateCompanyHandler,
 		UpdateCompany:      UpdateCompanyHandler,

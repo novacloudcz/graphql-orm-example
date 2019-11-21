@@ -46,7 +46,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Validator func(ctx context.Context, obj interface{}, next graphql.Resolver, required bool) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -813,8 +812,6 @@ enum ObjectSortType {
   DESC
 }
 
-directive @validator(required: Boolean!) on FIELD_DEFINITION
-
 extend type Query {
   hello: String!
 }
@@ -899,6 +896,7 @@ input CompanyFilterType {
   id_gte: ID
   id_lte: ID
   id_in: [ID!]
+  id_null: Boolean
   name: String
   name_ne: String
   name_gt: String
@@ -909,6 +907,7 @@ input CompanyFilterType {
   name_like: String
   name_prefix: String
   name_suffix: String
+  name_null: Boolean
   updatedAt: Time
   updatedAt_ne: Time
   updatedAt_gt: Time
@@ -916,6 +915,7 @@ input CompanyFilterType {
   updatedAt_gte: Time
   updatedAt_lte: Time
   updatedAt_in: [Time!]
+  updatedAt_null: Boolean
   createdAt: Time
   createdAt_ne: Time
   createdAt_gt: Time
@@ -923,6 +923,7 @@ input CompanyFilterType {
   createdAt_gte: Time
   createdAt_lte: Time
   createdAt_in: [Time!]
+  createdAt_null: Boolean
   updatedBy: ID
   updatedBy_ne: ID
   updatedBy_gt: ID
@@ -930,6 +931,7 @@ input CompanyFilterType {
   updatedBy_gte: ID
   updatedBy_lte: ID
   updatedBy_in: [ID!]
+  updatedBy_null: Boolean
   createdBy: ID
   createdBy_ne: ID
   createdBy_gt: ID
@@ -937,6 +939,7 @@ input CompanyFilterType {
   createdBy_gte: ID
   createdBy_lte: ID
   createdBy_in: [ID!]
+  createdBy_null: Boolean
   employees: UserFilterType
 }
 
@@ -991,6 +994,7 @@ input UserFilterType {
   id_gte: ID
   id_lte: ID
   id_in: [ID!]
+  id_null: Boolean
   email: String
   email_ne: String
   email_gt: String
@@ -1001,6 +1005,7 @@ input UserFilterType {
   email_like: String
   email_prefix: String
   email_suffix: String
+  email_null: Boolean
   firstName: String
   firstName_ne: String
   firstName_gt: String
@@ -1011,6 +1016,7 @@ input UserFilterType {
   firstName_like: String
   firstName_prefix: String
   firstName_suffix: String
+  firstName_null: Boolean
   lastName: String
   lastName_ne: String
   lastName_gt: String
@@ -1021,6 +1027,7 @@ input UserFilterType {
   lastName_like: String
   lastName_prefix: String
   lastName_suffix: String
+  lastName_null: Boolean
   updatedAt: Time
   updatedAt_ne: Time
   updatedAt_gt: Time
@@ -1028,6 +1035,7 @@ input UserFilterType {
   updatedAt_gte: Time
   updatedAt_lte: Time
   updatedAt_in: [Time!]
+  updatedAt_null: Boolean
   createdAt: Time
   createdAt_ne: Time
   createdAt_gt: Time
@@ -1035,6 +1043,7 @@ input UserFilterType {
   createdAt_gte: Time
   createdAt_lte: Time
   createdAt_in: [Time!]
+  createdAt_null: Boolean
   updatedBy: ID
   updatedBy_ne: ID
   updatedBy_gt: ID
@@ -1042,6 +1051,7 @@ input UserFilterType {
   updatedBy_gte: ID
   updatedBy_lte: ID
   updatedBy_in: [ID!]
+  updatedBy_null: Boolean
   createdBy: ID
   createdBy_ne: ID
   createdBy_gt: ID
@@ -1049,6 +1059,7 @@ input UserFilterType {
   createdBy_gte: ID
   createdBy_lte: ID
   createdBy_in: [ID!]
+  createdBy_null: Boolean
   tasks: TaskFilterType
   companies: CompanyFilterType
   friends: UserFilterType
@@ -1103,6 +1114,7 @@ input TaskFilterType {
   id_gte: ID
   id_lte: ID
   id_in: [ID!]
+  id_null: Boolean
   title: String
   title_ne: String
   title_gt: String
@@ -1113,6 +1125,7 @@ input TaskFilterType {
   title_like: String
   title_prefix: String
   title_suffix: String
+  title_null: Boolean
   completed: Boolean
   completed_ne: Boolean
   completed_gt: Boolean
@@ -1120,6 +1133,7 @@ input TaskFilterType {
   completed_gte: Boolean
   completed_lte: Boolean
   completed_in: [Boolean!]
+  completed_null: Boolean
   dueDate: Time
   dueDate_ne: Time
   dueDate_gt: Time
@@ -1127,6 +1141,7 @@ input TaskFilterType {
   dueDate_gte: Time
   dueDate_lte: Time
   dueDate_in: [Time!]
+  dueDate_null: Boolean
   type: TaskType
   type_ne: TaskType
   type_gt: TaskType
@@ -1134,6 +1149,7 @@ input TaskFilterType {
   type_gte: TaskType
   type_lte: TaskType
   type_in: [TaskType!]
+  type_null: Boolean
   description: String
   description_ne: String
   description_gt: String
@@ -1144,6 +1160,7 @@ input TaskFilterType {
   description_like: String
   description_prefix: String
   description_suffix: String
+  description_null: Boolean
   assigneeId: ID
   assigneeId_ne: ID
   assigneeId_gt: ID
@@ -1151,6 +1168,7 @@ input TaskFilterType {
   assigneeId_gte: ID
   assigneeId_lte: ID
   assigneeId_in: [ID!]
+  assigneeId_null: Boolean
   updatedAt: Time
   updatedAt_ne: Time
   updatedAt_gt: Time
@@ -1158,6 +1176,7 @@ input TaskFilterType {
   updatedAt_gte: Time
   updatedAt_lte: Time
   updatedAt_in: [Time!]
+  updatedAt_null: Boolean
   createdAt: Time
   createdAt_ne: Time
   createdAt_gt: Time
@@ -1165,6 +1184,7 @@ input TaskFilterType {
   createdAt_gte: Time
   createdAt_lte: Time
   createdAt_in: [Time!]
+  createdAt_null: Boolean
   updatedBy: ID
   updatedBy_ne: ID
   updatedBy_gt: ID
@@ -1172,6 +1192,7 @@ input TaskFilterType {
   updatedBy_gte: ID
   updatedBy_lte: ID
   updatedBy_in: [ID!]
+  updatedBy_null: Boolean
   createdBy: ID
   createdBy_ne: ID
   createdBy_gt: ID
@@ -1179,6 +1200,7 @@ input TaskFilterType {
   createdBy_gte: ID
   createdBy_lte: ID
   createdBy_in: [ID!]
+  createdBy_null: Boolean
   assignee: UserFilterType
 }
 
@@ -1196,20 +1218,6 @@ type _Service {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) dir_validator_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["required"]; ok {
-		arg0, err = ec.unmarshalNBoolean2bool(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["required"] = arg0
-	return args, nil
-}
 
 func (ec *executionContext) field_Mutation_createCompany_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -5206,6 +5214,12 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "id_null":
+			var err error
+			it.IDNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "name":
 			var err error
 			it.Name, err = ec.unmarshalOString2ᚖstring(ctx, v)
@@ -5266,6 +5280,12 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "name_null":
+			var err error
+			it.NameNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt":
 			var err error
 			it.UpdatedAt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
@@ -5305,6 +5325,12 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 		case "updatedAt_in":
 			var err error
 			it.UpdatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAt_null":
+			var err error
+			it.UpdatedAtNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5350,6 +5376,12 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "createdAt_null":
+			var err error
+			it.CreatedAtNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy":
 			var err error
 			it.UpdatedBy, err = ec.unmarshalOID2ᚖstring(ctx, v)
@@ -5392,6 +5424,12 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "updatedBy_null":
+			var err error
+			it.UpdatedByNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy":
 			var err error
 			it.CreatedBy, err = ec.unmarshalOID2ᚖstring(ctx, v)
@@ -5431,6 +5469,12 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 		case "createdBy_in":
 			var err error
 			it.CreatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdBy_null":
+			var err error
+			it.CreatedByNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5566,6 +5610,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "id_null":
+			var err error
+			it.IDNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title":
 			var err error
 			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
@@ -5626,6 +5676,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "title_null":
+			var err error
+			it.TitleNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "completed":
 			var err error
 			it.Completed, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
@@ -5665,6 +5721,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 		case "completed_in":
 			var err error
 			it.CompletedIn, err = ec.unmarshalOBoolean2ᚕbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completed_null":
+			var err error
+			it.CompletedNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5710,6 +5772,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "dueDate_null":
+			var err error
+			it.DueDateNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type":
 			var err error
 			it.Type, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
@@ -5749,6 +5817,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 		case "type_in":
 			var err error
 			it.TypeIn, err = ec.unmarshalOTaskType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "type_null":
+			var err error
+			it.TypeNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5812,6 +5886,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "description_null":
+			var err error
+			it.DescriptionNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "assigneeId":
 			var err error
 			it.AssigneeID, err = ec.unmarshalOID2ᚖstring(ctx, v)
@@ -5851,6 +5931,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 		case "assigneeId_in":
 			var err error
 			it.AssigneeIDIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeId_null":
+			var err error
+			it.AssigneeIDNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5896,6 +5982,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedAt_null":
+			var err error
+			it.UpdatedAtNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt":
 			var err error
 			it.CreatedAt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
@@ -5935,6 +6027,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 		case "createdAt_in":
 			var err error
 			it.CreatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAt_null":
+			var err error
+			it.CreatedAtNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5980,6 +6078,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedBy_null":
+			var err error
+			it.UpdatedByNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy":
 			var err error
 			it.CreatedBy, err = ec.unmarshalOID2ᚖstring(ctx, v)
@@ -6019,6 +6123,12 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 		case "createdBy_in":
 			var err error
 			it.CreatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdBy_null":
+			var err error
+			it.CreatedByNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6178,6 +6288,12 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "id_null":
+			var err error
+			it.IDNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "email":
 			var err error
 			it.Email, err = ec.unmarshalOString2ᚖstring(ctx, v)
@@ -6235,6 +6351,12 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 		case "email_suffix":
 			var err error
 			it.EmailSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "email_null":
+			var err error
+			it.EmailNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6298,6 +6420,12 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "firstName_null":
+			var err error
+			it.FirstNameNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "lastName":
 			var err error
 			it.LastName, err = ec.unmarshalOString2ᚖstring(ctx, v)
@@ -6358,6 +6486,12 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "lastName_null":
+			var err error
+			it.LastNameNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt":
 			var err error
 			it.UpdatedAt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
@@ -6397,6 +6531,12 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 		case "updatedAt_in":
 			var err error
 			it.UpdatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAt_null":
+			var err error
+			it.UpdatedAtNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6442,6 +6582,12 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdAt_null":
+			var err error
+			it.CreatedAtNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy":
 			var err error
 			it.UpdatedBy, err = ec.unmarshalOID2ᚖstring(ctx, v)
@@ -6484,6 +6630,12 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedBy_null":
+			var err error
+			it.UpdatedByNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy":
 			var err error
 			it.CreatedBy, err = ec.unmarshalOID2ᚖstring(ctx, v)
@@ -6523,6 +6675,12 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 		case "createdBy_in":
 			var err error
 			it.CreatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdBy_null":
+			var err error
+			it.CreatedByNull, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
