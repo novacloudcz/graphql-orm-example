@@ -1,6 +1,7 @@
 test.db
 app
 lambda
+lambda.zip
 # Binaries for programs and plugins
 *.exe
 *.exe~
