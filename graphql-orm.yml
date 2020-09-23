@@ -1,4 +1,2 @@
 package: github.com/novacloudcz/graphql-orm-example
-connection:
-  maxIdleConnections: 2
-  maxOpenConnections: 13
+connection: null

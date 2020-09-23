@@ -12,11 +12,11 @@ schema {
 type Query {
   _service: _Service!
   company(id: ID, q: String, filter: CompanyFilterType): Company
-  companies(offset: Int, limit: Int = 30, q: String, sort: [CompanySortType!], filter: CompanyFilterType): CompanyResultType
+  companies(offset: Int, limit: Int = 30, q: String, sort: [CompanySortType!], filter: CompanyFilterType): CompanyResultType!
   user(id: ID, q: String, filter: UserFilterType): User
-  users(offset: Int, limit: Int = 30, q: String, sort: [UserSortType!], filter: UserFilterType): UserResultType
+  users(offset: Int, limit: Int = 30, q: String, sort: [UserSortType!], filter: UserFilterType): UserResultType!
   task(id: ID, q: String, filter: TaskFilterType): Task
-  tasks(offset: Int, limit: Int = 30, q: String, sort: [TaskSortType!], filter: TaskFilterType): TaskResultType
+  tasks(offset: Int, limit: Int = 30, q: String, sort: [TaskSortType!], filter: TaskFilterType): TaskResultType!
 }
 
 type Mutation {
@@ -52,6 +52,7 @@ type Company {
   updatedBy: ID
   createdBy: ID
   employeesIds: [ID!]!
+  employeesConnection(offset: Int, limit: Int = 30, q: String, sort: [UserSortType!], filter: UserFilterType): UserResultType!
 }
 
 type User {
@@ -61,14 +62,14 @@ type User {
   lastName: String
   tasks: [Task!]!
   companies: [Company!]!
-  friends: [User!]!
   updatedAt: Time
   createdAt: Time!
   updatedBy: ID
   createdBy: ID
   tasksIds: [ID!]!
+  tasksConnection(offset: Int, limit: Int = 30, q: String, sort: [TaskSortType!], filter: TaskFilterType): TaskResultType!
   companiesIds: [ID!]!
-  friendsIds: [ID!]!
+  companiesConnection(offset: Int, limit: Int = 30, q: String, sort: [CompanySortType!], filter: CompanyFilterType): CompanyResultType!
 }
 
 enum TaskType {
@@ -104,12 +105,26 @@ input CompanyUpdateInput {
 
 input CompanySortType {
   id: ObjectSortType
+  idMin: ObjectSortType
+  idMax: ObjectSortType
   name: ObjectSortType
+  nameMin: ObjectSortType
+  nameMax: ObjectSortType
   updatedAt: ObjectSortType
+  updatedAtMin: ObjectSortType
+  updatedAtMax: ObjectSortType
   createdAt: ObjectSortType
+  createdAtMin: ObjectSortType
+  createdAtMax: ObjectSortType
   updatedBy: ObjectSortType
+  updatedByMin: ObjectSortType
+  updatedByMax: ObjectSortType
   createdBy: ObjectSortType
+  createdByMin: ObjectSortType
+  createdByMax: ObjectSortType
   employeesIds: ObjectSortType
+  employeesIdsMin: ObjectSortType
+  employeesIdsMax: ObjectSortType
   employees: UserSortType
 }
 
@@ -117,55 +132,145 @@ input CompanyFilterType {
   AND: [CompanyFilterType!]
   OR: [CompanyFilterType!]
   id: ID
+  idMin: ID
+  idMax: ID
   id_ne: ID
+  idMin_ne: ID
+  idMax_ne: ID
   id_gt: ID
+  idMin_gt: ID
+  idMax_gt: ID
   id_lt: ID
+  idMin_lt: ID
+  idMax_lt: ID
   id_gte: ID
+  idMin_gte: ID
+  idMax_gte: ID
   id_lte: ID
+  idMin_lte: ID
+  idMax_lte: ID
   id_in: [ID!]
+  idMin_in: [ID!]
+  idMax_in: [ID!]
   id_null: Boolean
   name: String
+  nameMin: String
+  nameMax: String
   name_ne: String
+  nameMin_ne: String
+  nameMax_ne: String
   name_gt: String
+  nameMin_gt: String
+  nameMax_gt: String
   name_lt: String
+  nameMin_lt: String
+  nameMax_lt: String
   name_gte: String
+  nameMin_gte: String
+  nameMax_gte: String
   name_lte: String
+  nameMin_lte: String
+  nameMax_lte: String
   name_in: [String!]
+  nameMin_in: [String!]
+  nameMax_in: [String!]
   name_like: String
+  nameMin_like: String
+  nameMax_like: String
   name_prefix: String
+  nameMin_prefix: String
+  nameMax_prefix: String
   name_suffix: String
+  nameMin_suffix: String
+  nameMax_suffix: String
   name_null: Boolean
   updatedAt: Time
+  updatedAtMin: Time
+  updatedAtMax: Time
   updatedAt_ne: Time
+  updatedAtMin_ne: Time
+  updatedAtMax_ne: Time
   updatedAt_gt: Time
+  updatedAtMin_gt: Time
+  updatedAtMax_gt: Time
   updatedAt_lt: Time
+  updatedAtMin_lt: Time
+  updatedAtMax_lt: Time
   updatedAt_gte: Time
+  updatedAtMin_gte: Time
+  updatedAtMax_gte: Time
   updatedAt_lte: Time
+  updatedAtMin_lte: Time
+  updatedAtMax_lte: Time
   updatedAt_in: [Time!]
+  updatedAtMin_in: [Time!]
+  updatedAtMax_in: [Time!]
   updatedAt_null: Boolean
   createdAt: Time
+  createdAtMin: Time
+  createdAtMax: Time
   createdAt_ne: Time
+  createdAtMin_ne: Time
+  createdAtMax_ne: Time
   createdAt_gt: Time
+  createdAtMin_gt: Time
+  createdAtMax_gt: Time
   createdAt_lt: Time
+  createdAtMin_lt: Time
+  createdAtMax_lt: Time
   createdAt_gte: Time
+  createdAtMin_gte: Time
+  createdAtMax_gte: Time
   createdAt_lte: Time
+  createdAtMin_lte: Time
+  createdAtMax_lte: Time
   createdAt_in: [Time!]
+  createdAtMin_in: [Time!]
+  createdAtMax_in: [Time!]
   createdAt_null: Boolean
   updatedBy: ID
+  updatedByMin: ID
+  updatedByMax: ID
   updatedBy_ne: ID
+  updatedByMin_ne: ID
+  updatedByMax_ne: ID
   updatedBy_gt: ID
+  updatedByMin_gt: ID
+  updatedByMax_gt: ID
   updatedBy_lt: ID
+  updatedByMin_lt: ID
+  updatedByMax_lt: ID
   updatedBy_gte: ID
+  updatedByMin_gte: ID
+  updatedByMax_gte: ID
   updatedBy_lte: ID
+  updatedByMin_lte: ID
+  updatedByMax_lte: ID
   updatedBy_in: [ID!]
+  updatedByMin_in: [ID!]
+  updatedByMax_in: [ID!]
   updatedBy_null: Boolean
   createdBy: ID
+  createdByMin: ID
+  createdByMax: ID
   createdBy_ne: ID
+  createdByMin_ne: ID
+  createdByMax_ne: ID
   createdBy_gt: ID
+  createdByMin_gt: ID
+  createdByMax_gt: ID
   createdBy_lt: ID
+  createdByMin_lt: ID
+  createdByMax_lt: ID
   createdBy_gte: ID
+  createdByMin_gte: ID
+  createdByMax_gte: ID
   createdBy_lte: ID
+  createdByMin_lte: ID
+  createdByMax_lte: ID
   createdBy_in: [ID!]
+  createdByMin_in: [ID!]
+  createdByMax_in: [ID!]
   createdBy_null: Boolean
   employees: UserFilterType
 }
@@ -182,7 +287,6 @@ input UserCreateInput {
   lastName: String
   tasksIds: [ID!]
   companiesIds: [ID!]
-  friendsIds: [ID!]
 }
 
 input UserUpdateInput {
@@ -191,105 +295,251 @@ input UserUpdateInput {
   lastName: String
   tasksIds: [ID!]
   companiesIds: [ID!]
-  friendsIds: [ID!]
 }
 
 input UserSortType {
   id: ObjectSortType
+  idMin: ObjectSortType
+  idMax: ObjectSortType
   email: ObjectSortType
+  emailMin: ObjectSortType
+  emailMax: ObjectSortType
   firstName: ObjectSortType
+  firstNameMin: ObjectSortType
+  firstNameMax: ObjectSortType
   lastName: ObjectSortType
+  lastNameMin: ObjectSortType
+  lastNameMax: ObjectSortType
   updatedAt: ObjectSortType
+  updatedAtMin: ObjectSortType
+  updatedAtMax: ObjectSortType
   createdAt: ObjectSortType
+  createdAtMin: ObjectSortType
+  createdAtMax: ObjectSortType
   updatedBy: ObjectSortType
+  updatedByMin: ObjectSortType
+  updatedByMax: ObjectSortType
   createdBy: ObjectSortType
+  createdByMin: ObjectSortType
+  createdByMax: ObjectSortType
   tasksIds: ObjectSortType
+  tasksIdsMin: ObjectSortType
+  tasksIdsMax: ObjectSortType
   companiesIds: ObjectSortType
-  friendsIds: ObjectSortType
+  companiesIdsMin: ObjectSortType
+  companiesIdsMax: ObjectSortType
   tasks: TaskSortType
   companies: CompanySortType
-  friends: UserSortType
 }
 
 input UserFilterType {
   AND: [UserFilterType!]
   OR: [UserFilterType!]
   id: ID
+  idMin: ID
+  idMax: ID
   id_ne: ID
+  idMin_ne: ID
+  idMax_ne: ID
   id_gt: ID
+  idMin_gt: ID
+  idMax_gt: ID
   id_lt: ID
+  idMin_lt: ID
+  idMax_lt: ID
   id_gte: ID
+  idMin_gte: ID
+  idMax_gte: ID
   id_lte: ID
+  idMin_lte: ID
+  idMax_lte: ID
   id_in: [ID!]
+  idMin_in: [ID!]
+  idMax_in: [ID!]
   id_null: Boolean
   email: String
+  emailMin: String
+  emailMax: String
   email_ne: String
+  emailMin_ne: String
+  emailMax_ne: String
   email_gt: String
+  emailMin_gt: String
+  emailMax_gt: String
   email_lt: String
+  emailMin_lt: String
+  emailMax_lt: String
   email_gte: String
+  emailMin_gte: String
+  emailMax_gte: String
   email_lte: String
+  emailMin_lte: String
+  emailMax_lte: String
   email_in: [String!]
+  emailMin_in: [String!]
+  emailMax_in: [String!]
   email_like: String
+  emailMin_like: String
+  emailMax_like: String
   email_prefix: String
+  emailMin_prefix: String
+  emailMax_prefix: String
   email_suffix: String
+  emailMin_suffix: String
+  emailMax_suffix: String
   email_null: Boolean
   firstName: String
+  firstNameMin: String
+  firstNameMax: String
   firstName_ne: String
+  firstNameMin_ne: String
+  firstNameMax_ne: String
   firstName_gt: String
+  firstNameMin_gt: String
+  firstNameMax_gt: String
   firstName_lt: String
+  firstNameMin_lt: String
+  firstNameMax_lt: String
   firstName_gte: String
+  firstNameMin_gte: String
+  firstNameMax_gte: String
   firstName_lte: String
+  firstNameMin_lte: String
+  firstNameMax_lte: String
   firstName_in: [String!]
+  firstNameMin_in: [String!]
+  firstNameMax_in: [String!]
   firstName_like: String
+  firstNameMin_like: String
+  firstNameMax_like: String
   firstName_prefix: String
+  firstNameMin_prefix: String
+  firstNameMax_prefix: String
   firstName_suffix: String
+  firstNameMin_suffix: String
+  firstNameMax_suffix: String
   firstName_null: Boolean
   lastName: String
+  lastNameMin: String
+  lastNameMax: String
   lastName_ne: String
+  lastNameMin_ne: String
+  lastNameMax_ne: String
   lastName_gt: String
+  lastNameMin_gt: String
+  lastNameMax_gt: String
   lastName_lt: String
+  lastNameMin_lt: String
+  lastNameMax_lt: String
   lastName_gte: String
+  lastNameMin_gte: String
+  lastNameMax_gte: String
   lastName_lte: String
+  lastNameMin_lte: String
+  lastNameMax_lte: String
   lastName_in: [String!]
+  lastNameMin_in: [String!]
+  lastNameMax_in: [String!]
   lastName_like: String
+  lastNameMin_like: String
+  lastNameMax_like: String
   lastName_prefix: String
+  lastNameMin_prefix: String
+  lastNameMax_prefix: String
   lastName_suffix: String
+  lastNameMin_suffix: String
+  lastNameMax_suffix: String
   lastName_null: Boolean
   updatedAt: Time
+  updatedAtMin: Time
+  updatedAtMax: Time
   updatedAt_ne: Time
+  updatedAtMin_ne: Time
+  updatedAtMax_ne: Time
   updatedAt_gt: Time
+  updatedAtMin_gt: Time
+  updatedAtMax_gt: Time
   updatedAt_lt: Time
+  updatedAtMin_lt: Time
+  updatedAtMax_lt: Time
   updatedAt_gte: Time
+  updatedAtMin_gte: Time
+  updatedAtMax_gte: Time
   updatedAt_lte: Time
+  updatedAtMin_lte: Time
+  updatedAtMax_lte: Time
   updatedAt_in: [Time!]
+  updatedAtMin_in: [Time!]
+  updatedAtMax_in: [Time!]
   updatedAt_null: Boolean
   createdAt: Time
+  createdAtMin: Time
+  createdAtMax: Time
   createdAt_ne: Time
+  createdAtMin_ne: Time
+  createdAtMax_ne: Time
   createdAt_gt: Time
+  createdAtMin_gt: Time
+  createdAtMax_gt: Time
   createdAt_lt: Time
+  createdAtMin_lt: Time
+  createdAtMax_lt: Time
   createdAt_gte: Time
+  createdAtMin_gte: Time
+  createdAtMax_gte: Time
   createdAt_lte: Time
+  createdAtMin_lte: Time
+  createdAtMax_lte: Time
   createdAt_in: [Time!]
+  createdAtMin_in: [Time!]
+  createdAtMax_in: [Time!]
   createdAt_null: Boolean
   updatedBy: ID
+  updatedByMin: ID
+  updatedByMax: ID
   updatedBy_ne: ID
+  updatedByMin_ne: ID
+  updatedByMax_ne: ID
   updatedBy_gt: ID
+  updatedByMin_gt: ID
+  updatedByMax_gt: ID
   updatedBy_lt: ID
+  updatedByMin_lt: ID
+  updatedByMax_lt: ID
   updatedBy_gte: ID
+  updatedByMin_gte: ID
+  updatedByMax_gte: ID
   updatedBy_lte: ID
+  updatedByMin_lte: ID
+  updatedByMax_lte: ID
   updatedBy_in: [ID!]
+  updatedByMin_in: [ID!]
+  updatedByMax_in: [ID!]
   updatedBy_null: Boolean
   createdBy: ID
+  createdByMin: ID
+  createdByMax: ID
   createdBy_ne: ID
+  createdByMin_ne: ID
+  createdByMax_ne: ID
   createdBy_gt: ID
+  createdByMin_gt: ID
+  createdByMax_gt: ID
   createdBy_lt: ID
+  createdByMin_lt: ID
+  createdByMax_lt: ID
   createdBy_gte: ID
+  createdByMin_gte: ID
+  createdByMax_gte: ID
   createdBy_lte: ID
+  createdByMin_lte: ID
+  createdByMax_lte: ID
   createdBy_in: [ID!]
+  createdByMin_in: [ID!]
+  createdByMax_in: [ID!]
   createdBy_null: Boolean
   tasks: TaskFilterType
   companies: CompanyFilterType
-  friends: UserFilterType
 }
 
 type UserResultType {
@@ -318,16 +568,38 @@ input TaskUpdateInput {
 
 input TaskSortType {
   id: ObjectSortType
+  idMin: ObjectSortType
+  idMax: ObjectSortType
   title: ObjectSortType
+  titleMin: ObjectSortType
+  titleMax: ObjectSortType
   completed: ObjectSortType
+  completedMin: ObjectSortType
+  completedMax: ObjectSortType
   dueDate: ObjectSortType
+  dueDateMin: ObjectSortType
+  dueDateMax: ObjectSortType
   type: ObjectSortType
+  typeMin: ObjectSortType
+  typeMax: ObjectSortType
   description: ObjectSortType
+  descriptionMin: ObjectSortType
+  descriptionMax: ObjectSortType
   assigneeId: ObjectSortType
+  assigneeIdMin: ObjectSortType
+  assigneeIdMax: ObjectSortType
   updatedAt: ObjectSortType
+  updatedAtMin: ObjectSortType
+  updatedAtMax: ObjectSortType
   createdAt: ObjectSortType
+  createdAtMin: ObjectSortType
+  createdAtMax: ObjectSortType
   updatedBy: ObjectSortType
+  updatedByMin: ObjectSortType
+  updatedByMax: ObjectSortType
   createdBy: ObjectSortType
+  createdByMin: ObjectSortType
+  createdByMax: ObjectSortType
   assignee: UserSortType
 }
 
@@ -335,98 +607,264 @@ input TaskFilterType {
   AND: [TaskFilterType!]
   OR: [TaskFilterType!]
   id: ID
+  idMin: ID
+  idMax: ID
   id_ne: ID
+  idMin_ne: ID
+  idMax_ne: ID
   id_gt: ID
+  idMin_gt: ID
+  idMax_gt: ID
   id_lt: ID
+  idMin_lt: ID
+  idMax_lt: ID
   id_gte: ID
+  idMin_gte: ID
+  idMax_gte: ID
   id_lte: ID
+  idMin_lte: ID
+  idMax_lte: ID
   id_in: [ID!]
+  idMin_in: [ID!]
+  idMax_in: [ID!]
   id_null: Boolean
   title: String
+  titleMin: String
+  titleMax: String
   title_ne: String
+  titleMin_ne: String
+  titleMax_ne: String
   title_gt: String
+  titleMin_gt: String
+  titleMax_gt: String
   title_lt: String
+  titleMin_lt: String
+  titleMax_lt: String
   title_gte: String
+  titleMin_gte: String
+  titleMax_gte: String
   title_lte: String
+  titleMin_lte: String
+  titleMax_lte: String
   title_in: [String!]
+  titleMin_in: [String!]
+  titleMax_in: [String!]
   title_like: String
+  titleMin_like: String
+  titleMax_like: String
   title_prefix: String
+  titleMin_prefix: String
+  titleMax_prefix: String
   title_suffix: String
+  titleMin_suffix: String
+  titleMax_suffix: String
   title_null: Boolean
   completed: Boolean
+  completedMin: Boolean
+  completedMax: Boolean
   completed_ne: Boolean
+  completedMin_ne: Boolean
+  completedMax_ne: Boolean
   completed_gt: Boolean
+  completedMin_gt: Boolean
+  completedMax_gt: Boolean
   completed_lt: Boolean
+  completedMin_lt: Boolean
+  completedMax_lt: Boolean
   completed_gte: Boolean
+  completedMin_gte: Boolean
+  completedMax_gte: Boolean
   completed_lte: Boolean
+  completedMin_lte: Boolean
+  completedMax_lte: Boolean
   completed_in: [Boolean!]
+  completedMin_in: [Boolean!]
+  completedMax_in: [Boolean!]
   completed_null: Boolean
   dueDate: Time
+  dueDateMin: Time
+  dueDateMax: Time
   dueDate_ne: Time
+  dueDateMin_ne: Time
+  dueDateMax_ne: Time
   dueDate_gt: Time
+  dueDateMin_gt: Time
+  dueDateMax_gt: Time
   dueDate_lt: Time
+  dueDateMin_lt: Time
+  dueDateMax_lt: Time
   dueDate_gte: Time
+  dueDateMin_gte: Time
+  dueDateMax_gte: Time
   dueDate_lte: Time
+  dueDateMin_lte: Time
+  dueDateMax_lte: Time
   dueDate_in: [Time!]
+  dueDateMin_in: [Time!]
+  dueDateMax_in: [Time!]
   dueDate_null: Boolean
   type: TaskType
+  typeMin: TaskType
+  typeMax: TaskType
   type_ne: TaskType
+  typeMin_ne: TaskType
+  typeMax_ne: TaskType
   type_gt: TaskType
+  typeMin_gt: TaskType
+  typeMax_gt: TaskType
   type_lt: TaskType
+  typeMin_lt: TaskType
+  typeMax_lt: TaskType
   type_gte: TaskType
+  typeMin_gte: TaskType
+  typeMax_gte: TaskType
   type_lte: TaskType
+  typeMin_lte: TaskType
+  typeMax_lte: TaskType
   type_in: [TaskType!]
+  typeMin_in: [TaskType!]
+  typeMax_in: [TaskType!]
   type_null: Boolean
   description: String
+  descriptionMin: String
+  descriptionMax: String
   description_ne: String
+  descriptionMin_ne: String
+  descriptionMax_ne: String
   description_gt: String
+  descriptionMin_gt: String
+  descriptionMax_gt: String
   description_lt: String
+  descriptionMin_lt: String
+  descriptionMax_lt: String
   description_gte: String
+  descriptionMin_gte: String
+  descriptionMax_gte: String
   description_lte: String
+  descriptionMin_lte: String
+  descriptionMax_lte: String
   description_in: [String!]
+  descriptionMin_in: [String!]
+  descriptionMax_in: [String!]
   description_like: String
+  descriptionMin_like: String
+  descriptionMax_like: String
   description_prefix: String
+  descriptionMin_prefix: String
+  descriptionMax_prefix: String
   description_suffix: String
+  descriptionMin_suffix: String
+  descriptionMax_suffix: String
   description_null: Boolean
   assigneeId: ID
+  assigneeIdMin: ID
+  assigneeIdMax: ID
   assigneeId_ne: ID
+  assigneeIdMin_ne: ID
+  assigneeIdMax_ne: ID
   assigneeId_gt: ID
+  assigneeIdMin_gt: ID
+  assigneeIdMax_gt: ID
   assigneeId_lt: ID
+  assigneeIdMin_lt: ID
+  assigneeIdMax_lt: ID
   assigneeId_gte: ID
+  assigneeIdMin_gte: ID
+  assigneeIdMax_gte: ID
   assigneeId_lte: ID
+  assigneeIdMin_lte: ID
+  assigneeIdMax_lte: ID
   assigneeId_in: [ID!]
+  assigneeIdMin_in: [ID!]
+  assigneeIdMax_in: [ID!]
   assigneeId_null: Boolean
   updatedAt: Time
+  updatedAtMin: Time
+  updatedAtMax: Time
   updatedAt_ne: Time
+  updatedAtMin_ne: Time
+  updatedAtMax_ne: Time
   updatedAt_gt: Time
+  updatedAtMin_gt: Time
+  updatedAtMax_gt: Time
   updatedAt_lt: Time
+  updatedAtMin_lt: Time
+  updatedAtMax_lt: Time
   updatedAt_gte: Time
+  updatedAtMin_gte: Time
+  updatedAtMax_gte: Time
   updatedAt_lte: Time
+  updatedAtMin_lte: Time
+  updatedAtMax_lte: Time
   updatedAt_in: [Time!]
+  updatedAtMin_in: [Time!]
+  updatedAtMax_in: [Time!]
   updatedAt_null: Boolean
   createdAt: Time
+  createdAtMin: Time
+  createdAtMax: Time
   createdAt_ne: Time
+  createdAtMin_ne: Time
+  createdAtMax_ne: Time
   createdAt_gt: Time
+  createdAtMin_gt: Time
+  createdAtMax_gt: Time
   createdAt_lt: Time
+  createdAtMin_lt: Time
+  createdAtMax_lt: Time
   createdAt_gte: Time
+  createdAtMin_gte: Time
+  createdAtMax_gte: Time
   createdAt_lte: Time
+  createdAtMin_lte: Time
+  createdAtMax_lte: Time
   createdAt_in: [Time!]
+  createdAtMin_in: [Time!]
+  createdAtMax_in: [Time!]
   createdAt_null: Boolean
   updatedBy: ID
+  updatedByMin: ID
+  updatedByMax: ID
   updatedBy_ne: ID
+  updatedByMin_ne: ID
+  updatedByMax_ne: ID
   updatedBy_gt: ID
+  updatedByMin_gt: ID
+  updatedByMax_gt: ID
   updatedBy_lt: ID
+  updatedByMin_lt: ID
+  updatedByMax_lt: ID
   updatedBy_gte: ID
+  updatedByMin_gte: ID
+  updatedByMax_gte: ID
   updatedBy_lte: ID
+  updatedByMin_lte: ID
+  updatedByMax_lte: ID
   updatedBy_in: [ID!]
+  updatedByMin_in: [ID!]
+  updatedByMax_in: [ID!]
   updatedBy_null: Boolean
   createdBy: ID
+  createdByMin: ID
+  createdByMax: ID
   createdBy_ne: ID
+  createdByMin_ne: ID
+  createdByMax_ne: ID
   createdBy_gt: ID
+  createdByMin_gt: ID
+  createdByMax_gt: ID
   createdBy_lt: ID
+  createdByMin_lt: ID
+  createdByMax_lt: ID
   createdBy_gte: ID
+  createdByMin_gte: ID
+  createdByMax_gte: ID
   createdBy_lte: ID
+  createdByMin_lte: ID
+  createdByMax_lte: ID
   createdBy_in: [ID!]
+  createdByMin_in: [ID!]
+  createdByMax_in: [ID!]
   createdBy_null: Boolean
   assignee: UserFilterType
 }

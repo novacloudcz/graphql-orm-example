@@ -3,6 +3,7 @@ package gen
 import (
 	"context"
 
+	"github.com/jinzhu/gorm"
 	"github.com/novacloudcz/graphql-orm/events"
 )
 
@@ -16,7 +17,7 @@ type ResolutionHandlers struct {
 	QueryCompany       func(ctx context.Context, r *GeneratedResolver, opts QueryCompanyHandlerOptions) (*Company, error)
 	QueryCompanies     func(ctx context.Context, r *GeneratedResolver, opts QueryCompaniesHandlerOptions) (*CompanyResultType, error)
 
-	CompanyEmployees func(ctx context.Context, r *GeneratedCompanyResolver, obj *Company) (res []*User, err error)
+	CompanyEmployees func(ctx context.Context, r *GeneratedResolver, obj *Company) (res []*User, err error)
 
 	CreateUser     func(ctx context.Context, r *GeneratedResolver, input map[string]interface{}) (item *User, err error)
 	UpdateUser     func(ctx context.Context, r *GeneratedResolver, id string, input map[string]interface{}) (item *User, err error)
@@ -25,11 +26,9 @@ type ResolutionHandlers struct {
 	QueryUser      func(ctx context.Context, r *GeneratedResolver, opts QueryUserHandlerOptions) (*User, error)
 	QueryUsers     func(ctx context.Context, r *GeneratedResolver, opts QueryUsersHandlerOptions) (*UserResultType, error)
 
-	UserTasks func(ctx context.Context, r *GeneratedUserResolver, obj *User) (res []*Task, err error)
+	UserTasks func(ctx context.Context, r *GeneratedResolver, obj *User) (res []*Task, err error)
 
-	UserCompanies func(ctx context.Context, r *GeneratedUserResolver, obj *User) (res []*Company, err error)
-
-	UserFriends func(ctx context.Context, r *GeneratedUserResolver, obj *User) (res []*User, err error)
+	UserCompanies func(ctx context.Context, r *GeneratedResolver, obj *User) (res []*Company, err error)
 
 	CreateTask     func(ctx context.Context, r *GeneratedResolver, input map[string]interface{}) (item *Task, err error)
 	UpdateTask     func(ctx context.Context, r *GeneratedResolver, id string, input map[string]interface{}) (item *Task, err error)
@@ -38,7 +37,7 @@ type ResolutionHandlers struct {
 	QueryTask      func(ctx context.Context, r *GeneratedResolver, opts QueryTaskHandlerOptions) (*Task, error)
 	QueryTasks     func(ctx context.Context, r *GeneratedResolver, opts QueryTasksHandlerOptions) (*TaskResultType, error)
 
-	TaskAssignee func(ctx context.Context, r *GeneratedTaskResolver, obj *Task) (res *User, err error)
+	TaskAssignee func(ctx context.Context, r *GeneratedResolver, obj *Task) (res *User, err error)
 }
 
 func DefaultResolutionHandlers() ResolutionHandlers {
@@ -65,8 +64,6 @@ func DefaultResolutionHandlers() ResolutionHandlers {
 
 		UserCompanies: UserCompaniesHandler,
 
-		UserFriends: UserFriendsHandler,
-
 		CreateTask:     CreateTaskHandler,
 		UpdateTask:     UpdateTaskHandler,
 		DeleteTask:     DeleteTaskHandler,
@@ -82,5 +79,14 @@ func DefaultResolutionHandlers() ResolutionHandlers {
 type GeneratedResolver struct {
 	Handlers        ResolutionHandlers
 	DB              *DB
-	EventController *events.EventController
+	EventController *EventController
+}
+
+// GetDB returns database connection or transaction for given context (if exists)
+func (r *GeneratedResolver) GetDB(ctx context.Context) *gorm.DB {
+	db, _ := ctx.Value(KeyMutationTransaction).(*gorm.DB)
+	if db == nil {
+		db = r.DB.Query()
+	}
+	return db
 }

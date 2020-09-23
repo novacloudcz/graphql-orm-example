@@ -183,25 +183,6 @@ func (qf *UserQueryFilter) applyQueryWithFields(dialect gorm.Dialect, fields []*
 		}
 	}
 
-	if fs, ok := fieldsMap["friends"]; ok {
-		_fields := []*ast.Field{}
-		_alias := alias + "_friends"
-		*joins = append(*joins, "LEFT JOIN "+dialect.Quote(TableName("user_friends"))+" "+dialect.Quote(_alias+"_jointable")+" ON "+dialect.Quote(alias)+".id = "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" LEFT JOIN "+dialect.Quote(TableName("users"))+" "+dialect.Quote(_alias)+" ON "+dialect.Quote(_alias+"_jointable")+"."+dialect.Quote("friend_id")+" = "+dialect.Quote(_alias)+".id")
-
-		for _, f := range fs {
-			for _, s := range f.SelectionSet {
-				if f, ok := s.(*ast.Field); ok {
-					_fields = append(_fields, f)
-				}
-			}
-		}
-		q := UserQueryFilter{qf.Query}
-		err := q.applyQueryWithFields(dialect, _fields, query, _alias, ors, values, joins)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 

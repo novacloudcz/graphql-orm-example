@@ -9,14 +9,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-type NotFoundError struct {
-	Entity string
-}
-
-func (e *NotFoundError) Error() string {
-	return fmt.Sprintf("%s not found", e.Entity)
-}
-
 type CompanyResultType struct {
 	EntityResultType
 }
@@ -45,6 +37,15 @@ type CompanyChanges struct {
 	EmployeesIDs []*string
 }
 
+type Company_employees struct {
+	company_id  string
+	employee_id string
+}
+
+func (Company_employees) TableName() string {
+	return TableName("company_employees")
+}
+
 type UserResultType struct {
 	EntityResultType
 }
@@ -62,8 +63,6 @@ type User struct {
 	Tasks []*Task `json:"tasks" gorm:"foreignkey:AssigneeID"`
 
 	Companies []*Company `json:"companies" gorm:"many2many:company_employees;jointable_foreignkey:employee_id;association_jointable_foreignkey:company_id"`
-
-	Friends []*User `json:"friends" gorm:"many2many:user_friends;jointable_foreignkey:user_id;association_jointable_foreignkey:friend_id"`
 }
 
 func (m *User) Is_Entity() {}
@@ -80,7 +79,6 @@ type UserChanges struct {
 
 	TasksIDs     []*string
 	CompaniesIDs []*string
-	FriendsIDs   []*string
 }
 
 type TaskResultType struct {

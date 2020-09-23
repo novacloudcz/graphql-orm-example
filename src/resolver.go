@@ -5,12 +5,11 @@ import (
 	"fmt"
 
 	"github.com/novacloudcz/graphql-orm-example/gen"
-	"github.com/novacloudcz/graphql-orm/events"
 
 	"github.com/badoux/checkmail"
 )
 
-func New(db *gen.DB, ec *events.EventController) *Resolver {
+func New(db *gen.DB, ec *gen.EventController) *Resolver {
 	resolver := NewResolver(db, ec)
 
 	resolver.Handlers.CreateUser = func(ctx context.Context, r *gen.GeneratedResolver, input map[string]interface{}) (item *gen.User, err error) {

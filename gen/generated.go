@@ -50,14 +50,15 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Company struct {
-		CreatedAt    func(childComplexity int) int
-		CreatedBy    func(childComplexity int) int
-		Employees    func(childComplexity int) int
-		EmployeesIds func(childComplexity int) int
-		ID           func(childComplexity int) int
-		Name         func(childComplexity int) int
-		UpdatedAt    func(childComplexity int) int
-		UpdatedBy    func(childComplexity int) int
+		CreatedAt           func(childComplexity int) int
+		CreatedBy           func(childComplexity int) int
+		Employees           func(childComplexity int) int
+		EmployeesConnection func(childComplexity int, offset *int, limit *int, q *string, sort []*UserSortType, filter *UserFilterType) int
+		EmployeesIds        func(childComplexity int) int
+		ID                  func(childComplexity int) int
+		Name                func(childComplexity int) int
+		UpdatedAt           func(childComplexity int) int
+		UpdatedBy           func(childComplexity int) int
 	}
 
 	CompanyResultType struct {
@@ -112,20 +113,20 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Companies    func(childComplexity int) int
-		CompaniesIds func(childComplexity int) int
-		CreatedAt    func(childComplexity int) int
-		CreatedBy    func(childComplexity int) int
-		Email        func(childComplexity int) int
-		FirstName    func(childComplexity int) int
-		Friends      func(childComplexity int) int
-		FriendsIds   func(childComplexity int) int
-		ID           func(childComplexity int) int
-		LastName     func(childComplexity int) int
-		Tasks        func(childComplexity int) int
-		TasksIds     func(childComplexity int) int
-		UpdatedAt    func(childComplexity int) int
-		UpdatedBy    func(childComplexity int) int
+		Companies           func(childComplexity int) int
+		CompaniesConnection func(childComplexity int, offset *int, limit *int, q *string, sort []*CompanySortType, filter *CompanyFilterType) int
+		CompaniesIds        func(childComplexity int) int
+		CreatedAt           func(childComplexity int) int
+		CreatedBy           func(childComplexity int) int
+		Email               func(childComplexity int) int
+		FirstName           func(childComplexity int) int
+		ID                  func(childComplexity int) int
+		LastName            func(childComplexity int) int
+		Tasks               func(childComplexity int) int
+		TasksConnection     func(childComplexity int, offset *int, limit *int, q *string, sort []*TaskSortType, filter *TaskFilterType) int
+		TasksIds            func(childComplexity int) int
+		UpdatedAt           func(childComplexity int) int
+		UpdatedBy           func(childComplexity int) int
 	}
 
 	UserResultType struct {
@@ -142,6 +143,7 @@ type CompanyResolver interface {
 	Employees(ctx context.Context, obj *Company) ([]*User, error)
 
 	EmployeesIds(ctx context.Context, obj *Company) ([]string, error)
+	EmployeesConnection(ctx context.Context, obj *Company, offset *int, limit *int, q *string, sort []*UserSortType, filter *UserFilterType) (*UserResultType, error)
 }
 type CompanyResultTypeResolver interface {
 	Items(ctx context.Context, obj *CompanyResultType) ([]*Company, error)
@@ -181,11 +183,11 @@ type TaskResultTypeResolver interface {
 type UserResolver interface {
 	Tasks(ctx context.Context, obj *User) ([]*Task, error)
 	Companies(ctx context.Context, obj *User) ([]*Company, error)
-	Friends(ctx context.Context, obj *User) ([]*User, error)
 
 	TasksIds(ctx context.Context, obj *User) ([]string, error)
+	TasksConnection(ctx context.Context, obj *User, offset *int, limit *int, q *string, sort []*TaskSortType, filter *TaskFilterType) (*TaskResultType, error)
 	CompaniesIds(ctx context.Context, obj *User) ([]string, error)
-	FriendsIds(ctx context.Context, obj *User) ([]string, error)
+	CompaniesConnection(ctx context.Context, obj *User, offset *int, limit *int, q *string, sort []*CompanySortType, filter *CompanyFilterType) (*CompanyResultType, error)
 }
 type UserResultTypeResolver interface {
 	Items(ctx context.Context, obj *UserResultType) ([]*User, error)
@@ -227,6 +229,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Company.Employees(childComplexity), true
+
+	case "Company.employeesConnection":
+		if e.complexity.Company.EmployeesConnection == nil {
+			break
+		}
+
+		args, err := ec.field_Company_employeesConnection_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Company.EmployeesConnection(childComplexity, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*UserSortType), args["filter"].(*UserFilterType)), true
 
 	case "Company.employeesIds":
 		if e.complexity.Company.EmployeesIds == nil {
@@ -597,6 +611,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Companies(childComplexity), true
 
+	case "User.companiesConnection":
+		if e.complexity.User.CompaniesConnection == nil {
+			break
+		}
+
+		args, err := ec.field_User_companiesConnection_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.User.CompaniesConnection(childComplexity, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*CompanySortType), args["filter"].(*CompanyFilterType)), true
+
 	case "User.companiesIds":
 		if e.complexity.User.CompaniesIds == nil {
 			break
@@ -632,20 +658,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.FirstName(childComplexity), true
 
-	case "User.friends":
-		if e.complexity.User.Friends == nil {
-			break
-		}
-
-		return e.complexity.User.Friends(childComplexity), true
-
-	case "User.friendsIds":
-		if e.complexity.User.FriendsIds == nil {
-			break
-		}
-
-		return e.complexity.User.FriendsIds(childComplexity), true
-
 	case "User.id":
 		if e.complexity.User.ID == nil {
 			break
@@ -666,6 +678,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Tasks(childComplexity), true
+
+	case "User.tasksConnection":
+		if e.complexity.User.TasksConnection == nil {
+			break
+		}
+
+		args, err := ec.field_User_tasksConnection_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.User.TasksConnection(childComplexity, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*TaskSortType), args["filter"].(*TaskFilterType)), true
 
 	case "User.tasksIds":
 		if e.complexity.User.TasksIds == nil {
@@ -785,11 +809,11 @@ schema {
 type Query {
   _service: _Service!
   company(id: ID, q: String, filter: CompanyFilterType): Company
-  companies(offset: Int, limit: Int = 30, q: String, sort: [CompanySortType!], filter: CompanyFilterType): CompanyResultType
+  companies(offset: Int, limit: Int = 30, q: String, sort: [CompanySortType!], filter: CompanyFilterType): CompanyResultType!
   user(id: ID, q: String, filter: UserFilterType): User
-  users(offset: Int, limit: Int = 30, q: String, sort: [UserSortType!], filter: UserFilterType): UserResultType
+  users(offset: Int, limit: Int = 30, q: String, sort: [UserSortType!], filter: UserFilterType): UserResultType!
   task(id: ID, q: String, filter: TaskFilterType): Task
-  tasks(offset: Int, limit: Int = 30, q: String, sort: [TaskSortType!], filter: TaskFilterType): TaskResultType
+  tasks(offset: Int, limit: Int = 30, q: String, sort: [TaskSortType!], filter: TaskFilterType): TaskResultType!
 }
 
 type Mutation {
@@ -825,6 +849,7 @@ type Company {
   updatedBy: ID
   createdBy: ID
   employeesIds: [ID!]!
+  employeesConnection(offset: Int, limit: Int = 30, q: String, sort: [UserSortType!], filter: UserFilterType): UserResultType!
 }
 
 type User {
@@ -834,14 +859,14 @@ type User {
   lastName: String
   tasks: [Task!]!
   companies: [Company!]!
-  friends: [User!]!
   updatedAt: Time
   createdAt: Time!
   updatedBy: ID
   createdBy: ID
   tasksIds: [ID!]!
+  tasksConnection(offset: Int, limit: Int = 30, q: String, sort: [TaskSortType!], filter: TaskFilterType): TaskResultType!
   companiesIds: [ID!]!
-  friendsIds: [ID!]!
+  companiesConnection(offset: Int, limit: Int = 30, q: String, sort: [CompanySortType!], filter: CompanyFilterType): CompanyResultType!
 }
 
 enum TaskType {
@@ -877,12 +902,26 @@ input CompanyUpdateInput {
 
 input CompanySortType {
   id: ObjectSortType
+  idMin: ObjectSortType
+  idMax: ObjectSortType
   name: ObjectSortType
+  nameMin: ObjectSortType
+  nameMax: ObjectSortType
   updatedAt: ObjectSortType
+  updatedAtMin: ObjectSortType
+  updatedAtMax: ObjectSortType
   createdAt: ObjectSortType
+  createdAtMin: ObjectSortType
+  createdAtMax: ObjectSortType
   updatedBy: ObjectSortType
+  updatedByMin: ObjectSortType
+  updatedByMax: ObjectSortType
   createdBy: ObjectSortType
+  createdByMin: ObjectSortType
+  createdByMax: ObjectSortType
   employeesIds: ObjectSortType
+  employeesIdsMin: ObjectSortType
+  employeesIdsMax: ObjectSortType
   employees: UserSortType
 }
 
@@ -890,55 +929,145 @@ input CompanyFilterType {
   AND: [CompanyFilterType!]
   OR: [CompanyFilterType!]
   id: ID
+  idMin: ID
+  idMax: ID
   id_ne: ID
+  idMin_ne: ID
+  idMax_ne: ID
   id_gt: ID
+  idMin_gt: ID
+  idMax_gt: ID
   id_lt: ID
+  idMin_lt: ID
+  idMax_lt: ID
   id_gte: ID
+  idMin_gte: ID
+  idMax_gte: ID
   id_lte: ID
+  idMin_lte: ID
+  idMax_lte: ID
   id_in: [ID!]
+  idMin_in: [ID!]
+  idMax_in: [ID!]
   id_null: Boolean
   name: String
+  nameMin: String
+  nameMax: String
   name_ne: String
+  nameMin_ne: String
+  nameMax_ne: String
   name_gt: String
+  nameMin_gt: String
+  nameMax_gt: String
   name_lt: String
+  nameMin_lt: String
+  nameMax_lt: String
   name_gte: String
+  nameMin_gte: String
+  nameMax_gte: String
   name_lte: String
+  nameMin_lte: String
+  nameMax_lte: String
   name_in: [String!]
+  nameMin_in: [String!]
+  nameMax_in: [String!]
   name_like: String
+  nameMin_like: String
+  nameMax_like: String
   name_prefix: String
+  nameMin_prefix: String
+  nameMax_prefix: String
   name_suffix: String
+  nameMin_suffix: String
+  nameMax_suffix: String
   name_null: Boolean
   updatedAt: Time
+  updatedAtMin: Time
+  updatedAtMax: Time
   updatedAt_ne: Time
+  updatedAtMin_ne: Time
+  updatedAtMax_ne: Time
   updatedAt_gt: Time
+  updatedAtMin_gt: Time
+  updatedAtMax_gt: Time
   updatedAt_lt: Time
+  updatedAtMin_lt: Time
+  updatedAtMax_lt: Time
   updatedAt_gte: Time
+  updatedAtMin_gte: Time
+  updatedAtMax_gte: Time
   updatedAt_lte: Time
+  updatedAtMin_lte: Time
+  updatedAtMax_lte: Time
   updatedAt_in: [Time!]
+  updatedAtMin_in: [Time!]
+  updatedAtMax_in: [Time!]
   updatedAt_null: Boolean
   createdAt: Time
+  createdAtMin: Time
+  createdAtMax: Time
   createdAt_ne: Time
+  createdAtMin_ne: Time
+  createdAtMax_ne: Time
   createdAt_gt: Time
+  createdAtMin_gt: Time
+  createdAtMax_gt: Time
   createdAt_lt: Time
+  createdAtMin_lt: Time
+  createdAtMax_lt: Time
   createdAt_gte: Time
+  createdAtMin_gte: Time
+  createdAtMax_gte: Time
   createdAt_lte: Time
+  createdAtMin_lte: Time
+  createdAtMax_lte: Time
   createdAt_in: [Time!]
+  createdAtMin_in: [Time!]
+  createdAtMax_in: [Time!]
   createdAt_null: Boolean
   updatedBy: ID
+  updatedByMin: ID
+  updatedByMax: ID
   updatedBy_ne: ID
+  updatedByMin_ne: ID
+  updatedByMax_ne: ID
   updatedBy_gt: ID
+  updatedByMin_gt: ID
+  updatedByMax_gt: ID
   updatedBy_lt: ID
+  updatedByMin_lt: ID
+  updatedByMax_lt: ID
   updatedBy_gte: ID
+  updatedByMin_gte: ID
+  updatedByMax_gte: ID
   updatedBy_lte: ID
+  updatedByMin_lte: ID
+  updatedByMax_lte: ID
   updatedBy_in: [ID!]
+  updatedByMin_in: [ID!]
+  updatedByMax_in: [ID!]
   updatedBy_null: Boolean
   createdBy: ID
+  createdByMin: ID
+  createdByMax: ID
   createdBy_ne: ID
+  createdByMin_ne: ID
+  createdByMax_ne: ID
   createdBy_gt: ID
+  createdByMin_gt: ID
+  createdByMax_gt: ID
   createdBy_lt: ID
+  createdByMin_lt: ID
+  createdByMax_lt: ID
   createdBy_gte: ID
+  createdByMin_gte: ID
+  createdByMax_gte: ID
   createdBy_lte: ID
+  createdByMin_lte: ID
+  createdByMax_lte: ID
   createdBy_in: [ID!]
+  createdByMin_in: [ID!]
+  createdByMax_in: [ID!]
   createdBy_null: Boolean
   employees: UserFilterType
 }
@@ -955,7 +1084,6 @@ input UserCreateInput {
   lastName: String
   tasksIds: [ID!]
   companiesIds: [ID!]
-  friendsIds: [ID!]
 }
 
 input UserUpdateInput {
@@ -964,105 +1092,251 @@ input UserUpdateInput {
   lastName: String
   tasksIds: [ID!]
   companiesIds: [ID!]
-  friendsIds: [ID!]
 }
 
 input UserSortType {
   id: ObjectSortType
+  idMin: ObjectSortType
+  idMax: ObjectSortType
   email: ObjectSortType
+  emailMin: ObjectSortType
+  emailMax: ObjectSortType
   firstName: ObjectSortType
+  firstNameMin: ObjectSortType
+  firstNameMax: ObjectSortType
   lastName: ObjectSortType
+  lastNameMin: ObjectSortType
+  lastNameMax: ObjectSortType
   updatedAt: ObjectSortType
+  updatedAtMin: ObjectSortType
+  updatedAtMax: ObjectSortType
   createdAt: ObjectSortType
+  createdAtMin: ObjectSortType
+  createdAtMax: ObjectSortType
   updatedBy: ObjectSortType
+  updatedByMin: ObjectSortType
+  updatedByMax: ObjectSortType
   createdBy: ObjectSortType
+  createdByMin: ObjectSortType
+  createdByMax: ObjectSortType
   tasksIds: ObjectSortType
+  tasksIdsMin: ObjectSortType
+  tasksIdsMax: ObjectSortType
   companiesIds: ObjectSortType
-  friendsIds: ObjectSortType
+  companiesIdsMin: ObjectSortType
+  companiesIdsMax: ObjectSortType
   tasks: TaskSortType
   companies: CompanySortType
-  friends: UserSortType
 }
 
 input UserFilterType {
   AND: [UserFilterType!]
   OR: [UserFilterType!]
   id: ID
+  idMin: ID
+  idMax: ID
   id_ne: ID
+  idMin_ne: ID
+  idMax_ne: ID
   id_gt: ID
+  idMin_gt: ID
+  idMax_gt: ID
   id_lt: ID
+  idMin_lt: ID
+  idMax_lt: ID
   id_gte: ID
+  idMin_gte: ID
+  idMax_gte: ID
   id_lte: ID
+  idMin_lte: ID
+  idMax_lte: ID
   id_in: [ID!]
+  idMin_in: [ID!]
+  idMax_in: [ID!]
   id_null: Boolean
   email: String
+  emailMin: String
+  emailMax: String
   email_ne: String
+  emailMin_ne: String
+  emailMax_ne: String
   email_gt: String
+  emailMin_gt: String
+  emailMax_gt: String
   email_lt: String
+  emailMin_lt: String
+  emailMax_lt: String
   email_gte: String
+  emailMin_gte: String
+  emailMax_gte: String
   email_lte: String
+  emailMin_lte: String
+  emailMax_lte: String
   email_in: [String!]
+  emailMin_in: [String!]
+  emailMax_in: [String!]
   email_like: String
+  emailMin_like: String
+  emailMax_like: String
   email_prefix: String
+  emailMin_prefix: String
+  emailMax_prefix: String
   email_suffix: String
+  emailMin_suffix: String
+  emailMax_suffix: String
   email_null: Boolean
   firstName: String
+  firstNameMin: String
+  firstNameMax: String
   firstName_ne: String
+  firstNameMin_ne: String
+  firstNameMax_ne: String
   firstName_gt: String
+  firstNameMin_gt: String
+  firstNameMax_gt: String
   firstName_lt: String
+  firstNameMin_lt: String
+  firstNameMax_lt: String
   firstName_gte: String
+  firstNameMin_gte: String
+  firstNameMax_gte: String
   firstName_lte: String
+  firstNameMin_lte: String
+  firstNameMax_lte: String
   firstName_in: [String!]
+  firstNameMin_in: [String!]
+  firstNameMax_in: [String!]
   firstName_like: String
+  firstNameMin_like: String
+  firstNameMax_like: String
   firstName_prefix: String
+  firstNameMin_prefix: String
+  firstNameMax_prefix: String
   firstName_suffix: String
+  firstNameMin_suffix: String
+  firstNameMax_suffix: String
   firstName_null: Boolean
   lastName: String
+  lastNameMin: String
+  lastNameMax: String
   lastName_ne: String
+  lastNameMin_ne: String
+  lastNameMax_ne: String
   lastName_gt: String
+  lastNameMin_gt: String
+  lastNameMax_gt: String
   lastName_lt: String
+  lastNameMin_lt: String
+  lastNameMax_lt: String
   lastName_gte: String
+  lastNameMin_gte: String
+  lastNameMax_gte: String
   lastName_lte: String
+  lastNameMin_lte: String
+  lastNameMax_lte: String
   lastName_in: [String!]
+  lastNameMin_in: [String!]
+  lastNameMax_in: [String!]
   lastName_like: String
+  lastNameMin_like: String
+  lastNameMax_like: String
   lastName_prefix: String
+  lastNameMin_prefix: String
+  lastNameMax_prefix: String
   lastName_suffix: String
+  lastNameMin_suffix: String
+  lastNameMax_suffix: String
   lastName_null: Boolean
   updatedAt: Time
+  updatedAtMin: Time
+  updatedAtMax: Time
   updatedAt_ne: Time
+  updatedAtMin_ne: Time
+  updatedAtMax_ne: Time
   updatedAt_gt: Time
+  updatedAtMin_gt: Time
+  updatedAtMax_gt: Time
   updatedAt_lt: Time
+  updatedAtMin_lt: Time
+  updatedAtMax_lt: Time
   updatedAt_gte: Time
+  updatedAtMin_gte: Time
+  updatedAtMax_gte: Time
   updatedAt_lte: Time
+  updatedAtMin_lte: Time
+  updatedAtMax_lte: Time
   updatedAt_in: [Time!]
+  updatedAtMin_in: [Time!]
+  updatedAtMax_in: [Time!]
   updatedAt_null: Boolean
   createdAt: Time
+  createdAtMin: Time
+  createdAtMax: Time
   createdAt_ne: Time
+  createdAtMin_ne: Time
+  createdAtMax_ne: Time
   createdAt_gt: Time
+  createdAtMin_gt: Time
+  createdAtMax_gt: Time
   createdAt_lt: Time
+  createdAtMin_lt: Time
+  createdAtMax_lt: Time
   createdAt_gte: Time
+  createdAtMin_gte: Time
+  createdAtMax_gte: Time
   createdAt_lte: Time
+  createdAtMin_lte: Time
+  createdAtMax_lte: Time
   createdAt_in: [Time!]
+  createdAtMin_in: [Time!]
+  createdAtMax_in: [Time!]
   createdAt_null: Boolean
   updatedBy: ID
+  updatedByMin: ID
+  updatedByMax: ID
   updatedBy_ne: ID
+  updatedByMin_ne: ID
+  updatedByMax_ne: ID
   updatedBy_gt: ID
+  updatedByMin_gt: ID
+  updatedByMax_gt: ID
   updatedBy_lt: ID
+  updatedByMin_lt: ID
+  updatedByMax_lt: ID
   updatedBy_gte: ID
+  updatedByMin_gte: ID
+  updatedByMax_gte: ID
   updatedBy_lte: ID
+  updatedByMin_lte: ID
+  updatedByMax_lte: ID
   updatedBy_in: [ID!]
+  updatedByMin_in: [ID!]
+  updatedByMax_in: [ID!]
   updatedBy_null: Boolean
   createdBy: ID
+  createdByMin: ID
+  createdByMax: ID
   createdBy_ne: ID
+  createdByMin_ne: ID
+  createdByMax_ne: ID
   createdBy_gt: ID
+  createdByMin_gt: ID
+  createdByMax_gt: ID
   createdBy_lt: ID
+  createdByMin_lt: ID
+  createdByMax_lt: ID
   createdBy_gte: ID
+  createdByMin_gte: ID
+  createdByMax_gte: ID
   createdBy_lte: ID
+  createdByMin_lte: ID
+  createdByMax_lte: ID
   createdBy_in: [ID!]
+  createdByMin_in: [ID!]
+  createdByMax_in: [ID!]
   createdBy_null: Boolean
   tasks: TaskFilterType
   companies: CompanyFilterType
-  friends: UserFilterType
 }
 
 type UserResultType {
@@ -1091,16 +1365,38 @@ input TaskUpdateInput {
 
 input TaskSortType {
   id: ObjectSortType
+  idMin: ObjectSortType
+  idMax: ObjectSortType
   title: ObjectSortType
+  titleMin: ObjectSortType
+  titleMax: ObjectSortType
   completed: ObjectSortType
+  completedMin: ObjectSortType
+  completedMax: ObjectSortType
   dueDate: ObjectSortType
+  dueDateMin: ObjectSortType
+  dueDateMax: ObjectSortType
   type: ObjectSortType
+  typeMin: ObjectSortType
+  typeMax: ObjectSortType
   description: ObjectSortType
+  descriptionMin: ObjectSortType
+  descriptionMax: ObjectSortType
   assigneeId: ObjectSortType
+  assigneeIdMin: ObjectSortType
+  assigneeIdMax: ObjectSortType
   updatedAt: ObjectSortType
+  updatedAtMin: ObjectSortType
+  updatedAtMax: ObjectSortType
   createdAt: ObjectSortType
+  createdAtMin: ObjectSortType
+  createdAtMax: ObjectSortType
   updatedBy: ObjectSortType
+  updatedByMin: ObjectSortType
+  updatedByMax: ObjectSortType
   createdBy: ObjectSortType
+  createdByMin: ObjectSortType
+  createdByMax: ObjectSortType
   assignee: UserSortType
 }
 
@@ -1108,98 +1404,264 @@ input TaskFilterType {
   AND: [TaskFilterType!]
   OR: [TaskFilterType!]
   id: ID
+  idMin: ID
+  idMax: ID
   id_ne: ID
+  idMin_ne: ID
+  idMax_ne: ID
   id_gt: ID
+  idMin_gt: ID
+  idMax_gt: ID
   id_lt: ID
+  idMin_lt: ID
+  idMax_lt: ID
   id_gte: ID
+  idMin_gte: ID
+  idMax_gte: ID
   id_lte: ID
+  idMin_lte: ID
+  idMax_lte: ID
   id_in: [ID!]
+  idMin_in: [ID!]
+  idMax_in: [ID!]
   id_null: Boolean
   title: String
+  titleMin: String
+  titleMax: String
   title_ne: String
+  titleMin_ne: String
+  titleMax_ne: String
   title_gt: String
+  titleMin_gt: String
+  titleMax_gt: String
   title_lt: String
+  titleMin_lt: String
+  titleMax_lt: String
   title_gte: String
+  titleMin_gte: String
+  titleMax_gte: String
   title_lte: String
+  titleMin_lte: String
+  titleMax_lte: String
   title_in: [String!]
+  titleMin_in: [String!]
+  titleMax_in: [String!]
   title_like: String
+  titleMin_like: String
+  titleMax_like: String
   title_prefix: String
+  titleMin_prefix: String
+  titleMax_prefix: String
   title_suffix: String
+  titleMin_suffix: String
+  titleMax_suffix: String
   title_null: Boolean
   completed: Boolean
+  completedMin: Boolean
+  completedMax: Boolean
   completed_ne: Boolean
+  completedMin_ne: Boolean
+  completedMax_ne: Boolean
   completed_gt: Boolean
+  completedMin_gt: Boolean
+  completedMax_gt: Boolean
   completed_lt: Boolean
+  completedMin_lt: Boolean
+  completedMax_lt: Boolean
   completed_gte: Boolean
+  completedMin_gte: Boolean
+  completedMax_gte: Boolean
   completed_lte: Boolean
+  completedMin_lte: Boolean
+  completedMax_lte: Boolean
   completed_in: [Boolean!]
+  completedMin_in: [Boolean!]
+  completedMax_in: [Boolean!]
   completed_null: Boolean
   dueDate: Time
+  dueDateMin: Time
+  dueDateMax: Time
   dueDate_ne: Time
+  dueDateMin_ne: Time
+  dueDateMax_ne: Time
   dueDate_gt: Time
+  dueDateMin_gt: Time
+  dueDateMax_gt: Time
   dueDate_lt: Time
+  dueDateMin_lt: Time
+  dueDateMax_lt: Time
   dueDate_gte: Time
+  dueDateMin_gte: Time
+  dueDateMax_gte: Time
   dueDate_lte: Time
+  dueDateMin_lte: Time
+  dueDateMax_lte: Time
   dueDate_in: [Time!]
+  dueDateMin_in: [Time!]
+  dueDateMax_in: [Time!]
   dueDate_null: Boolean
   type: TaskType
+  typeMin: TaskType
+  typeMax: TaskType
   type_ne: TaskType
+  typeMin_ne: TaskType
+  typeMax_ne: TaskType
   type_gt: TaskType
+  typeMin_gt: TaskType
+  typeMax_gt: TaskType
   type_lt: TaskType
+  typeMin_lt: TaskType
+  typeMax_lt: TaskType
   type_gte: TaskType
+  typeMin_gte: TaskType
+  typeMax_gte: TaskType
   type_lte: TaskType
+  typeMin_lte: TaskType
+  typeMax_lte: TaskType
   type_in: [TaskType!]
+  typeMin_in: [TaskType!]
+  typeMax_in: [TaskType!]
   type_null: Boolean
   description: String
+  descriptionMin: String
+  descriptionMax: String
   description_ne: String
+  descriptionMin_ne: String
+  descriptionMax_ne: String
   description_gt: String
+  descriptionMin_gt: String
+  descriptionMax_gt: String
   description_lt: String
+  descriptionMin_lt: String
+  descriptionMax_lt: String
   description_gte: String
+  descriptionMin_gte: String
+  descriptionMax_gte: String
   description_lte: String
+  descriptionMin_lte: String
+  descriptionMax_lte: String
   description_in: [String!]
+  descriptionMin_in: [String!]
+  descriptionMax_in: [String!]
   description_like: String
+  descriptionMin_like: String
+  descriptionMax_like: String
   description_prefix: String
+  descriptionMin_prefix: String
+  descriptionMax_prefix: String
   description_suffix: String
+  descriptionMin_suffix: String
+  descriptionMax_suffix: String
   description_null: Boolean
   assigneeId: ID
+  assigneeIdMin: ID
+  assigneeIdMax: ID
   assigneeId_ne: ID
+  assigneeIdMin_ne: ID
+  assigneeIdMax_ne: ID
   assigneeId_gt: ID
+  assigneeIdMin_gt: ID
+  assigneeIdMax_gt: ID
   assigneeId_lt: ID
+  assigneeIdMin_lt: ID
+  assigneeIdMax_lt: ID
   assigneeId_gte: ID
+  assigneeIdMin_gte: ID
+  assigneeIdMax_gte: ID
   assigneeId_lte: ID
+  assigneeIdMin_lte: ID
+  assigneeIdMax_lte: ID
   assigneeId_in: [ID!]
+  assigneeIdMin_in: [ID!]
+  assigneeIdMax_in: [ID!]
   assigneeId_null: Boolean
   updatedAt: Time
+  updatedAtMin: Time
+  updatedAtMax: Time
   updatedAt_ne: Time
+  updatedAtMin_ne: Time
+  updatedAtMax_ne: Time
   updatedAt_gt: Time
+  updatedAtMin_gt: Time
+  updatedAtMax_gt: Time
   updatedAt_lt: Time
+  updatedAtMin_lt: Time
+  updatedAtMax_lt: Time
   updatedAt_gte: Time
+  updatedAtMin_gte: Time
+  updatedAtMax_gte: Time
   updatedAt_lte: Time
+  updatedAtMin_lte: Time
+  updatedAtMax_lte: Time
   updatedAt_in: [Time!]
+  updatedAtMin_in: [Time!]
+  updatedAtMax_in: [Time!]
   updatedAt_null: Boolean
   createdAt: Time
+  createdAtMin: Time
+  createdAtMax: Time
   createdAt_ne: Time
+  createdAtMin_ne: Time
+  createdAtMax_ne: Time
   createdAt_gt: Time
+  createdAtMin_gt: Time
+  createdAtMax_gt: Time
   createdAt_lt: Time
+  createdAtMin_lt: Time
+  createdAtMax_lt: Time
   createdAt_gte: Time
+  createdAtMin_gte: Time
+  createdAtMax_gte: Time
   createdAt_lte: Time
+  createdAtMin_lte: Time
+  createdAtMax_lte: Time
   createdAt_in: [Time!]
+  createdAtMin_in: [Time!]
+  createdAtMax_in: [Time!]
   createdAt_null: Boolean
   updatedBy: ID
+  updatedByMin: ID
+  updatedByMax: ID
   updatedBy_ne: ID
+  updatedByMin_ne: ID
+  updatedByMax_ne: ID
   updatedBy_gt: ID
+  updatedByMin_gt: ID
+  updatedByMax_gt: ID
   updatedBy_lt: ID
+  updatedByMin_lt: ID
+  updatedByMax_lt: ID
   updatedBy_gte: ID
+  updatedByMin_gte: ID
+  updatedByMax_gte: ID
   updatedBy_lte: ID
+  updatedByMin_lte: ID
+  updatedByMax_lte: ID
   updatedBy_in: [ID!]
+  updatedByMin_in: [ID!]
+  updatedByMax_in: [ID!]
   updatedBy_null: Boolean
   createdBy: ID
+  createdByMin: ID
+  createdByMax: ID
   createdBy_ne: ID
+  createdByMin_ne: ID
+  createdByMax_ne: ID
   createdBy_gt: ID
+  createdByMin_gt: ID
+  createdByMax_gt: ID
   createdBy_lt: ID
+  createdByMin_lt: ID
+  createdByMax_lt: ID
   createdBy_gte: ID
+  createdByMin_gte: ID
+  createdByMax_gte: ID
   createdBy_lte: ID
+  createdByMin_lte: ID
+  createdByMax_lte: ID
   createdBy_in: [ID!]
+  createdByMin_in: [ID!]
+  createdByMax_in: [ID!]
   createdBy_null: Boolean
   assignee: UserFilterType
 }
@@ -1218,6 +1680,52 @@ type _Service {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Company_employeesConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["limit"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["q"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["q"] = arg2
+	var arg3 []*UserSortType
+	if tmp, ok := rawArgs["sort"]; ok {
+		arg3, err = ec.unmarshalOUserSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortTypeᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sort"] = arg3
+	var arg4 *UserFilterType
+	if tmp, ok := rawArgs["filter"]; ok {
+		arg4, err = ec.unmarshalOUserFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg4
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createCompany_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1412,7 +1920,7 @@ func (ec *executionContext) field_Query_companies_args(ctx context.Context, rawA
 	args["q"] = arg2
 	var arg3 []*CompanySortType
 	if tmp, ok := rawArgs["sort"]; ok {
-		arg3, err = ec.unmarshalOCompanySortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx, tmp)
+		arg3, err = ec.unmarshalOCompanySortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortTypeᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1518,7 +2026,7 @@ func (ec *executionContext) field_Query_tasks_args(ctx context.Context, rawArgs 
 	args["q"] = arg2
 	var arg3 []*TaskSortType
 	if tmp, ok := rawArgs["sort"]; ok {
-		arg3, err = ec.unmarshalOTaskSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx, tmp)
+		arg3, err = ec.unmarshalOTaskSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortTypeᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1594,7 +2102,7 @@ func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs 
 	args["q"] = arg2
 	var arg3 []*UserSortType
 	if tmp, ok := rawArgs["sort"]; ok {
-		arg3, err = ec.unmarshalOUserSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, tmp)
+		arg3, err = ec.unmarshalOUserSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortTypeᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1603,6 +2111,98 @@ func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs 
 	var arg4 *UserFilterType
 	if tmp, ok := rawArgs["filter"]; ok {
 		arg4, err = ec.unmarshalOUserFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg4
+	return args, nil
+}
+
+func (ec *executionContext) field_User_companiesConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["limit"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["q"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["q"] = arg2
+	var arg3 []*CompanySortType
+	if tmp, ok := rawArgs["sort"]; ok {
+		arg3, err = ec.unmarshalOCompanySortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortTypeᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sort"] = arg3
+	var arg4 *CompanyFilterType
+	if tmp, ok := rawArgs["filter"]; ok {
+		arg4, err = ec.unmarshalOCompanyFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyFilterType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg4
+	return args, nil
+}
+
+func (ec *executionContext) field_User_tasksConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["limit"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["q"]; ok {
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["q"] = arg2
+	var arg3 []*TaskSortType
+	if tmp, ok := rawArgs["sort"]; ok {
+		arg3, err = ec.unmarshalOTaskSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortTypeᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sort"] = arg3
+	var arg4 *TaskFilterType
+	if tmp, ok := rawArgs["filter"]; ok {
+		arg4, err = ec.unmarshalOTaskFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskFilterType(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1752,7 +2352,7 @@ func (ec *executionContext) _Company_employees(ctx context.Context, field graphq
 	res := resTmp.([]*User)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Company_updatedAt(ctx context.Context, field graphql.CollectedField, obj *Company) (ret graphql.Marshaler) {
@@ -1928,7 +2528,51 @@ func (ec *executionContext) _Company_employeesIds(ctx context.Context, field gra
 	res := resTmp.([]string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2ᚕstring(ctx, field.Selections, res)
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Company_employeesConnection(ctx context.Context, field graphql.CollectedField, obj *Company) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Company",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Company_employeesConnection_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Company().EmployeesConnection(rctx, obj, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*UserSortType), args["filter"].(*UserFilterType))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*UserResultType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNUserResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserResultType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CompanyResultType_items(ctx context.Context, field graphql.CollectedField, obj *CompanyResultType) (ret graphql.Marshaler) {
@@ -1965,7 +2609,7 @@ func (ec *executionContext) _CompanyResultType_items(ctx context.Context, field 
 	res := resTmp.([]*Company)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNCompany2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompany(ctx, field.Selections, res)
+	return ec.marshalNCompany2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CompanyResultType_count(ctx context.Context, field graphql.CollectedField, obj *CompanyResultType) (ret graphql.Marshaler) {
@@ -2623,12 +3267,15 @@ func (ec *executionContext) _Query_companies(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*CompanyResultType)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOCompanyResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyResultType(ctx, field.Selections, res)
+	return ec.marshalNCompanyResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyResultType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2705,12 +3352,15 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*UserResultType)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOUserResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserResultType(ctx, field.Selections, res)
+	return ec.marshalNUserResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserResultType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_task(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2787,12 +3437,15 @@ func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*TaskResultType)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOTaskResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskResultType(ctx, field.Selections, res)
+	return ec.marshalNTaskResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskResultType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_hello(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3355,7 +4008,7 @@ func (ec *executionContext) _TaskResultType_items(ctx context.Context, field gra
 	res := resTmp.([]*Task)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNTask2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTask(ctx, field.Selections, res)
+	return ec.marshalNTask2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TaskResultType_count(ctx context.Context, field graphql.CollectedField, obj *TaskResultType) (ret graphql.Marshaler) {
@@ -3568,7 +4221,7 @@ func (ec *executionContext) _User_tasks(ctx context.Context, field graphql.Colle
 	res := resTmp.([]*Task)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNTask2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTask(ctx, field.Selections, res)
+	return ec.marshalNTask2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_companies(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -3605,44 +4258,7 @@ func (ec *executionContext) _User_companies(ctx context.Context, field graphql.C
 	res := resTmp.([]*Company)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNCompany2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompany(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _User_friends(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().Friends(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*User)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUser(ctx, field.Selections, res)
+	return ec.marshalNCompany2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_updatedAt(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -3818,7 +4434,51 @@ func (ec *executionContext) _User_tasksIds(ctx context.Context, field graphql.Co
 	res := resTmp.([]string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2ᚕstring(ctx, field.Selections, res)
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_tasksConnection(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_User_tasksConnection_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().TasksConnection(rctx, obj, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*TaskSortType), args["filter"].(*TaskFilterType))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*TaskResultType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNTaskResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskResultType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_companiesIds(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -3855,10 +4515,10 @@ func (ec *executionContext) _User_companiesIds(ctx context.Context, field graphq
 	res := resTmp.([]string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2ᚕstring(ctx, field.Selections, res)
+	return ec.marshalNID2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_friendsIds(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_companiesConnection(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -3874,10 +4534,17 @@ func (ec *executionContext) _User_friendsIds(ctx context.Context, field graphql.
 		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_User_companiesConnection_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().FriendsIds(rctx, obj)
+		return ec.resolvers.User().CompaniesConnection(rctx, obj, args["offset"].(*int), args["limit"].(*int), args["q"].(*string), args["sort"].([]*CompanySortType), args["filter"].(*CompanyFilterType))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3889,10 +4556,10 @@ func (ec *executionContext) _User_friendsIds(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.(*CompanyResultType)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2ᚕstring(ctx, field.Selections, res)
+	return ec.marshalNCompanyResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyResultType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _UserResultType_items(ctx context.Context, field graphql.CollectedField, obj *UserResultType) (ret graphql.Marshaler) {
@@ -3929,7 +4596,7 @@ func (ec *executionContext) _UserResultType_items(ctx context.Context, field gra
 	res := resTmp.([]*User)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _UserResultType_count(ctx context.Context, field graphql.CollectedField, obj *UserResultType) (ret graphql.Marshaler) {
@@ -4108,7 +4775,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	res := resTmp.([]string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalN__DirectiveLocation2ᚕstring(ctx, field.Selections, res)
+	return ec.marshalN__DirectiveLocation2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -4145,7 +4812,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	res := resTmp.([]introspection.InputValue)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, field.Selections, res)
+	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -4395,7 +5062,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	res := resTmp.([]introspection.InputValue)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, field.Selections, res)
+	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -4682,7 +5349,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	res := resTmp.([]introspection.Type)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
+	return ec.marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
@@ -4824,7 +5491,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	res := resTmp.([]introspection.Directive)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx, field.Selections, res)
+	return ec.marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -4970,7 +5637,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	res := resTmp.([]introspection.Field)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx, field.Selections, res)
+	return ec.marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -5004,7 +5671,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	res := resTmp.([]introspection.Type)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
+	return ec.marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -5038,7 +5705,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	res := resTmp.([]introspection.Type)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
+	return ec.marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -5079,7 +5746,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	res := resTmp.([]introspection.EnumValue)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx, field.Selections, res)
+	return ec.marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -5113,7 +5780,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	res := resTmp.([]introspection.InputValue)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, field.Selections, res)
+	return ec.marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -5162,13 +5829,13 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 		switch k {
 		case "AND":
 			var err error
-			it.And, err = ec.unmarshalOCompanyFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyFilterType(ctx, v)
+			it.And, err = ec.unmarshalOCompanyFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyFilterTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "OR":
 			var err error
-			it.Or, err = ec.unmarshalOCompanyFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyFilterType(ctx, v)
+			it.Or, err = ec.unmarshalOCompanyFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyFilterTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5178,9 +5845,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "idMin":
+			var err error
+			it.IDMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax":
+			var err error
+			it.IDMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_ne":
 			var err error
 			it.IDNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_ne":
+			var err error
+			it.IDMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_ne":
+			var err error
+			it.IDMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5190,9 +5881,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "idMin_gt":
+			var err error
+			it.IDMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_gt":
+			var err error
+			it.IDMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_lt":
 			var err error
 			it.IDLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_lt":
+			var err error
+			it.IDMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_lt":
+			var err error
+			it.IDMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5202,15 +5917,51 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "idMin_gte":
+			var err error
+			it.IDMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_gte":
+			var err error
+			it.IDMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_lte":
 			var err error
 			it.IDLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "idMin_lte":
+			var err error
+			it.IDMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_lte":
+			var err error
+			it.IDMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_in":
 			var err error
-			it.IDIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.IDIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_in":
+			var err error
+			it.IDMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_in":
+			var err error
+			it.IDMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5226,9 +5977,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "nameMin":
+			var err error
+			it.NameMin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax":
+			var err error
+			it.NameMax, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "name_ne":
 			var err error
 			it.NameNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMin_ne":
+			var err error
+			it.NameMinNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax_ne":
+			var err error
+			it.NameMaxNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5238,9 +6013,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "nameMin_gt":
+			var err error
+			it.NameMinGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax_gt":
+			var err error
+			it.NameMaxGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "name_lt":
 			var err error
 			it.NameLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMin_lt":
+			var err error
+			it.NameMinLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax_lt":
+			var err error
+			it.NameMaxLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5250,15 +6049,51 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "nameMin_gte":
+			var err error
+			it.NameMinGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax_gte":
+			var err error
+			it.NameMaxGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "name_lte":
 			var err error
 			it.NameLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "nameMin_lte":
+			var err error
+			it.NameMinLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax_lte":
+			var err error
+			it.NameMaxLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "name_in":
 			var err error
-			it.NameIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			it.NameIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMin_in":
+			var err error
+			it.NameMinIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax_in":
+			var err error
+			it.NameMaxIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5268,15 +6103,51 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "nameMin_like":
+			var err error
+			it.NameMinLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax_like":
+			var err error
+			it.NameMaxLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "name_prefix":
 			var err error
 			it.NamePrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "nameMin_prefix":
+			var err error
+			it.NameMinPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax_prefix":
+			var err error
+			it.NameMaxPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "name_suffix":
 			var err error
 			it.NameSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMin_suffix":
+			var err error
+			it.NameMinSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax_suffix":
+			var err error
+			it.NameMaxSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5292,9 +6163,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin":
+			var err error
+			it.UpdatedAtMin, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax":
+			var err error
+			it.UpdatedAtMax, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_ne":
 			var err error
 			it.UpdatedAtNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_ne":
+			var err error
+			it.UpdatedAtMinNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_ne":
+			var err error
+			it.UpdatedAtMaxNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5304,9 +6199,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_gt":
+			var err error
+			it.UpdatedAtMinGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_gt":
+			var err error
+			it.UpdatedAtMaxGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_lt":
 			var err error
 			it.UpdatedAtLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_lt":
+			var err error
+			it.UpdatedAtMinLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_lt":
+			var err error
+			it.UpdatedAtMaxLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5316,15 +6235,51 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_gte":
+			var err error
+			it.UpdatedAtMinGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_gte":
+			var err error
+			it.UpdatedAtMaxGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_lte":
 			var err error
 			it.UpdatedAtLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_lte":
+			var err error
+			it.UpdatedAtMinLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_lte":
+			var err error
+			it.UpdatedAtMaxLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_in":
 			var err error
-			it.UpdatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			it.UpdatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_in":
+			var err error
+			it.UpdatedAtMinIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_in":
+			var err error
+			it.UpdatedAtMaxIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5340,9 +6295,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin":
+			var err error
+			it.CreatedAtMin, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax":
+			var err error
+			it.CreatedAtMax, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_ne":
 			var err error
 			it.CreatedAtNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_ne":
+			var err error
+			it.CreatedAtMinNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_ne":
+			var err error
+			it.CreatedAtMaxNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5352,9 +6331,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_gt":
+			var err error
+			it.CreatedAtMinGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_gt":
+			var err error
+			it.CreatedAtMaxGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_lt":
 			var err error
 			it.CreatedAtLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_lt":
+			var err error
+			it.CreatedAtMinLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_lt":
+			var err error
+			it.CreatedAtMaxLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5364,15 +6367,51 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_gte":
+			var err error
+			it.CreatedAtMinGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_gte":
+			var err error
+			it.CreatedAtMaxGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_lte":
 			var err error
 			it.CreatedAtLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_lte":
+			var err error
+			it.CreatedAtMinLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_lte":
+			var err error
+			it.CreatedAtMaxLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_in":
 			var err error
-			it.CreatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			it.CreatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_in":
+			var err error
+			it.CreatedAtMinIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_in":
+			var err error
+			it.CreatedAtMaxIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5388,9 +6427,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin":
+			var err error
+			it.UpdatedByMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax":
+			var err error
+			it.UpdatedByMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_ne":
 			var err error
 			it.UpdatedByNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_ne":
+			var err error
+			it.UpdatedByMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_ne":
+			var err error
+			it.UpdatedByMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5400,9 +6463,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_gt":
+			var err error
+			it.UpdatedByMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_gt":
+			var err error
+			it.UpdatedByMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_lt":
 			var err error
 			it.UpdatedByLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_lt":
+			var err error
+			it.UpdatedByMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_lt":
+			var err error
+			it.UpdatedByMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5412,15 +6499,51 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_gte":
+			var err error
+			it.UpdatedByMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_gte":
+			var err error
+			it.UpdatedByMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_lte":
 			var err error
 			it.UpdatedByLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_lte":
+			var err error
+			it.UpdatedByMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_lte":
+			var err error
+			it.UpdatedByMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_in":
 			var err error
-			it.UpdatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.UpdatedByIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_in":
+			var err error
+			it.UpdatedByMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_in":
+			var err error
+			it.UpdatedByMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5436,9 +6559,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin":
+			var err error
+			it.CreatedByMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax":
+			var err error
+			it.CreatedByMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_ne":
 			var err error
 			it.CreatedByNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_ne":
+			var err error
+			it.CreatedByMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_ne":
+			var err error
+			it.CreatedByMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5448,9 +6595,33 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_gt":
+			var err error
+			it.CreatedByMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_gt":
+			var err error
+			it.CreatedByMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_lt":
 			var err error
 			it.CreatedByLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_lt":
+			var err error
+			it.CreatedByMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_lt":
+			var err error
+			it.CreatedByMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5460,15 +6631,51 @@ func (ec *executionContext) unmarshalInputCompanyFilterType(ctx context.Context,
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_gte":
+			var err error
+			it.CreatedByMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_gte":
+			var err error
+			it.CreatedByMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_lte":
 			var err error
 			it.CreatedByLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_lte":
+			var err error
+			it.CreatedByMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_lte":
+			var err error
+			it.CreatedByMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_in":
 			var err error
-			it.CreatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.CreatedByIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_in":
+			var err error
+			it.CreatedByMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_in":
+			var err error
+			it.CreatedByMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5502,9 +6709,33 @@ func (ec *executionContext) unmarshalInputCompanySortType(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
+		case "idMin":
+			var err error
+			it.IDMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax":
+			var err error
+			it.IDMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "name":
 			var err error
 			it.Name, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMin":
+			var err error
+			it.NameMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nameMax":
+			var err error
+			it.NameMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5514,9 +6745,33 @@ func (ec *executionContext) unmarshalInputCompanySortType(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin":
+			var err error
+			it.UpdatedAtMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax":
+			var err error
+			it.UpdatedAtMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt":
 			var err error
 			it.CreatedAt, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin":
+			var err error
+			it.CreatedAtMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax":
+			var err error
+			it.CreatedAtMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5526,15 +6781,51 @@ func (ec *executionContext) unmarshalInputCompanySortType(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin":
+			var err error
+			it.UpdatedByMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax":
+			var err error
+			it.UpdatedByMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy":
 			var err error
 			it.CreatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin":
+			var err error
+			it.CreatedByMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax":
+			var err error
+			it.CreatedByMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "employeesIds":
 			var err error
 			it.EmployeesIds, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employeesIdsMin":
+			var err error
+			it.EmployeesIdsMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "employeesIdsMax":
+			var err error
+			it.EmployeesIdsMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5558,13 +6849,13 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 		switch k {
 		case "AND":
 			var err error
-			it.And, err = ec.unmarshalOTaskFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskFilterType(ctx, v)
+			it.And, err = ec.unmarshalOTaskFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskFilterTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "OR":
 			var err error
-			it.Or, err = ec.unmarshalOTaskFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskFilterType(ctx, v)
+			it.Or, err = ec.unmarshalOTaskFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskFilterTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5574,9 +6865,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "idMin":
+			var err error
+			it.IDMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax":
+			var err error
+			it.IDMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_ne":
 			var err error
 			it.IDNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_ne":
+			var err error
+			it.IDMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_ne":
+			var err error
+			it.IDMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5586,9 +6901,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "idMin_gt":
+			var err error
+			it.IDMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_gt":
+			var err error
+			it.IDMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_lt":
 			var err error
 			it.IDLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_lt":
+			var err error
+			it.IDMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_lt":
+			var err error
+			it.IDMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5598,15 +6937,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "idMin_gte":
+			var err error
+			it.IDMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_gte":
+			var err error
+			it.IDMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_lte":
 			var err error
 			it.IDLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "idMin_lte":
+			var err error
+			it.IDMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_lte":
+			var err error
+			it.IDMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_in":
 			var err error
-			it.IDIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.IDIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_in":
+			var err error
+			it.IDMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_in":
+			var err error
+			it.IDMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5622,9 +6997,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "titleMin":
+			var err error
+			it.TitleMin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax":
+			var err error
+			it.TitleMax, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title_ne":
 			var err error
 			it.TitleNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMin_ne":
+			var err error
+			it.TitleMinNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax_ne":
+			var err error
+			it.TitleMaxNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5634,9 +7033,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "titleMin_gt":
+			var err error
+			it.TitleMinGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax_gt":
+			var err error
+			it.TitleMaxGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title_lt":
 			var err error
 			it.TitleLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMin_lt":
+			var err error
+			it.TitleMinLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax_lt":
+			var err error
+			it.TitleMaxLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5646,15 +7069,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "titleMin_gte":
+			var err error
+			it.TitleMinGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax_gte":
+			var err error
+			it.TitleMaxGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title_lte":
 			var err error
 			it.TitleLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "titleMin_lte":
+			var err error
+			it.TitleMinLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax_lte":
+			var err error
+			it.TitleMaxLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title_in":
 			var err error
-			it.TitleIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			it.TitleIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMin_in":
+			var err error
+			it.TitleMinIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax_in":
+			var err error
+			it.TitleMaxIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5664,15 +7123,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "titleMin_like":
+			var err error
+			it.TitleMinLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax_like":
+			var err error
+			it.TitleMaxLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title_prefix":
 			var err error
 			it.TitlePrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "titleMin_prefix":
+			var err error
+			it.TitleMinPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax_prefix":
+			var err error
+			it.TitleMaxPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title_suffix":
 			var err error
 			it.TitleSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMin_suffix":
+			var err error
+			it.TitleMinSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax_suffix":
+			var err error
+			it.TitleMaxSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5688,9 +7183,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "completedMin":
+			var err error
+			it.CompletedMin, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMax":
+			var err error
+			it.CompletedMax, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "completed_ne":
 			var err error
 			it.CompletedNe, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMin_ne":
+			var err error
+			it.CompletedMinNe, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMax_ne":
+			var err error
+			it.CompletedMaxNe, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5700,9 +7219,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "completedMin_gt":
+			var err error
+			it.CompletedMinGt, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMax_gt":
+			var err error
+			it.CompletedMaxGt, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "completed_lt":
 			var err error
 			it.CompletedLt, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMin_lt":
+			var err error
+			it.CompletedMinLt, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMax_lt":
+			var err error
+			it.CompletedMaxLt, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5712,15 +7255,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "completedMin_gte":
+			var err error
+			it.CompletedMinGte, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMax_gte":
+			var err error
+			it.CompletedMaxGte, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "completed_lte":
 			var err error
 			it.CompletedLte, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "completedMin_lte":
+			var err error
+			it.CompletedMinLte, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMax_lte":
+			var err error
+			it.CompletedMaxLte, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "completed_in":
 			var err error
-			it.CompletedIn, err = ec.unmarshalOBoolean2ᚕbool(ctx, v)
+			it.CompletedIn, err = ec.unmarshalOBoolean2ᚕboolᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMin_in":
+			var err error
+			it.CompletedMinIn, err = ec.unmarshalOBoolean2ᚕboolᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMax_in":
+			var err error
+			it.CompletedMaxIn, err = ec.unmarshalOBoolean2ᚕboolᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5736,9 +7315,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "dueDateMin":
+			var err error
+			it.DueDateMin, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMax":
+			var err error
+			it.DueDateMax, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "dueDate_ne":
 			var err error
 			it.DueDateNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMin_ne":
+			var err error
+			it.DueDateMinNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMax_ne":
+			var err error
+			it.DueDateMaxNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5748,9 +7351,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "dueDateMin_gt":
+			var err error
+			it.DueDateMinGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMax_gt":
+			var err error
+			it.DueDateMaxGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "dueDate_lt":
 			var err error
 			it.DueDateLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMin_lt":
+			var err error
+			it.DueDateMinLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMax_lt":
+			var err error
+			it.DueDateMaxLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5760,15 +7387,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "dueDateMin_gte":
+			var err error
+			it.DueDateMinGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMax_gte":
+			var err error
+			it.DueDateMaxGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "dueDate_lte":
 			var err error
 			it.DueDateLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "dueDateMin_lte":
+			var err error
+			it.DueDateMinLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMax_lte":
+			var err error
+			it.DueDateMaxLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "dueDate_in":
 			var err error
-			it.DueDateIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			it.DueDateIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMin_in":
+			var err error
+			it.DueDateMinIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMax_in":
+			var err error
+			it.DueDateMaxIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5784,9 +7447,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "typeMin":
+			var err error
+			it.TypeMin, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax":
+			var err error
+			it.TypeMax, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type_ne":
 			var err error
 			it.TypeNe, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMin_ne":
+			var err error
+			it.TypeMinNe, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_ne":
+			var err error
+			it.TypeMaxNe, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5796,9 +7483,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "typeMin_gt":
+			var err error
+			it.TypeMinGt, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_gt":
+			var err error
+			it.TypeMaxGt, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type_lt":
 			var err error
 			it.TypeLt, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMin_lt":
+			var err error
+			it.TypeMinLt, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_lt":
+			var err error
+			it.TypeMaxLt, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5808,15 +7519,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "typeMin_gte":
+			var err error
+			it.TypeMinGte, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_gte":
+			var err error
+			it.TypeMaxGte, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type_lte":
 			var err error
 			it.TypeLte, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "typeMin_lte":
+			var err error
+			it.TypeMinLte, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_lte":
+			var err error
+			it.TypeMaxLte, err = ec.unmarshalOTaskType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "type_in":
 			var err error
-			it.TypeIn, err = ec.unmarshalOTaskType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx, v)
+			it.TypeIn, err = ec.unmarshalOTaskType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskTypeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMin_in":
+			var err error
+			it.TypeMinIn, err = ec.unmarshalOTaskType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskTypeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax_in":
+			var err error
+			it.TypeMaxIn, err = ec.unmarshalOTaskType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5832,9 +7579,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "descriptionMin":
+			var err error
+			it.DescriptionMin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax":
+			var err error
+			it.DescriptionMax, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description_ne":
 			var err error
 			it.DescriptionNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMin_ne":
+			var err error
+			it.DescriptionMinNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax_ne":
+			var err error
+			it.DescriptionMaxNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5844,9 +7615,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "descriptionMin_gt":
+			var err error
+			it.DescriptionMinGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax_gt":
+			var err error
+			it.DescriptionMaxGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description_lt":
 			var err error
 			it.DescriptionLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMin_lt":
+			var err error
+			it.DescriptionMinLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax_lt":
+			var err error
+			it.DescriptionMaxLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5856,15 +7651,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "descriptionMin_gte":
+			var err error
+			it.DescriptionMinGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax_gte":
+			var err error
+			it.DescriptionMaxGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description_lte":
 			var err error
 			it.DescriptionLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "descriptionMin_lte":
+			var err error
+			it.DescriptionMinLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax_lte":
+			var err error
+			it.DescriptionMaxLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description_in":
 			var err error
-			it.DescriptionIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			it.DescriptionIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMin_in":
+			var err error
+			it.DescriptionMinIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax_in":
+			var err error
+			it.DescriptionMaxIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5874,15 +7705,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "descriptionMin_like":
+			var err error
+			it.DescriptionMinLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax_like":
+			var err error
+			it.DescriptionMaxLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description_prefix":
 			var err error
 			it.DescriptionPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "descriptionMin_prefix":
+			var err error
+			it.DescriptionMinPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax_prefix":
+			var err error
+			it.DescriptionMaxPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description_suffix":
 			var err error
 			it.DescriptionSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMin_suffix":
+			var err error
+			it.DescriptionMinSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax_suffix":
+			var err error
+			it.DescriptionMaxSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5898,9 +7765,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "assigneeIdMin":
+			var err error
+			it.AssigneeIDMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMax":
+			var err error
+			it.AssigneeIDMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "assigneeId_ne":
 			var err error
 			it.AssigneeIDNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMin_ne":
+			var err error
+			it.AssigneeIDMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMax_ne":
+			var err error
+			it.AssigneeIDMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5910,9 +7801,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "assigneeIdMin_gt":
+			var err error
+			it.AssigneeIDMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMax_gt":
+			var err error
+			it.AssigneeIDMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "assigneeId_lt":
 			var err error
 			it.AssigneeIDLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMin_lt":
+			var err error
+			it.AssigneeIDMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMax_lt":
+			var err error
+			it.AssigneeIDMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5922,15 +7837,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "assigneeIdMin_gte":
+			var err error
+			it.AssigneeIDMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMax_gte":
+			var err error
+			it.AssigneeIDMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "assigneeId_lte":
 			var err error
 			it.AssigneeIDLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "assigneeIdMin_lte":
+			var err error
+			it.AssigneeIDMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMax_lte":
+			var err error
+			it.AssigneeIDMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "assigneeId_in":
 			var err error
-			it.AssigneeIDIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.AssigneeIDIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMin_in":
+			var err error
+			it.AssigneeIDMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMax_in":
+			var err error
+			it.AssigneeIDMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5946,9 +7897,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin":
+			var err error
+			it.UpdatedAtMin, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax":
+			var err error
+			it.UpdatedAtMax, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_ne":
 			var err error
 			it.UpdatedAtNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_ne":
+			var err error
+			it.UpdatedAtMinNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_ne":
+			var err error
+			it.UpdatedAtMaxNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5958,9 +7933,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_gt":
+			var err error
+			it.UpdatedAtMinGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_gt":
+			var err error
+			it.UpdatedAtMaxGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_lt":
 			var err error
 			it.UpdatedAtLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_lt":
+			var err error
+			it.UpdatedAtMinLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_lt":
+			var err error
+			it.UpdatedAtMaxLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5970,15 +7969,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_gte":
+			var err error
+			it.UpdatedAtMinGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_gte":
+			var err error
+			it.UpdatedAtMaxGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_lte":
 			var err error
 			it.UpdatedAtLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_lte":
+			var err error
+			it.UpdatedAtMinLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_lte":
+			var err error
+			it.UpdatedAtMaxLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_in":
 			var err error
-			it.UpdatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			it.UpdatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_in":
+			var err error
+			it.UpdatedAtMinIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_in":
+			var err error
+			it.UpdatedAtMaxIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5994,9 +8029,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin":
+			var err error
+			it.CreatedAtMin, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax":
+			var err error
+			it.CreatedAtMax, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_ne":
 			var err error
 			it.CreatedAtNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_ne":
+			var err error
+			it.CreatedAtMinNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_ne":
+			var err error
+			it.CreatedAtMaxNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6006,9 +8065,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_gt":
+			var err error
+			it.CreatedAtMinGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_gt":
+			var err error
+			it.CreatedAtMaxGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_lt":
 			var err error
 			it.CreatedAtLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_lt":
+			var err error
+			it.CreatedAtMinLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_lt":
+			var err error
+			it.CreatedAtMaxLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6018,15 +8101,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_gte":
+			var err error
+			it.CreatedAtMinGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_gte":
+			var err error
+			it.CreatedAtMaxGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_lte":
 			var err error
 			it.CreatedAtLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_lte":
+			var err error
+			it.CreatedAtMinLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_lte":
+			var err error
+			it.CreatedAtMaxLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_in":
 			var err error
-			it.CreatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			it.CreatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_in":
+			var err error
+			it.CreatedAtMinIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_in":
+			var err error
+			it.CreatedAtMaxIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6042,9 +8161,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin":
+			var err error
+			it.UpdatedByMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax":
+			var err error
+			it.UpdatedByMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_ne":
 			var err error
 			it.UpdatedByNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_ne":
+			var err error
+			it.UpdatedByMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_ne":
+			var err error
+			it.UpdatedByMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6054,9 +8197,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_gt":
+			var err error
+			it.UpdatedByMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_gt":
+			var err error
+			it.UpdatedByMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_lt":
 			var err error
 			it.UpdatedByLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_lt":
+			var err error
+			it.UpdatedByMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_lt":
+			var err error
+			it.UpdatedByMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6066,15 +8233,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_gte":
+			var err error
+			it.UpdatedByMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_gte":
+			var err error
+			it.UpdatedByMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_lte":
 			var err error
 			it.UpdatedByLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_lte":
+			var err error
+			it.UpdatedByMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_lte":
+			var err error
+			it.UpdatedByMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_in":
 			var err error
-			it.UpdatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.UpdatedByIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_in":
+			var err error
+			it.UpdatedByMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_in":
+			var err error
+			it.UpdatedByMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6090,9 +8293,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin":
+			var err error
+			it.CreatedByMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax":
+			var err error
+			it.CreatedByMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_ne":
 			var err error
 			it.CreatedByNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_ne":
+			var err error
+			it.CreatedByMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_ne":
+			var err error
+			it.CreatedByMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6102,9 +8329,33 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_gt":
+			var err error
+			it.CreatedByMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_gt":
+			var err error
+			it.CreatedByMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_lt":
 			var err error
 			it.CreatedByLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_lt":
+			var err error
+			it.CreatedByMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_lt":
+			var err error
+			it.CreatedByMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6114,15 +8365,51 @@ func (ec *executionContext) unmarshalInputTaskFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_gte":
+			var err error
+			it.CreatedByMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_gte":
+			var err error
+			it.CreatedByMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_lte":
 			var err error
 			it.CreatedByLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_lte":
+			var err error
+			it.CreatedByMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_lte":
+			var err error
+			it.CreatedByMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_in":
 			var err error
-			it.CreatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.CreatedByIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_in":
+			var err error
+			it.CreatedByMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_in":
+			var err error
+			it.CreatedByMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6156,9 +8443,33 @@ func (ec *executionContext) unmarshalInputTaskSortType(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "idMin":
+			var err error
+			it.IDMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax":
+			var err error
+			it.IDMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "title":
 			var err error
 			it.Title, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMin":
+			var err error
+			it.TitleMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "titleMax":
+			var err error
+			it.TitleMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6168,9 +8479,33 @@ func (ec *executionContext) unmarshalInputTaskSortType(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "completedMin":
+			var err error
+			it.CompletedMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "completedMax":
+			var err error
+			it.CompletedMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "dueDate":
 			var err error
 			it.DueDate, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMin":
+			var err error
+			it.DueDateMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "dueDateMax":
+			var err error
+			it.DueDateMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6180,9 +8515,33 @@ func (ec *executionContext) unmarshalInputTaskSortType(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "typeMin":
+			var err error
+			it.TypeMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "typeMax":
+			var err error
+			it.TypeMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description":
 			var err error
 			it.Description, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMin":
+			var err error
+			it.DescriptionMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "descriptionMax":
+			var err error
+			it.DescriptionMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6192,9 +8551,33 @@ func (ec *executionContext) unmarshalInputTaskSortType(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "assigneeIdMin":
+			var err error
+			it.AssigneeIDMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "assigneeIdMax":
+			var err error
+			it.AssigneeIDMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt":
 			var err error
 			it.UpdatedAt, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin":
+			var err error
+			it.UpdatedAtMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax":
+			var err error
+			it.UpdatedAtMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6204,15 +8587,51 @@ func (ec *executionContext) unmarshalInputTaskSortType(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin":
+			var err error
+			it.CreatedAtMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax":
+			var err error
+			it.CreatedAtMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy":
 			var err error
 			it.UpdatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin":
+			var err error
+			it.UpdatedByMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax":
+			var err error
+			it.UpdatedByMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy":
 			var err error
 			it.CreatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin":
+			var err error
+			it.CreatedByMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax":
+			var err error
+			it.CreatedByMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6236,13 +8655,13 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 		switch k {
 		case "AND":
 			var err error
-			it.And, err = ec.unmarshalOUserFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterType(ctx, v)
+			it.And, err = ec.unmarshalOUserFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "OR":
 			var err error
-			it.Or, err = ec.unmarshalOUserFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterType(ctx, v)
+			it.Or, err = ec.unmarshalOUserFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6252,9 +8671,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "idMin":
+			var err error
+			it.IDMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax":
+			var err error
+			it.IDMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_ne":
 			var err error
 			it.IDNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_ne":
+			var err error
+			it.IDMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_ne":
+			var err error
+			it.IDMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6264,9 +8707,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "idMin_gt":
+			var err error
+			it.IDMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_gt":
+			var err error
+			it.IDMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_lt":
 			var err error
 			it.IDLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_lt":
+			var err error
+			it.IDMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_lt":
+			var err error
+			it.IDMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6276,15 +8743,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "idMin_gte":
+			var err error
+			it.IDMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_gte":
+			var err error
+			it.IDMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_lte":
 			var err error
 			it.IDLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "idMin_lte":
+			var err error
+			it.IDMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_lte":
+			var err error
+			it.IDMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "id_in":
 			var err error
-			it.IDIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.IDIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMin_in":
+			var err error
+			it.IDMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax_in":
+			var err error
+			it.IDMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6300,9 +8803,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "emailMin":
+			var err error
+			it.EmailMin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax":
+			var err error
+			it.EmailMax, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "email_ne":
 			var err error
 			it.EmailNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMin_ne":
+			var err error
+			it.EmailMinNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax_ne":
+			var err error
+			it.EmailMaxNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6312,9 +8839,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "emailMin_gt":
+			var err error
+			it.EmailMinGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax_gt":
+			var err error
+			it.EmailMaxGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "email_lt":
 			var err error
 			it.EmailLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMin_lt":
+			var err error
+			it.EmailMinLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax_lt":
+			var err error
+			it.EmailMaxLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6324,15 +8875,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "emailMin_gte":
+			var err error
+			it.EmailMinGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax_gte":
+			var err error
+			it.EmailMaxGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "email_lte":
 			var err error
 			it.EmailLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "emailMin_lte":
+			var err error
+			it.EmailMinLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax_lte":
+			var err error
+			it.EmailMaxLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "email_in":
 			var err error
-			it.EmailIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			it.EmailIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMin_in":
+			var err error
+			it.EmailMinIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax_in":
+			var err error
+			it.EmailMaxIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6342,15 +8929,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "emailMin_like":
+			var err error
+			it.EmailMinLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax_like":
+			var err error
+			it.EmailMaxLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "email_prefix":
 			var err error
 			it.EmailPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "emailMin_prefix":
+			var err error
+			it.EmailMinPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax_prefix":
+			var err error
+			it.EmailMaxPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "email_suffix":
 			var err error
 			it.EmailSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMin_suffix":
+			var err error
+			it.EmailMinSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax_suffix":
+			var err error
+			it.EmailMaxSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6366,9 +8989,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "firstNameMin":
+			var err error
+			it.FirstNameMin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax":
+			var err error
+			it.FirstNameMax, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "firstName_ne":
 			var err error
 			it.FirstNameNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMin_ne":
+			var err error
+			it.FirstNameMinNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax_ne":
+			var err error
+			it.FirstNameMaxNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6378,9 +9025,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "firstNameMin_gt":
+			var err error
+			it.FirstNameMinGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax_gt":
+			var err error
+			it.FirstNameMaxGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "firstName_lt":
 			var err error
 			it.FirstNameLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMin_lt":
+			var err error
+			it.FirstNameMinLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax_lt":
+			var err error
+			it.FirstNameMaxLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6390,15 +9061,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "firstNameMin_gte":
+			var err error
+			it.FirstNameMinGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax_gte":
+			var err error
+			it.FirstNameMaxGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "firstName_lte":
 			var err error
 			it.FirstNameLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "firstNameMin_lte":
+			var err error
+			it.FirstNameMinLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax_lte":
+			var err error
+			it.FirstNameMaxLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "firstName_in":
 			var err error
-			it.FirstNameIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			it.FirstNameIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMin_in":
+			var err error
+			it.FirstNameMinIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax_in":
+			var err error
+			it.FirstNameMaxIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6408,15 +9115,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "firstNameMin_like":
+			var err error
+			it.FirstNameMinLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax_like":
+			var err error
+			it.FirstNameMaxLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "firstName_prefix":
 			var err error
 			it.FirstNamePrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "firstNameMin_prefix":
+			var err error
+			it.FirstNameMinPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax_prefix":
+			var err error
+			it.FirstNameMaxPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "firstName_suffix":
 			var err error
 			it.FirstNameSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMin_suffix":
+			var err error
+			it.FirstNameMinSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax_suffix":
+			var err error
+			it.FirstNameMaxSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6432,9 +9175,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "lastNameMin":
+			var err error
+			it.LastNameMin, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax":
+			var err error
+			it.LastNameMax, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "lastName_ne":
 			var err error
 			it.LastNameNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMin_ne":
+			var err error
+			it.LastNameMinNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax_ne":
+			var err error
+			it.LastNameMaxNe, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6444,9 +9211,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "lastNameMin_gt":
+			var err error
+			it.LastNameMinGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax_gt":
+			var err error
+			it.LastNameMaxGt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "lastName_lt":
 			var err error
 			it.LastNameLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMin_lt":
+			var err error
+			it.LastNameMinLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax_lt":
+			var err error
+			it.LastNameMaxLt, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6456,15 +9247,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "lastNameMin_gte":
+			var err error
+			it.LastNameMinGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax_gte":
+			var err error
+			it.LastNameMaxGte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "lastName_lte":
 			var err error
 			it.LastNameLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "lastNameMin_lte":
+			var err error
+			it.LastNameMinLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax_lte":
+			var err error
+			it.LastNameMaxLte, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "lastName_in":
 			var err error
-			it.LastNameIn, err = ec.unmarshalOString2ᚕstring(ctx, v)
+			it.LastNameIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMin_in":
+			var err error
+			it.LastNameMinIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax_in":
+			var err error
+			it.LastNameMaxIn, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6474,15 +9301,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "lastNameMin_like":
+			var err error
+			it.LastNameMinLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax_like":
+			var err error
+			it.LastNameMaxLike, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "lastName_prefix":
 			var err error
 			it.LastNamePrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "lastNameMin_prefix":
+			var err error
+			it.LastNameMinPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax_prefix":
+			var err error
+			it.LastNameMaxPrefix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "lastName_suffix":
 			var err error
 			it.LastNameSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMin_suffix":
+			var err error
+			it.LastNameMinSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax_suffix":
+			var err error
+			it.LastNameMaxSuffix, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6498,9 +9361,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin":
+			var err error
+			it.UpdatedAtMin, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax":
+			var err error
+			it.UpdatedAtMax, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_ne":
 			var err error
 			it.UpdatedAtNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_ne":
+			var err error
+			it.UpdatedAtMinNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_ne":
+			var err error
+			it.UpdatedAtMaxNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6510,9 +9397,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_gt":
+			var err error
+			it.UpdatedAtMinGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_gt":
+			var err error
+			it.UpdatedAtMaxGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_lt":
 			var err error
 			it.UpdatedAtLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_lt":
+			var err error
+			it.UpdatedAtMinLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_lt":
+			var err error
+			it.UpdatedAtMaxLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6522,15 +9433,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_gte":
+			var err error
+			it.UpdatedAtMinGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_gte":
+			var err error
+			it.UpdatedAtMaxGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_lte":
 			var err error
 			it.UpdatedAtLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin_lte":
+			var err error
+			it.UpdatedAtMinLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_lte":
+			var err error
+			it.UpdatedAtMaxLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedAt_in":
 			var err error
-			it.UpdatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			it.UpdatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMin_in":
+			var err error
+			it.UpdatedAtMinIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax_in":
+			var err error
+			it.UpdatedAtMaxIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6546,9 +9493,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin":
+			var err error
+			it.CreatedAtMin, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax":
+			var err error
+			it.CreatedAtMax, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_ne":
 			var err error
 			it.CreatedAtNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_ne":
+			var err error
+			it.CreatedAtMinNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_ne":
+			var err error
+			it.CreatedAtMaxNe, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6558,9 +9529,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_gt":
+			var err error
+			it.CreatedAtMinGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_gt":
+			var err error
+			it.CreatedAtMaxGt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_lt":
 			var err error
 			it.CreatedAtLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_lt":
+			var err error
+			it.CreatedAtMinLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_lt":
+			var err error
+			it.CreatedAtMaxLt, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6570,15 +9565,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_gte":
+			var err error
+			it.CreatedAtMinGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_gte":
+			var err error
+			it.CreatedAtMaxGte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_lte":
 			var err error
 			it.CreatedAtLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "createdAtMin_lte":
+			var err error
+			it.CreatedAtMinLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_lte":
+			var err error
+			it.CreatedAtMaxLte, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt_in":
 			var err error
-			it.CreatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTime(ctx, v)
+			it.CreatedAtIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin_in":
+			var err error
+			it.CreatedAtMinIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax_in":
+			var err error
+			it.CreatedAtMaxIn, err = ec.unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6594,9 +9625,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin":
+			var err error
+			it.UpdatedByMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax":
+			var err error
+			it.UpdatedByMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_ne":
 			var err error
 			it.UpdatedByNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_ne":
+			var err error
+			it.UpdatedByMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_ne":
+			var err error
+			it.UpdatedByMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6606,9 +9661,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_gt":
+			var err error
+			it.UpdatedByMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_gt":
+			var err error
+			it.UpdatedByMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_lt":
 			var err error
 			it.UpdatedByLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_lt":
+			var err error
+			it.UpdatedByMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_lt":
+			var err error
+			it.UpdatedByMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6618,15 +9697,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_gte":
+			var err error
+			it.UpdatedByMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_gte":
+			var err error
+			it.UpdatedByMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_lte":
 			var err error
 			it.UpdatedByLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin_lte":
+			var err error
+			it.UpdatedByMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_lte":
+			var err error
+			it.UpdatedByMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "updatedBy_in":
 			var err error
-			it.UpdatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.UpdatedByIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMin_in":
+			var err error
+			it.UpdatedByMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax_in":
+			var err error
+			it.UpdatedByMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6642,9 +9757,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin":
+			var err error
+			it.CreatedByMin, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax":
+			var err error
+			it.CreatedByMax, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_ne":
 			var err error
 			it.CreatedByNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_ne":
+			var err error
+			it.CreatedByMinNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_ne":
+			var err error
+			it.CreatedByMaxNe, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6654,9 +9793,33 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_gt":
+			var err error
+			it.CreatedByMinGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_gt":
+			var err error
+			it.CreatedByMaxGt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_lt":
 			var err error
 			it.CreatedByLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_lt":
+			var err error
+			it.CreatedByMinLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_lt":
+			var err error
+			it.CreatedByMaxLt, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6666,15 +9829,51 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_gte":
+			var err error
+			it.CreatedByMinGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_gte":
+			var err error
+			it.CreatedByMaxGte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_lte":
 			var err error
 			it.CreatedByLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		case "createdByMin_lte":
+			var err error
+			it.CreatedByMinLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_lte":
+			var err error
+			it.CreatedByMaxLte, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy_in":
 			var err error
-			it.CreatedByIn, err = ec.unmarshalOID2ᚕstring(ctx, v)
+			it.CreatedByIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin_in":
+			var err error
+			it.CreatedByMinIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax_in":
+			var err error
+			it.CreatedByMaxIn, err = ec.unmarshalOID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6696,12 +9895,6 @@ func (ec *executionContext) unmarshalInputUserFilterType(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
-		case "friends":
-			var err error
-			it.Friends, err = ec.unmarshalOUserFilterType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterType(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		}
 	}
 
@@ -6720,9 +9913,33 @@ func (ec *executionContext) unmarshalInputUserSortType(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "idMin":
+			var err error
+			it.IDMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "idMax":
+			var err error
+			it.IDMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "email":
 			var err error
 			it.Email, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMin":
+			var err error
+			it.EmailMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "emailMax":
+			var err error
+			it.EmailMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6732,9 +9949,33 @@ func (ec *executionContext) unmarshalInputUserSortType(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "firstNameMin":
+			var err error
+			it.FirstNameMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "firstNameMax":
+			var err error
+			it.FirstNameMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "lastName":
 			var err error
 			it.LastName, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMin":
+			var err error
+			it.LastNameMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lastNameMax":
+			var err error
+			it.LastNameMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6744,9 +9985,33 @@ func (ec *executionContext) unmarshalInputUserSortType(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "updatedAtMin":
+			var err error
+			it.UpdatedAtMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedAtMax":
+			var err error
+			it.UpdatedAtMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdAt":
 			var err error
 			it.CreatedAt, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMin":
+			var err error
+			it.CreatedAtMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdAtMax":
+			var err error
+			it.CreatedAtMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6756,9 +10021,33 @@ func (ec *executionContext) unmarshalInputUserSortType(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "updatedByMin":
+			var err error
+			it.UpdatedByMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "updatedByMax":
+			var err error
+			it.UpdatedByMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "createdBy":
 			var err error
 			it.CreatedBy, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMin":
+			var err error
+			it.CreatedByMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "createdByMax":
+			var err error
+			it.CreatedByMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6768,15 +10057,33 @@ func (ec *executionContext) unmarshalInputUserSortType(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "tasksIdsMin":
+			var err error
+			it.TasksIdsMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "tasksIdsMax":
+			var err error
+			it.TasksIdsMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "companiesIds":
 			var err error
 			it.CompaniesIds, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "friendsIds":
+		case "companiesIdsMin":
 			var err error
-			it.FriendsIds, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			it.CompaniesIdsMin, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companiesIdsMax":
+			var err error
+			it.CompaniesIdsMax, err = ec.unmarshalOObjectSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐObjectSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6789,12 +10096,6 @@ func (ec *executionContext) unmarshalInputUserSortType(ctx context.Context, obj 
 		case "companies":
 			var err error
 			it.Companies, err = ec.unmarshalOCompanySortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "friends":
-			var err error
-			it.Friends, err = ec.unmarshalOUserSortType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6864,6 +10165,20 @@ func (ec *executionContext) _Company(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._Company_employeesIds(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "employeesConnection":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Company_employeesConnection(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -7065,6 +10380,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_companies(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "user":
@@ -7087,6 +10405,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_users(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "task":
@@ -7109,6 +10430,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_tasks(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "hello":
@@ -7301,20 +10625,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				}
 				return res
 			})
-		case "friends":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._User_friends(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "updatedAt":
 			out.Values[i] = ec._User_updatedAt(ctx, field, obj)
 		case "createdAt":
@@ -7340,6 +10650,20 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				}
 				return res
 			})
+		case "tasksConnection":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_tasksConnection(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "companiesIds":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -7354,7 +10678,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				}
 				return res
 			})
-		case "friendsIds":
+		case "companiesConnection":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -7362,7 +10686,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._User_friendsIds(ctx, field, obj)
+				res = ec._User_companiesConnection(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -7716,7 +11040,7 @@ func (ec *executionContext) marshalNCompany2githubᚗcomᚋnovacloudczᚋgraphql
 	return ec._Company(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCompany2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompany(ctx context.Context, sel ast.SelectionSet, v []*Company) graphql.Marshaler {
+func (ec *executionContext) marshalNCompany2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyᚄ(ctx context.Context, sel ast.SelectionSet, v []*Company) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -7782,6 +11106,20 @@ func (ec *executionContext) unmarshalNCompanyFilterType2ᚖgithubᚗcomᚋnovacl
 	return &res, err
 }
 
+func (ec *executionContext) marshalNCompanyResultType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyResultType(ctx context.Context, sel ast.SelectionSet, v CompanyResultType) graphql.Marshaler {
+	return ec._CompanyResultType(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCompanyResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyResultType(ctx context.Context, sel ast.SelectionSet, v *CompanyResultType) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._CompanyResultType(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNCompanySortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, v interface{}) (CompanySortType, error) {
 	return ec.unmarshalInputCompanySortType(ctx, v)
 }
@@ -7815,7 +11153,7 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNID2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+func (ec *executionContext) unmarshalNID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -7835,7 +11173,7 @@ func (ec *executionContext) unmarshalNID2ᚕstring(ctx context.Context, v interf
 	return res, nil
 }
 
-func (ec *executionContext) marshalNID2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+func (ec *executionContext) marshalNID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
@@ -7876,7 +11214,7 @@ func (ec *executionContext) marshalNTask2githubᚗcomᚋnovacloudczᚋgraphqlᚑ
 	return ec._Task(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTask2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTask(ctx context.Context, sel ast.SelectionSet, v []*Task) graphql.Marshaler {
+func (ec *executionContext) marshalNTask2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskᚄ(ctx context.Context, sel ast.SelectionSet, v []*Task) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -7940,6 +11278,20 @@ func (ec *executionContext) unmarshalNTaskFilterType2ᚖgithubᚗcomᚋnovacloud
 	}
 	res, err := ec.unmarshalNTaskFilterType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskFilterType(ctx, v)
 	return &res, err
+}
+
+func (ec *executionContext) marshalNTaskResultType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskResultType(ctx context.Context, sel ast.SelectionSet, v TaskResultType) graphql.Marshaler {
+	return ec._TaskResultType(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTaskResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskResultType(ctx context.Context, sel ast.SelectionSet, v *TaskResultType) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._TaskResultType(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNTaskSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, v interface{}) (TaskSortType, error) {
@@ -8006,7 +11358,7 @@ func (ec *executionContext) marshalNUser2githubᚗcomᚋnovacloudczᚋgraphqlᚑ
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUser(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -8072,6 +11424,20 @@ func (ec *executionContext) unmarshalNUserFilterType2ᚖgithubᚗcomᚋnovacloud
 	return &res, err
 }
 
+func (ec *executionContext) marshalNUserResultType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserResultType(ctx context.Context, sel ast.SelectionSet, v UserResultType) graphql.Marshaler {
+	return ec._UserResultType(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUserResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserResultType(ctx context.Context, sel ast.SelectionSet, v *UserResultType) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._UserResultType(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNUserSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, v interface{}) (UserSortType, error) {
 	return ec.unmarshalInputUserSortType(ctx, v)
 }
@@ -8109,7 +11475,7 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 	return ec.___Directive(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
+func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -8160,7 +11526,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 	return res
 }
 
-func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8180,7 +11546,7 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstring(ctx context.
 	return res, nil
 }
 
-func (ec *executionContext) marshalN__DirectiveLocation2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -8229,7 +11595,7 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 	return ec.___InputValue(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -8270,7 +11636,7 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 	return ec.___Type(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -8339,7 +11705,7 @@ func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.Se
 	return graphql.MarshalBoolean(v)
 }
 
-func (ec *executionContext) unmarshalOBoolean2ᚕbool(ctx context.Context, v interface{}) ([]bool, error) {
+func (ec *executionContext) unmarshalOBoolean2ᚕboolᚄ(ctx context.Context, v interface{}) ([]bool, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8359,7 +11725,7 @@ func (ec *executionContext) unmarshalOBoolean2ᚕbool(ctx context.Context, v int
 	return res, nil
 }
 
-func (ec *executionContext) marshalOBoolean2ᚕbool(ctx context.Context, sel ast.SelectionSet, v []bool) graphql.Marshaler {
+func (ec *executionContext) marshalOBoolean2ᚕboolᚄ(ctx context.Context, sel ast.SelectionSet, v []bool) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -8401,7 +11767,7 @@ func (ec *executionContext) unmarshalOCompanyFilterType2githubᚗcomᚋnovacloud
 	return ec.unmarshalInputCompanyFilterType(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOCompanyFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyFilterType(ctx context.Context, v interface{}) ([]*CompanyFilterType, error) {
+func (ec *executionContext) unmarshalOCompanyFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyFilterTypeᚄ(ctx context.Context, v interface{}) ([]*CompanyFilterType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8429,22 +11795,11 @@ func (ec *executionContext) unmarshalOCompanyFilterType2ᚖgithubᚗcomᚋnovacl
 	return &res, err
 }
 
-func (ec *executionContext) marshalOCompanyResultType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyResultType(ctx context.Context, sel ast.SelectionSet, v CompanyResultType) graphql.Marshaler {
-	return ec._CompanyResultType(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOCompanyResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanyResultType(ctx context.Context, sel ast.SelectionSet, v *CompanyResultType) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._CompanyResultType(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalOCompanySortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, v interface{}) (CompanySortType, error) {
 	return ec.unmarshalInputCompanySortType(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOCompanySortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortType(ctx context.Context, v interface{}) ([]*CompanySortType, error) {
+func (ec *executionContext) unmarshalOCompanySortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐCompanySortTypeᚄ(ctx context.Context, v interface{}) ([]*CompanySortType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8480,7 +11835,7 @@ func (ec *executionContext) marshalOID2string(ctx context.Context, sel ast.Selec
 	return graphql.MarshalID(v)
 }
 
-func (ec *executionContext) unmarshalOID2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+func (ec *executionContext) unmarshalOID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8500,7 +11855,7 @@ func (ec *executionContext) unmarshalOID2ᚕstring(ctx context.Context, v interf
 	return res, nil
 }
 
-func (ec *executionContext) marshalOID2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+func (ec *executionContext) marshalOID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -8582,7 +11937,7 @@ func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.S
 	return graphql.MarshalString(v)
 }
 
-func (ec *executionContext) unmarshalOString2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8602,7 +11957,7 @@ func (ec *executionContext) unmarshalOString2ᚕstring(ctx context.Context, v in
 	return res, nil
 }
 
-func (ec *executionContext) marshalOString2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -8644,7 +11999,7 @@ func (ec *executionContext) unmarshalOTaskFilterType2githubᚗcomᚋnovacloudcz�
 	return ec.unmarshalInputTaskFilterType(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOTaskFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskFilterType(ctx context.Context, v interface{}) ([]*TaskFilterType, error) {
+func (ec *executionContext) unmarshalOTaskFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskFilterTypeᚄ(ctx context.Context, v interface{}) ([]*TaskFilterType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8672,22 +12027,11 @@ func (ec *executionContext) unmarshalOTaskFilterType2ᚖgithubᚗcomᚋnovacloud
 	return &res, err
 }
 
-func (ec *executionContext) marshalOTaskResultType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskResultType(ctx context.Context, sel ast.SelectionSet, v TaskResultType) graphql.Marshaler {
-	return ec._TaskResultType(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOTaskResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskResultType(ctx context.Context, sel ast.SelectionSet, v *TaskResultType) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._TaskResultType(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalOTaskSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, v interface{}) (TaskSortType, error) {
 	return ec.unmarshalInputTaskSortType(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOTaskSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortType(ctx context.Context, v interface{}) ([]*TaskSortType, error) {
+func (ec *executionContext) unmarshalOTaskSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskSortTypeᚄ(ctx context.Context, v interface{}) ([]*TaskSortType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8724,7 +12068,7 @@ func (ec *executionContext) marshalOTaskType2githubᚗcomᚋnovacloudczᚋgraphq
 	return v
 }
 
-func (ec *executionContext) unmarshalOTaskType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx context.Context, v interface{}) ([]TaskType, error) {
+func (ec *executionContext) unmarshalOTaskType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskTypeᚄ(ctx context.Context, v interface{}) ([]TaskType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8744,7 +12088,7 @@ func (ec *executionContext) unmarshalOTaskType2ᚕgithubᚗcomᚋnovacloudczᚋg
 	return res, nil
 }
 
-func (ec *executionContext) marshalOTaskType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskType(ctx context.Context, sel ast.SelectionSet, v []TaskType) graphql.Marshaler {
+func (ec *executionContext) marshalOTaskType2ᚕgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐTaskTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []TaskType) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -8807,7 +12151,7 @@ func (ec *executionContext) marshalOTime2timeᚐTime(ctx context.Context, sel as
 	return graphql.MarshalTime(v)
 }
 
-func (ec *executionContext) unmarshalOTime2ᚕᚖtimeᚐTime(ctx context.Context, v interface{}) ([]*time.Time, error) {
+func (ec *executionContext) unmarshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx context.Context, v interface{}) ([]*time.Time, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8827,7 +12171,7 @@ func (ec *executionContext) unmarshalOTime2ᚕᚖtimeᚐTime(ctx context.Context
 	return res, nil
 }
 
-func (ec *executionContext) marshalOTime2ᚕᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v []*time.Time) graphql.Marshaler {
+func (ec *executionContext) marshalOTime2ᚕᚖtimeᚐTimeᚄ(ctx context.Context, sel ast.SelectionSet, v []*time.Time) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -8869,7 +12213,7 @@ func (ec *executionContext) unmarshalOUserFilterType2githubᚗcomᚋnovacloudcz�
 	return ec.unmarshalInputUserFilterType(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOUserFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterType(ctx context.Context, v interface{}) ([]*UserFilterType, error) {
+func (ec *executionContext) unmarshalOUserFilterType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserFilterTypeᚄ(ctx context.Context, v interface{}) ([]*UserFilterType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8897,22 +12241,11 @@ func (ec *executionContext) unmarshalOUserFilterType2ᚖgithubᚗcomᚋnovacloud
 	return &res, err
 }
 
-func (ec *executionContext) marshalOUserResultType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserResultType(ctx context.Context, sel ast.SelectionSet, v UserResultType) graphql.Marshaler {
-	return ec._UserResultType(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOUserResultType2ᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserResultType(ctx context.Context, sel ast.SelectionSet, v *UserResultType) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._UserResultType(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalOUserSortType2githubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, v interface{}) (UserSortType, error) {
 	return ec.unmarshalInputUserSortType(ctx, v)
 }
 
-func (ec *executionContext) unmarshalOUserSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortType(ctx context.Context, v interface{}) ([]*UserSortType, error) {
+func (ec *executionContext) unmarshalOUserSortType2ᚕᚖgithubᚗcomᚋnovacloudczᚋgraphqlᚑormᚑexampleᚋgenᚐUserSortTypeᚄ(ctx context.Context, v interface{}) ([]*UserSortType, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -8940,7 +12273,7 @@ func (ec *executionContext) unmarshalOUserSortType2ᚖgithubᚗcomᚋnovacloudcz
 	return &res, err
 }
 
-func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
+func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -8980,7 +12313,7 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	return ret
 }
 
-func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx context.Context, sel ast.SelectionSet, v []introspection.Field) graphql.Marshaler {
+func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Field) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -9020,7 +12353,7 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	return ret
 }
 
-func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -9075,7 +12408,7 @@ func (ec *executionContext) marshalO__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 	return ec.___Type(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

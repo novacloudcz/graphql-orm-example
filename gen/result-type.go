@@ -2,6 +2,7 @@ package gen
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/vektah/gqlparser/ast"
@@ -18,13 +19,24 @@ func GetItemForRelation(ctx context.Context, db *gorm.DB, obj interface{}, relat
 }
 
 type EntityFilter interface {
-	Apply(ctx context.Context, dialect gorm.Dialect, wheres *[]string, values *[]interface{}, joins *[]string) error
+	Apply(ctx context.Context, dialect gorm.Dialect, wheres *[]string, whereValues *[]interface{}, havings *[]string, havingValues *[]interface{}, joins *[]string) error
 }
 type EntityFilterQuery interface {
 	Apply(ctx context.Context, dialect gorm.Dialect, selectionSet *ast.SelectionSet, wheres *[]string, values *[]interface{}, joins *[]string) error
 }
+
+type SortInfo struct {
+	Field         string
+	Direction     string
+	IsAggregation bool
+}
+
+func (si *SortInfo) String() string {
+	return fmt.Sprintf("%s %s", si.Field, si.Direction)
+}
+
 type EntitySort interface {
-	Apply(ctx context.Context, dialect gorm.Dialect, sorts *[]string, joins *[]string) error
+	Apply(ctx context.Context, dialect gorm.Dialect, sorts *[]SortInfo, joins *[]string) error
 }
 
 type EntityResultType struct {
@@ -44,23 +56,32 @@ type GetItemsOptions struct {
 
 // GetResultTypeItems ...
 func (r *EntityResultType) GetItems(ctx context.Context, db *gorm.DB, opts GetItemsOptions, out interface{}) error {
+	subq := db.Model(out)
 	q := db
+	subqGroups := []string{opts.Alias + ".id"}
+	subqFields := []string{"DISTINCT(" + opts.Alias + ".id) as id"}
+	qSorts := []string{}
+	subqSorts := []string{}
 
 	if r.Limit != nil {
-		q = q.Limit(*r.Limit)
+		// q = q.Limit(*r.Limit)
+		subq = subq.Limit(*r.Limit)
 	}
 	if r.Offset != nil {
-		q = q.Offset(*r.Offset)
+		// q = q.Offset(*r.Offset)
+		subq = subq.Offset(*r.Offset)
 	}
 
 	dialect := q.Dialect()
 
 	wheres := []string{}
-	values := []interface{}{}
+	havings := []string{}
+	whereValues := []interface{}{}
+	havingValues := []interface{}{}
 	joins := []string{}
-	sorts := []string{}
+	sorts := []SortInfo{}
 
-	err := r.Query.Apply(ctx, dialect, r.SelectionSet, &wheres, &values, &joins)
+	err := r.Query.Apply(ctx, dialect, r.SelectionSet, &wheres, &whereValues, &joins)
 	if err != nil {
 		return err
 	}
@@ -70,17 +91,27 @@ func (r *EntityResultType) GetItems(ctx context.Context, db *gorm.DB, opts GetIt
 	}
 
 	if r.Filter != nil {
-		err = r.Filter.Apply(ctx, dialect, &wheres, &values, &joins)
+		err = r.Filter.Apply(ctx, dialect, &wheres, &whereValues, &havings, &havingValues, &joins)
 		if err != nil {
 			return err
 		}
 	}
 
 	if len(sorts) > 0 {
-		q = q.Order(strings.Join(sorts, ", "))
+		for i, sort := range sorts {
+			if !sort.IsAggregation {
+				subqGroups = append(subqGroups, fmt.Sprintf("%s", sort.Field))
+			}
+			subqFields = append(subqFields, fmt.Sprintf("%s as "+dialect.Quote("sort_key_%d"), sort.Field, i))
+			qSorts = append(qSorts, fmt.Sprintf(dialect.Quote("filter_table")+"."+dialect.Quote("sort_key_%d")+" %s", i, sort.Direction))
+			subqSorts = append(subqSorts, fmt.Sprintf(dialect.Quote("sort_key_%d")+" %s", i, sort.Direction))
+		}
 	}
 	if len(wheres) > 0 {
-		q = q.Where(strings.Join(wheres, " AND "), values...)
+		subq = subq.Where(strings.Join(wheres, " AND "), whereValues...)
+	}
+	if len(havings) > 0 {
+		subq = subq.Having(strings.Join(havings, " AND "), havingValues...)
 	}
 
 	uniqueJoinsMap := map[string]bool{}
@@ -94,6 +125,7 @@ func (r *EntityResultType) GetItems(ctx context.Context, db *gorm.DB, opts GetIt
 
 	for _, join := range uniqueJoins {
 		q = q.Joins(join)
+		subq = subq.Joins(join)
 	}
 
 	if len(opts.Preloaders) > 0 {
@@ -101,33 +133,42 @@ func (r *EntityResultType) GetItems(ctx context.Context, db *gorm.DB, opts GetIt
 			q = q.Preload(p)
 		}
 	}
-	q = q.Group(opts.Alias + ".id")
+	subq = subq.Group(strings.Join(subqGroups, ", ")).Select(strings.Join(subqFields, ", "))
+	subq = subq.Order(strings.Join(subqSorts, ", "))
+	q = q.Order(strings.Join(qSorts, ", "))
+	q = q.Joins("INNER JOIN (?) as filter_table ON filter_table.id = "+opts.Alias+".id", subq.QueryExpr())
+
 	return q.Find(out).Error
 }
 
 // GetCount ...
-func (r *EntityResultType) GetCount(ctx context.Context, db *gorm.DB, out interface{}) (count int, err error) {
+func (r *EntityResultType) GetCount(ctx context.Context, db *gorm.DB, opts GetItemsOptions, out interface{}) (count int, err error) {
 	q := db
 
 	dialect := q.Dialect()
 	wheres := []string{}
-	values := []interface{}{}
+	havings := []string{}
+	whereValues := []interface{}{}
+	havingValues := []interface{}{}
 	joins := []string{}
 
-	err = r.Query.Apply(ctx, dialect, r.SelectionSet, &wheres, &values, &joins)
+	err = r.Query.Apply(ctx, dialect, r.SelectionSet, &wheres, &whereValues, &joins)
 	if err != nil {
 		return 0, err
 	}
 
 	if r.Filter != nil {
-		err = r.Filter.Apply(ctx, dialect, &wheres, &values, &joins)
+		err = r.Filter.Apply(ctx, dialect, &wheres, &whereValues, &havings, &havingValues, &joins)
 		if err != nil {
 			return 0, err
 		}
 	}
 
 	if len(wheres) > 0 {
-		q = q.Where(strings.Join(wheres, " AND "), values...)
+		q = q.Where(strings.Join(wheres, " AND "), whereValues...)
+	}
+	if len(havings) > 0 {
+		q = q.Having(strings.Join(havings, " AND "), havingValues...)
 	}
 
 	uniqueJoinsMap := map[string]bool{}
@@ -142,7 +183,9 @@ func (r *EntityResultType) GetCount(ctx context.Context, db *gorm.DB, out interf
 	for _, join := range uniqueJoins {
 		q = q.Joins(join)
 	}
-	err = q.Model(out).Count(&count).Error
+	q = q.Model(out).Group(opts.Alias + ".id")
+	err = db.Model(out).Joins("INNER JOIN (?) as filter_table ON filter_table.id = "+opts.Alias+".id", q.QueryExpr()).Count(&count).Error
+
 	return
 }
 

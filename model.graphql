@@ -17,7 +17,6 @@ type User @entity {
 
   tasks: [Task!]! @relationship(inverse: "assignee")
   companies: [Company!]! @relationship(inverse: "employees")
-  friends: [User!]! @relationship(inverse: "friends")
 }
 
 enum TaskType {

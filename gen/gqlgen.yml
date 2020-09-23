@@ -39,8 +39,6 @@ models:
         resolver: true
       companies:
         resolver: true
-      friends:
-        resolver: true
   UserResultType:
     model: github.com/novacloudcz/graphql-orm-example/gen.UserResultType
     fields:
